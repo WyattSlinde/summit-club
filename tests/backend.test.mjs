@@ -45,18 +45,32 @@ test('registrations, interests, votes and private ideas flow to authorized club 
     assert.equal((await register('Unauthenticated Student', 'Explore')).status, 401);
     assert.equal((await leader.GET()).status, 403);
     signIn('student-one');
+    const notRegistered = await (await basecamp.GET()).json();
+    assert.equal(notRegistered.signedIn, true);
+    assert.equal(notRegistered.member, null, 'signing in alone never registers a student');
     const initialResponse = await register('Test Student One', 'Explore');
     assert.equal(initialResponse.status, 200);
     const initial = await initialResponse.json();
     assert.equal(initial.member.interest, 'Explore');
+    const reloaded = await (await basecamp.GET()).json();
+    assert.equal(reloaded.member.name, 'Test Student One', 'registration survives a fresh request');
     const changed = await (await register('Test Student One Updated', 'Lead')).json();
     assert.equal(changed.member.name, 'Test Student One Updated');
     assert.equal(changed.member.interest, 'Lead');
     assert.equal(changed.member.created_at, initial.member.created_at, 'editing preserves the original signup date');
     assert.equal((await register('Test Student One', 'Explore')).status, 200);
     assert.equal((await post(basecamp, { action: 'join', name: 'Bad Consent', grade: '10', interest: 'Lead', consent: false })).status, 400);
-    assert.equal((await post(basecamp, { action: 'vote', adventureId: 'ridge', selected: true })).status, 200);
-    assert.equal((await post(basecamp, { action: 'vote', adventureId: 'ridge', selected: true })).status, 200);
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const voteResponse = await post(basecamp, { action: 'vote', adventureId: 'ridge', selected: true });
+      assert.equal(voteResponse.status, 200);
+      const counted = await voteResponse.json();
+      assert.equal(counted.saved, true);
+      assert.equal(counted.votes.find(item => item.adventure_id === 'ridge').count, 1, 'retrying the same vote never adds another');
+      assert.deepEqual(counted.myVotes, [{ adventure_id: 'ridge' }]);
+      assert.equal(voteResponse.headers.get('cache-control'), 'no-store');
+    }
+    assert.equal((await post(basecamp, { action: 'vote', adventureId: 'fake', selected: true })).status, 400);
+    assert.equal((await post(basecamp, { action: 'vote', adventureId: 'ridge', selected: 'true' })).status, 400);
     const idea = { action: 'propose', requestId: crypto.randomUUID(), title: 'A local trail cleanup', category: 'Serve', description: 'Plan a weekend trail cleanup with the club.' };
     assert.equal((await post(basecamp, idea)).status, 200);
     assert.equal((await post(basecamp, idea)).status, 200);
@@ -67,6 +81,18 @@ test('registrations, interests, votes and private ideas flow to authorized club 
     assert.deepEqual(own.proposals, []);
     assert.equal(own.leader, false);
     assert.equal(own.votes.find(item => item.adventure_id === 'ridge').count, 1);
+    const countedTwo = await (await post(basecamp, { action: 'vote', adventureId: 'ridge', selected: true })).json();
+    assert.equal(countedTwo.votes.find(item => item.adventure_id === 'ridge').count, 2, 'another account contributes a separate vote');
+    const withCoast = await (await post(basecamp, { action: 'vote', adventureId: 'coast', selected: true })).json();
+    assert.equal(withCoast.myVotes.length, 2, 'students can support multiple ideas');
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const removed = await (await post(basecamp, { action: 'vote', adventureId: 'ridge', selected: false })).json();
+      assert.equal(removed.votes.find(item => item.adventure_id === 'ridge').count, 1, 'removing a vote never removes another student’s vote');
+      assert.deepEqual(removed.myVotes, [{ adventure_id: 'coast' }]);
+    }
+    const freshVotes = await (await basecamp.GET()).json();
+    assert.equal(freshVotes.votes.find(item => item.adventure_id === 'ridge').count, 1);
+    assert.deepEqual(freshVotes.myVotes, [{ adventure_id: 'coast' }], 'saved choices survive a fresh request');
     assert.equal((await leader.GET()).status, 403);
     assert.equal((await post(leader, { action: 'event', leader: true })).status, 403);
     signIn('leader-one');
@@ -76,6 +102,9 @@ test('registrations, interests, votes and private ideas flow to authorized club 
     assert.equal(desk.totalIdeas, 1);
     assert.equal(desk.proposals[0].name, 'Test Student One');
     assert.equal(desk.members.find(member => member.name === 'Test Student One').choices, 'ridge');
+    assert.equal(desk.members.find(member => member.name === 'Test Student Two').choices, 'coast');
+    assert.equal(desk.votes.find(item => item.adventure_id === 'ridge').count, 1);
+    assert.equal(desk.votes.find(item => item.adventure_id === 'coast').count, 1);
     assert.equal(desk.interests.find(item => item.interest === 'Serve').count, 1);
     assert.ok(desk.members.every(member => !('user_id' in member) && !('email' in member)));
     signIn('leader-two'); assert.equal((await leader.GET()).status, 200);
