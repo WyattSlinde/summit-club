@@ -45,6 +45,14 @@ test('registrations, interests, votes and private ideas flow to authorized club 
     assert.equal((await register('Unauthenticated Student', 'Explore')).status, 401);
     assert.equal((await leader.GET()).status, 403);
     signIn('student-one');
+    const initialResponse = await register('Test Student One', 'Explore');
+    assert.equal(initialResponse.status, 200);
+    const initial = await initialResponse.json();
+    assert.equal(initial.member.interest, 'Explore');
+    const changed = await (await register('Test Student One Updated', 'Lead')).json();
+    assert.equal(changed.member.name, 'Test Student One Updated');
+    assert.equal(changed.member.interest, 'Lead');
+    assert.equal(changed.member.created_at, initial.member.created_at, 'editing preserves the original signup date');
     assert.equal((await register('Test Student One', 'Explore')).status, 200);
     assert.equal((await post(basecamp, { action: 'join', name: 'Bad Consent', grade: '10', interest: 'Lead', consent: false })).status, 400);
     assert.equal((await post(basecamp, { action: 'vote', adventureId: 'ridge', selected: true })).status, 200);
