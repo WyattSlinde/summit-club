@@ -1,6 +1,12 @@
 /* A quiet field journal follows the cinematic hike. */
 :root,.dark{--forest-ink:#142b23;--forest-deep:#10231d;--forest-paper:#f4eee4;--forest-moss:#a8b799;--forest-muted:#bcc8b9;--forest-text-muted:#536156;--forest-line:#f4eee432;--forest-rule:#142b2329;--forest-signal:#985538;--forest-sunset:#e9b78d;--forest-granite:#e8ddcd;--ink:var(--forest-ink);--cream:var(--forest-paper);--red:var(--forest-signal);--background:var(--forest-paper);--foreground:var(--forest-ink);--primary:var(--forest-ink);--primary-foreground:var(--forest-paper);--secondary:#e4e8dd;--accent:#e0e6d9;--muted:#e6e9df;--muted-foreground:#56635a;--border:var(--forest-rule);--ring:var(--forest-signal)}
 body{background:var(--forest-deep);color:var(--forest-paper)}
+.club-photo-credit{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 14px;color:var(--forest-text-muted);font:11px/1.6 'DM Sans',sans-serif}
+.club-photo-credit a{color:inherit;text-decoration:underline;text-decoration-color:currentColor;text-underline-offset:3px;text-decoration-thickness:1px}
+.club-photo-credit a:hover{opacity:.8}
+.club-photo-credit a:focus-visible{outline:2px solid currentColor;outline-offset:4px}
+.outing-photo-note{margin-top:14px;max-width:680px;color:var(--forest-text-muted);font:11px/1.75 'DM Sans',sans-serif}
+.outing-photo-note a{display:inline-block;margin-left:4px;text-decoration:underline;text-underline-offset:3px}
 ::selection{background:#c5633b45;color:inherit}
 .masthead{height:76px;padding-inline:5%;background:var(--forest-ink);border-color:var(--forest-line);color:var(--forest-paper)}
 .masthead .wordmark>svg{color:var(--forest-paper);width:26px;height:26px}

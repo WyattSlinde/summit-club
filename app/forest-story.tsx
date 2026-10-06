@@ -3,7 +3,8 @@
 import { useId } from 'react';
 import { ArrowDownRight, ArrowRight } from 'lucide-react';
 import './forest-story.css';
-import media from './journey-media.json';
+import { clubPhotos } from '@/lib/club-photos';
+import { ClubPhoto, PhotoCredit } from './club-photo';
 
 type Props = {
   onJoin: () => void;
@@ -39,7 +40,10 @@ export default function ForestStory({ onJoin, member = false, nextEvent, loading
           <p className="forest-lead"><strong>Tobias Kell</strong><span>Founder &amp; President</span></p>
         </div>
         <aside className="forest-notice" aria-label="Club meeting">
-          <div className="forest-panorama" aria-hidden="true" style={{ backgroundImage: `url(${media.path}/overlook.webp)` }} />
+          <figure className="forest-photo">
+            <div className="forest-panorama"><ClubPhoto photo={clubPhotos.arrival} sizes="(max-width: 700px) 88vw, (max-width: 1372px) 40vw, 515px" /></div>
+            <PhotoCredit photo={clubPhotos.arrival} />
+          </figure>
           <div className="forest-notice-copy" aria-live="polite" aria-busy={loading}>
             <p className="forest-notice-label">{nextEvent ? 'Next on the calendar' : 'Meeting update'}</p>
             <h3>{meetingTitle}</h3>

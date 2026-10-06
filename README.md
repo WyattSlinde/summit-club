@@ -14,6 +14,10 @@ Cathedral Catholic High School outdoor adventure, service, and leadership club.
 - Three selectable outing proposals, live vote counts, downloadable notes, and a device-local packing checklist.
 - Plain authenticated interest registration with a simple saved-details confirmation, database-backed voting and proposals, event RSVPs, and a leadership desk. There is no ticket or pass.
 
+## Club photography
+
+Real photographs replace the generated stills in the club arrival and all three outing panels. Local 800px/1600px WebP files use responsive `srcset` selection and lazy loading. Original photographers are credited below each image; documentary locations stay separate from the proposed club plans. The images are under the Unsplash License or marked as public-domain NPS works. See [photo credits and licenses](public/photos/credits.txt).
+
 ## Journey media
 
 The generated source clip is a production asset, not a website player. Its source job and generation prompts are recorded in `journey-provenance.json`. The website ships derived frames and three stills in `public/ascent-hd/`, plus lightweight copies in `public/ascent-motion/`; no external Higgsfield URL is needed at runtime. The complete motion sequence is 24.4 MiB at 960×540 desktop or 17.1 MiB at 540×960 portrait. Only the matching viewport variant loads, progressively as needed. Four concurrent motion requests prioritize the current pose; speculative requests can be canceled immediately when direction or position changes. The motion cache holds up to 32 decoded frames (plus transient in-flight decodes) and 128 compressed frames. After 100ms on the same pose, one HD request refines that frame; the separate HD cache holds two decoded frames and four compressed frames. The complete HD sequence is 139.9 MiB desktop or 55.5 MiB portrait, but it is not prefetched in full. Resizing across the portrait threshold replaces the sequence. The canvas only advances to positions requested by scroll; HD refinement never changes the camera pose. The 3840×2160 source was enhanced from a 1080p generation; it is not native 4K camera footage.
@@ -56,7 +60,7 @@ Publication has not completed: the current environment rejects the Sites workflo
 
 ## Content and demo boundaries
 
-- The photographic landscapes are generated illustrations of an outdoor setting, not verified outing locations or school photography. Asset prompts and provenance are in ASSET-NOTES.txt.
+- The interactive intro uses generated Higgsfield scenery. The club page uses four real photographs: a mountain sunset, a group hike in the Tetons, a Fire Island beach cleanup, and Joshua Tree trail volunteers. These illustrate possible experiences, not completed SUMMIT trips or confirmed future locations. Each photo has a visible source credit; full license details are in `public/photos/credits.txt`. Asset prompts and historical provenance remain in ASSET-NOTES.txt.
 - Three initial activities are proposals; no unconfirmed meeting dates are presented as real.
 - Saved registration records club interest; outing RSVPs and any required permissions are handled separately.
 - Local development data is separate from the future hosted database. Demo test records are not included in the downloadable source.

@@ -137,14 +137,21 @@
 .forest-lead strong { color: var(--forest-paper); font-weight: 500; }
 
 .forest-notice { min-width: 0; }
+.forest-photo { margin: 0; }
 
 .forest-panorama {
+  position: relative;
+  overflow: hidden;
   width: 100%;
   aspect-ratio: 1.75;
   background-color: var(--forest-deep);
   background-position: center 48%;
   background-size: cover;
 }
+
+.forest-panorama > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.forest-photo .club-photo-credit { color: var(--forest-muted); padding: 10px 0 0; }
+.forest-photo .club-photo-credit a { color: var(--forest-sunset); }
 
 .forest-notice-copy {
   padding-top: 23px;

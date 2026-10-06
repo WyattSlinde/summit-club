@@ -3,7 +3,8 @@
 import { Backpack, Check, Heart, Loader2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { adventures } from '@/lib/adventures';
-import media from './journey-media.json';
+import { outingPhotos } from '@/lib/club-photos';
+import { ClubPhoto, PhotoCredit } from './club-photo';
 import './expedition-console.css';
 
 type Props = {
@@ -17,11 +18,11 @@ type Props = {
   votesReady?: boolean;
 };
 const labels = ['A group hike', 'Beach cleanup', 'Trail project'];
-const landscapes = [`${media.path}/trailhead.webp`, '/coast.webp', '/forest-basecamp.webp'];
 
 export default function ExpeditionConsole({ selected, onSelect, onOpenNotes, onVote, voted, busy, voteCount = 0, votesReady = true }: Props) {
   const active = Math.max(0, Math.min(adventures.length - 1, selected));
   const trip = adventures[active];
+  const photo = outingPhotos[active];
   const countLabel = votesReady ? `${voteCount} ${voteCount === 1 ? 'vote' : 'votes'}` : 'Votes loading';
 
   return <Tabs className="xc-console" value={String(active)} onValueChange={value => onSelect(Number(value))}>
@@ -29,7 +30,10 @@ export default function ExpeditionConsole({ selected, onSelect, onOpenNotes, onV
       {adventures.map((adventure, index) => <TabsTrigger key={adventure.id} value={String(index)} className="xc-tab"><span>{labels[index]}</span><i aria-hidden="true" /></TabsTrigger>)}
     </TabsList>
     <TabsContent className="xc-body" value={String(active)}>
-      <div className="xc-landscape" aria-hidden="true"><img src={landscapes[active]} alt="" width={1600} height={900} loading="lazy" decoding="async"/><span>{trip.category}</span></div>
+      <figure className="xc-photo">
+        <div className="xc-landscape"><ClubPhoto photo={photo} sizes="(max-width: 750px) 88vw, (max-width: 1372px) 37vw, 502px" /><span aria-hidden="true">{trip.category}</span></div>
+        <PhotoCredit photo={photo} />
+      </figure>
       <div className="xc-plan"><div className="xc-copy"><p className="xc-category">Proposed outing · chosen by the club</p><h3>{trip.name}</h3><p className="xc-description">{trip.description}</p></div>
       <dl className="xc-facts"><div><dt>Time outside</dt><dd>{trip.duration}</dd></div><div><dt>The plan</dt><dd>{trip.level}</dd></div><div><dt>Dates &amp; location</dt><dd>To be confirmed</dd></div></dl>
       <div className="xc-actions">

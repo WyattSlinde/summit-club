@@ -1,0 +1,46 @@
+SUMMIT — Photography credits
+Sources and license status checked October 5, 2026.
+
+These are real photographs used as examples of outdoor adventure and service.
+They do not document SUMMIT trips or establish future trip locations.
+The separate interactive mountain intro remains generated Higgsfield scenery.
+
+1. mountain-sunset-800.webp / mountain-sunset-1600.webp
+   Photographer: Luke Peterson
+   Original: Mountain range at sunset with pine trees foreground
+   Source: https://unsplash.com/photos/eYBNVOJWnBc
+   License: Unsplash License — https://unsplash.com/license
+   Image: https://images.unsplash.com/photo-1758407909328-6b46fbfc5f98
+
+2. group-hike-800.webp / group-hike-1600.webp
+   Photographer: Kevin Doran
+   Original: A group of people hiking up a trail in the mountains
+   Location supplied by photographer: Teton County, Wyoming, USA
+   Source: https://unsplash.com/photos/MH0Oxx6h550
+   License: Unsplash License — https://unsplash.com/license
+   Image: https://images.unsplash.com/photo-1674085678761-5472e776e4c8
+
+3. beach-cleanup-800.webp / beach-cleanup-1600.webp
+   Credit: National Park Service
+   Original: VIPs Keep Our Beaches Clean
+   Scene: Groundwork volunteers cleaning a beach, Fire Island National Seashore
+   Source: https://commons.wikimedia.org/wiki/File:VIPs_Keep_Our_Beaches_Clean_(1c6f315e-155d-451f-6726-180829323dd0).JPG
+   NPS record: https://npgallery.nps.gov/AssetDetail/1c6f315e-155d-451f-6726-180829323dd0
+   License: Public domain in the United States (U.S. National Park Service work), as identified by the source.
+   Copyright information: https://www.nps.gov/aboutus/disclaimer.htm
+   Image: https://upload.wikimedia.org/wikipedia/commons/b/ba/VIPs_Keep_Our_Beaches_Clean_%281c6f315e-155d-451f-6726-180829323dd0%29.JPG
+
+4. trail-service-800.webp / trail-service-1600.webp
+   Credit: NPS / Donovan Smith
+   Original: Volunteer Trail Work (March 25, 2025)
+   Scene: Volunteers trimming brush on Lost Palms Oasis Trail, Joshua Tree National Park
+   Source: https://commons.wikimedia.org/wiki/File:Volunteer_Trail_Work_(54424524341).jpg
+   Publisher: https://www.flickr.com/photos/joshuatreenp/54424524341
+   License: Public domain in the United States (U.S. National Park Service work), as identified by the source; publisher marked Public Domain.
+   Copyright information: https://www.nps.gov/aboutus/disclaimer.htm
+   Image: https://live.staticflickr.com/65535/54424524341_2fce4b4620_o.jpg
+
+Preparation: resized to 800 and 1600 pixels wide, converted to WebP. Responsive
+display crops vary by screen size. No AI generation, retouching, object removal,
+or color grading was applied to these four photographs. The source images retain
+their individual licenses; inclusion does not change the license of other code.

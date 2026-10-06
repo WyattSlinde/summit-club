@@ -68,6 +68,7 @@ return <><a className="skip" href="#basecamp" onClick={enterClub}>Skip to club b
       <section className="expeditions section" id="expeditions" aria-labelledby="outings-title">
         <div className="next-heading"><div><h2 id="outings-title">Outing ideas</h2></div><p>Choose an idea, see the plan, and vote.</p></div>
         <ExpeditionConsole selected={selected} onSelect={setSelected} onOpenNotes={()=>open('trip')} onVote={()=>vote(trip.id)} voted={!!state?.myVotes.some(v=>v.adventure_id===trip.id)} busy={!!busy} voteCount={state?.votes.find(v=>v.adventure_id===trip.id)?.count??0} votesReady={!!state}/>
+        <p className="outing-photo-note">Photos show examples of adventure and service, not past SUMMIT trips. <a href="/photos/credits.txt" target="_blank" rel="noopener noreferrer">Photo credits &amp; licenses</a></p>
         {(error||loadError)&&!modal&&<div className="error" role="alert">{error||loadError} <button disabled={loading} onClick={retryBasecamp}>{loading?'Connecting…':'Retry'}</button></div>}
       </section>
       <section className="board section" id="board" aria-labelledby="ideas-title">
