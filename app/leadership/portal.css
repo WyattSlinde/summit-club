@@ -22,3 +22,4 @@
 .leadership-portal a:focus-visible,.leadership-portal button:focus-visible,.leadership-portal input:focus-visible{outline:2px solid #e9b78d;outline-offset:5px}
 .portal-panel a:focus-visible,.portal-panel button:focus-visible,.portal-panel input:focus-visible{outline-color:#985538}
 @media(max-width:750px){.leadership-portal{background-attachment:scroll}.portal-body{grid-template-columns:1fr;gap:35px;padding:38px 0}.portal-intro h1{font-size:64px}.portal-intro h1 br{display:none}.portal-intro>p{margin-bottom:18px}.portal-intro>span{font-size:16px;margin-top:20px}.portal-intro>span br{display:none}.portal-panel{padding:30px 25px}.portal-panel h2{font-size:28px}.portal-back{font-size:12px}.portal-code input{font-size:16px}}
+.portal-brand>.summit-mark{width:35px;height:35px;color:#e9b78d}.portal-brand>.summit-wordmark{width:130px;height:auto}

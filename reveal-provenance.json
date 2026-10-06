@@ -1,0 +1,77 @@
+{
+  "date": "2026-10-05",
+  "peakReference": "b12d787d-7b33-4660-8cff-e501ada4b926",
+  "finalPlateJob": "2af355ac-7255-47a6-8c2d-209c0eefe39e",
+  "finalPlate": {
+    "model": "gpt_image_2_5",
+    "aspect_ratio": "16:9",
+    "count": 1,
+    "medias": [
+      {
+        "role": "image",
+        "value": "b12d787d-7b33-4660-8cff-e501ada4b926"
+      }
+    ],
+    "prompt": "Create the spectacular final photograph of the SAME California granite mountain hike in the reference, after the photographer has walked 5 meters forward OVER the foreground granite ridge, looking out across the now fully revealed valley. Preserve the same real-world granite geology, green Jeffrey pine forest, golden-hour direction and geographic continuity. This is a photographic reward panorama, horizontal 16:9, exceptionally detailed natural landscape photography, large-format clarity. Nearby textured granite ledge now occupies only the bottom 15 percent, with a few sunlit grasses and delicate purple lupines at the lower right. A vast deep green pine valley sweeps through center toward monumental granite peaks and overlapping hazy ridgelines. The camera looks slightly downward into the depth, but the beautiful open sky occupies the upper 40 percent. Soft layered coral peach clouds with luminous warm undersides, lavender-blue sky, gold grazing light across granite peaks, delicate atmospheric shafts far in the valley, rich living emerald and sage greens. Inviting and expansive, a breathtaking believable Sierra mountain sunset with restrained natural colors, not oversaturated orange or fantasy. Keep the left lower middle darker and simple enough for cream website text, without making it gloomy. A tiny hawk naturally glides high in the right sky at realistic scale. No people, no buildings, no signs, NO TEXT, no logos, no interface. Same place as reference, seen just beyond its ridge, NOT a different mountain range. Crisp tree needles, granular granite, true optical detail, no illustration or CGI look."
+  },
+  "revealJob": "fd4c374d-7586-4c77-944d-81954e9ce9f0",
+  "reveal": {
+    "model": "seedance_2_5",
+    "mode": "omni_reference",
+    "duration": 8,
+    "resolution": "1080p",
+    "aspect_ratio": "16:9",
+    "generate_audio": false,
+    "bitrate_mode": "high",
+    "medias": [
+      {
+        "role": "start_image",
+        "value": "b12d787d-7b33-4660-8cff-e501ada4b926"
+      },
+      {
+        "role": "end_image",
+        "value": "2af355ac-7255-47a6-8c2d-209c0eefe39e"
+      }
+    ],
+    "prompt": "One single continuous eight-second camera move from the exact first photograph at the rocky summit to the exact second photograph JUST OVER that summit. The first photo is our starting position, the second our final viewpoint. Begin immediately moving smoothly forward, passing physically OVER the nearest granite lip. The granite foreground passes downward and out below the lens with strong real parallax, revealing the enormous pine valley BEHIND it. Gently crane a little forward and down beyond the ridge, looking outward and slightly down into the valley. Finish in the exact second photograph's spectacular panoramic view with the granite ledge now only at the bottom. This is one uninterrupted shot in one real location: NO cut, NO crossfade or dissolve between photos, NO zoom transition, no sudden acceleration, no camera teleport, no scene replacement. Stable geography, pines anchored to terrain, no objects melting or growing. Landscape documentary realism and immaculate smooth forward camera motion, like a stabilized camera on a walking hiker transitioning into a short gentle crane over the summit. Soft luminous peach-coral sunset gradually becomes more visible as we move past foreground rock and trees, lavender blue sky, naturally vibrant green forest. A tiny distant hawk glides naturally, never a giant foreground bird. No text, no letters, no people, no signage, no UI, no audio. Let the camera gently settle into the final view in the last one second, with absolutely no closing fade."
+  },
+  "repairJob": "f76c0aad-1e78-4114-a354-2c3154a365bb",
+  "repair": {
+    "model": "seedance_2_5",
+    "mode": "video_edit",
+    "resolution": "1080p",
+    "generate_audio": false,
+    "bitrate_mode": "high",
+    "medias": [
+      {
+        "role": "video",
+        "value": "fd4c374d-7586-4c77-944d-81954e9ce9f0"
+      }
+    ],
+    "prompt": "Repair this exact continuous mountain camera move. There is an unwanted diagonal wipe / ghostly double-exposure artifact moving across the left mountain and sky around seconds 3 to 5. Remove that artificial transition completely. Make the entire eight-second shot a single spatially consistent camera move over the same foreground granite ridge, revealing the same lush green forest valley. All terrain must stay solid and anchored in 3D; mountains never dissolve, flatten, melt, appear through each other, or change height. Preserve the start frame and final frame composition, sunset palette, clear photorealistic detail, 8-second timing and overall smooth forward camera movement. Reconstruct clean natural intermediate views as the camera goes over the granite lip. The left valley wall must simply recede with physical perspective, with no diagonal mask, wipe, crossfade, overlapping duplicate contours, or patchy lighting. All foreground rocks pass smoothly beneath the lens. Keep the final expansive sunset panorama. Absolutely no cuts, scene transitions, text, logos, UI, people, or audio. This is a realism and continuity cleanup of the provided shot, not a new sequence."
+  },
+  "delivery": {
+    "sourceJob": "fd4c374d-7586-4c77-944d-81954e9ce9f0",
+    "repairUsed": false,
+    "reason": "The cleanup generation retained a diagonal ghosting artifact across the left mountain, so it was excluded. The original continuation was reframed to the stable right granite wall during the affected segment, then opened to the complete panorama.",
+    "reframe": {
+      "sourceFps": 24,
+      "zoom": "1 to 2 with cubic smoothstep over output frames 0–24; 2 through 112; 2 to 1 over 112–191",
+      "anchorX": "right",
+      "anchorY": 0.38,
+      "sourceWidth": 1920,
+      "sourceHeight": 1080,
+      "outputWidth": 1920,
+      "outputHeight": 1080,
+      "sourceStartFrame": 65,
+      "retime": "1.5x duration with adjacent-frame blending at 24 samples per second; 8 seconds total",
+      "join": "Blend the first 8 samples against the exact original summit still to settle the slight generative framing difference",
+      "reasonForTrim": "The generation did not start at its supplied reference pose. Pixel comparison and visual inspection found the closest matching summit composition at source frame 65. Earlier generated approach frames are excluded.",
+      "deliveredSamples": 190
+    },
+    "preservation": "Original climb frames 0–340 are unchanged. Reveal starts at 341, omitting the duplicate reference pose. Desktop and portrait arrival stills are copies of the last delivered HD frame.",
+    "review": "Inspected two contact sheets of the generated candidate and cleanup candidate; a 16-frame contact sheet of the reframed delivery no longer exposes the diagonal artifact. This remains generated scenery, not footage of a real club outing. Browser-rendered localhost review remains unavailable. The generated pre-reference approach was trimmed at source frame 65; inspected a nine-frame join contact sheet and 16-frame final contact sheet after alignment. Original climb frame 340 and the aligned continuation now share the same summit composition.",
+    "frameCount": 530,
+    "appendedFrames": 189
+  }
+}

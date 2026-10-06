@@ -5,6 +5,8 @@ import { ScrollSequence } from './scroll-sequence';
 import { FramePainter } from './frame-painter';
 import { JOURNEY_VIEWPORTS, trailJourney, framePositionForProgress, reflowScroll, canvasResolution, frameFocalX } from './trail-journey';
 import media from './journey-media.json';
+import { journeyFrameUrl } from './journey-source';
+import { SummitMark, SummitWordmark } from './summit-brand';
 import './summit-experience.css';
 
 // The visible granite edge in the summit still, in the source image's coordinates.
@@ -12,7 +14,7 @@ const ridge = [[0,852],[45,797],[90,751],[130,719],[170,698],[210,685],[253,677]
 const stops = [
   { name: 'Explore', at: .14, start: .12, end: .235, title: 'A little further outside.', copy: 'Trails, coastlines, and new experiences with your Cathedral Catholic crew. No outdoor experience needed.' },
   { name: 'Serve', at: .29, start: .265, end: .375, title: 'Leave it better.', copy: 'Beach cleanups, habitat restoration, and service projects. Getting outside is better when we give something back.' },
-  { name: 'Lead', at: .43, start: .405, end: .50, title: 'Make it happen.', copy: 'Pitch an idea. Choose the next adventure. Help plan it with your friends. This is your club to build.' },
+  { name: 'Lead', at: .43, start: .405, end: .485, title: 'Make it happen.', copy: 'Pitch an idea. Choose the next adventure. Help plan it with your friends. This is your club to build.' },
 ];
 type Props = { onJoin: () => void; children: ReactNode; onReveal?: (visible: boolean) => void };
 export default function SummitExperience({ onJoin, children, onReveal }: Props) {
@@ -82,18 +84,20 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
       // Keep changing values on their visual layer, rather than invalidating the entire club tree.
       setStyle(stage!, '--sx-intro', state.intro);
       setStyle(stage!, '--sx-title', state.title);
+      setStyle(stage!, '--sx-invitation', state.invitation);
+      setStyle(stage!, '--sx-logo-scale', .94 + state.rise * .06);
       setStyle(stage!, '--sx-ui', state.controls);
       setStyle(stage!, '--sx-title-y', `${state.titleY.toFixed(3)}vh`);
       setStyle(stage!, '--sx-foreground', state.foreground);
       setStyle(stage!, '--sx-distance', `${(state.walk * 100).toFixed(3)}%`);
       setStyle(visual!, '--sx-cover', `${state.cover.toFixed(3)}%`);
-      setStyle(visual!, '--sx-scene-scale', 1 + state.approach * .045);
-      setStyle(visual!, '--sx-scene-y', `${(-state.approach * 5).toFixed(3)}vh`);
+      setStyle(visual!, '--sx-scene-scale', 1);
+      setStyle(visual!, '--sx-scene-y', '0vh');
       const remaining = Math.max(0, start + runway - currentScroll);
       const ended = progress >= 1 || isSimple();
       setStyle(underlay, 'opacity', state.camp);
       // No inherited animation variables or 3D texture for the long club page.
-      setStyle(underlay, 'transform', ended || state.camp === 0 ? 'none' : `translateY(${(-remaining + (1 - state.approach) * measuredHeight * .12).toFixed(2)}px)`);
+      setStyle(underlay, 'transform', ended || state.camp === 0 ? 'none' : `translateY(${(-remaining).toFixed(2)}px)`);
       if (ended !== previousEnded) { previousEnded = ended; shell.dataset.journeyEnded = String(ended); }
       shell.dataset.journeyProgress = progress.toFixed(4);
       const nextStop = isSimple() ? -1 : stops.findIndex(item => progress >= item.start && progress < item.end);
@@ -182,8 +186,8 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
       deadline = setTimeout(() => { if (lastDrawn < 0 && !isSimple()) fail(); }, 18000);
       const mobile = isPortraitViewport(); sequenceMobile = mobile;
       sequence = new ScrollSequence({ count: media.frameCount,
-        url: index => `${media.path}/${mobile ? 'mobile' : 'desktop'}/${String(index).padStart(4, '0')}.webp?v=${media.version}`,
-        previewUrl: index => `${media.motionPath}/${mobile ? 'mobile' : 'desktop'}/${String(index).padStart(4, '0')}.webp?v=${media.version}`,
+        url: index => journeyFrameUrl(media, index, mobile),
+        previewUrl: index => journeyFrameUrl(media, index, mobile, true),
         maxDecoded: 2, maxPreviewDecoded: 32, onFrame: receiveFrame, onError: fail });
       measure();
     }
@@ -200,15 +204,15 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
   const enter = (event: React.MouseEvent<HTMLAnchorElement>) => { event.preventDefault(); enterRef.current(); };
   const atSummit = phase === 'summit', descending = phase === 'descending', hidden = phase === 'revealed';
   return <section id="home" ref={shellRef} className={`sx-experience${simple ? ' sx-simple' : ''}${failed ? ' sx-fallback' : ''}`} aria-label="The hike to SUMMIT">
-    <div className="sx-backdrop" ref={visualRef} aria-hidden="true"><div className="sx-world"><img className="sx-poster" src={`${media.path}/${simple ? 'overlook' : 'trailhead'}.webp`} alt="" fetchPriority="high" /><canvas ref={canvasRef} className={ready && !simple ? 'is-ready' : ''} /><div className="sx-world-shade" /></div></div>
+    <div className="sx-backdrop" ref={visualRef} aria-hidden="true"><div className="sx-world"><img className="sx-poster" src={simple ? '/summit-arrival/overlook.webp' : `${media.path}/trailhead.webp`} alt="" fetchPriority="high" /><canvas ref={canvasRef} className={ready && !simple ? 'is-ready' : ''} /><div className="sx-world-shade" /></div></div>
     <div className="sx-journey"><div ref={stageRef} className="sx-stage" data-phase={phase} data-ready={ready}>
       <div className="sx-cinematic" aria-hidden={hidden} inert={hidden}>
-        <div className="sx-topbar" inert={atSummit || descending || simple}><a href="#basecamp" onClick={enter} className="sx-school"><Mountain size={28} strokeWidth={1.3} /><span>CATHEDRAL CATHOLIC<small>THE OUTDOOR CLUB</small></span></a><a className="sx-skip" href="#basecamp" onClick={enter}>Club &amp; signup <ArrowUpRight size={15} /></a></div>
+        <div className="sx-topbar" inert={atSummit || descending || simple}><a href="#basecamp" onClick={enter} className="sx-school"><SummitMark /><span>CATHEDRAL CATHOLIC<small>THE OUTDOOR CLUB</small></span></a><a className="sx-skip" href="#basecamp" onClick={enter}>Club &amp; signup <ArrowUpRight size={15} /></a></div>
         <div className="sx-opening" aria-hidden={phase !== 'opening'}><span className="sx-eyebrow">CATHEDRAL CATHOLIC’S OUTDOOR CLUB</span><p>It starts<br /><em>with a climb.</em></p><span className="sx-opening-copy">Scroll to climb the mountain.<br />There’s something waiting at the top.</span></div>
         <div className="sx-trail-stories" aria-live="polite" aria-atomic="true">{stops.map((item, index) => <article key={item.name} className="sx-trail-story" data-active={stop === index} aria-hidden={stop !== index}><span className="sx-eyebrow">0{index + 1} — {item.name.toUpperCase()}</span><h2>{item.title}</h2><p>{item.copy}</p></article>)}</div>
-        <nav className="sx-route" aria-label="Along the trail" inert={atSummit || descending || simple}><span className="sx-route-line"><i /></span>{stops.map((item, index) => <button key={item.name} onClick={() => seekRef.current(item.at)} aria-current={stop === index ? 'step' : undefined}><i />{item.name}</button>)}<button onClick={() => seekRef.current(.65)}><Mountain size={13} />The summit</button></nav>
+        <nav className="sx-route" aria-label="Along the trail" inert={atSummit || descending || simple}><span className="sx-route-line"><i /></span>{stops.map((item, index) => <button key={item.name} onClick={() => seekRef.current(item.at)} aria-current={stop === index ? 'step' : undefined}><i />{item.name}</button>)}<button onClick={() => seekRef.current(.675)}><Mountain size={13} />The summit</button></nav>
         <div className="sx-titlecard" aria-hidden={!atSummit}>
-          <div className="sx-title-rise"><span className="sx-eyebrow">CATHEDRAL CATHOLIC HIGH SCHOOL</span><h1>SUMMIT</h1><span className="sx-motto">EXPLORE. SERVE. LEAD.</span></div>
+          <div className="sx-title-rise"><span className="sx-eyebrow">CATHEDRAL CATHOLIC HIGH SCHOOL</span><h1 aria-label="SUMMIT"><SummitWordmark /></h1><span className="sx-motto">EXPLORE. SERVE. LEAD.</span></div>
         </div>
         <div className="sx-peak-foreground" aria-hidden="true"><img src={`${media.path}/summit.webp`} alt="" /><div className="sx-world-shade" /></div>
         <div className="sx-summit-invitation" aria-hidden={!atSummit} inert={!atSummit}><p>Adventure. Service. Your people.</p><span>KEEP SCROLLING. COME OVER THE TOP. <ArrowDown size={16}/></span><button onClick={onJoin}>Join SUMMIT <ArrowUpRight size={15}/></button></div>

@@ -188,3 +188,12 @@ body{background:var(--forest-deep);color:var(--forest-paper)}
 .sx-arrival-strip>button{color:#bdc9bb}
 .sx-arrival-strip>span>svg{color:#e9b78d}
 @media(max-width:750px){.camp-content>.expeditions{padding-top:42px}.camp-content>.club-signup{padding:28px 24px}.next-heading>p,.idea-strip p,.camp-content .xc-description,.camp-content .club-signup p{font-size:16px}.camp-content .xc-tab[data-slot=tabs-trigger]{font-size:14px}.camp-content .xc-actions{gap:14px 20px}}
+
+/* One original identity across the summit, navigation, and club. */
+.wordmark>.summit-mark,.masthead .wordmark>.summit-mark{width:35px;height:35px;flex:none;color:var(--forest-sunset)}
+.wordmark>.summit-wordmark,.masthead .wordmark>.summit-wordmark{width:125px;height:auto;flex:none;color:var(--forest-paper)}
+@media(max-width:750px){.masthead .wordmark{gap:9px}.masthead .wordmark>.summit-mark{width:28px;height:28px}.masthead .wordmark>.summit-wordmark{width:105px}}
+.club-footer .wordmark>.summit-mark{width:35px;height:35px;color:var(--forest-sunset)}
+.club-footer .wordmark>.summit-wordmark{width:125px;height:auto;color:var(--forest-paper)}
+@media(max-width:750px){.masthead .join-nav{min-height:44px;white-space:nowrap}.masthead .mobile-menu{width:44px;height:44px;flex:none;padding:0;align-items:center;justify-content:center}}
+@media(max-width:380px){.masthead .wordmark>.summit-mark{display:none}.masthead .join-nav{gap:8px;padding-inline:10px}}

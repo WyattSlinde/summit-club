@@ -1,9 +1,9 @@
 /** Every phase is a reversible function of scroll, including the hold at the peak. */
-export const WALK_END = .52;
+export const WALK_END = .50;
 export const DESCENT_START = .69;
-export const CLUB_START = .965;
-// A deliberate climb: about four screens of walking, then room for the peak and descent.
-export const JOURNEY_VIEWPORTS = 7.8;
+export const CLUB_START = .995;
+// Nearly six screens of walking, a two-screen summit rise, then an unhurried arrival.
+export const JOURNEY_VIEWPORTS = 11.6;
 const clamp = (value: number) => Math.max(0, Math.min(1, Number.isFinite(value) ? value : 0));
 const ease = (from: number, to: number, value: number) => {
   const t = clamp((value - from) / (to - from));
@@ -12,17 +12,18 @@ const ease = (from: number, to: number, value: number) => {
 export function trailJourney(scrollProgress: number, reducedMotion = false) {
   const progress = clamp(scrollProgress);
   const walk = reducedMotion ? 1 : clamp(progress / WALK_END);
-  const rise = reducedMotion ? 1 : ease(.53, .63, progress);
+  const rise = reducedMotion ? 1 : ease(.505, .665, progress);
   const descent = reducedMotion ? 1 : ease(DESCENT_START, .90, progress);
-  const approach = reducedMotion ? 1 : ease(.765, 1, progress);
+  const approach = reducedMotion ? 1 : ease(.925, 1, progress);
   return {
     progress, walk, rise, descent, approach,
     intro: reducedMotion ? 0 : 1 - ease(.025, .10, progress),
-    title: reducedMotion ? 1 : ease(.52, .545, progress) * (1 - ease(.71, .80, progress)),
-    titleY: reducedMotion ? 0 : (1 - rise) * 48 - ease(.69, .81, progress) * 36,
-    foreground: reducedMotion ? 0 : ease(.512, .52, progress) * (1 - ease(.69, .715, progress)),
-    controls: reducedMotion ? 0 : 1 - ease(.46, .52, progress),
-    camp: reducedMotion ? 1 : ease(.745, .79, progress),
+    title: reducedMotion ? 1 : ease(.50, .515, progress) * (1 - ease(.71, .785, progress)),
+    titleY: reducedMotion ? 0 : (1 - rise) * 70 - ease(.69, .81, progress) * 36,
+    invitation: reducedMotion ? 1 : ease(.63, .668, progress) * (1 - ease(.70, .76, progress)),
+    foreground: reducedMotion ? 0 : ease(.494, .50, progress) * (1 - ease(.69, .715, progress)),
+    controls: reducedMotion ? 0 : 1 - ease(.46, .50, progress),
+    camp: reducedMotion ? 1 : ease(.905, .94, progress),
     cover: reducedMotion ? -15 : 112 - approach * 130,
     shade: .06,
     accessible: reducedMotion || progress >= CLUB_START,

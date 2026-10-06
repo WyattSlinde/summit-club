@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Mountain, ArrowLeft, Copy, Check } from 'lucide-react';
+import { ArrowLeft, Copy, Check } from 'lucide-react';
 import LeaderDesk from '../leader-desk';
 import '../forest-continuity.css';
 import './portal.css';
+import { SummitMark, SummitWordmark } from '../summit-brand';
 
 type Account = { name: string; code: string; leader: boolean };
 export default function LeadershipPortal({ account, signInHref, signOutHref, localPreview }: {
@@ -18,7 +19,7 @@ export default function LeadershipPortal({ account, signInHref, signOutHref, loc
     catch { setError('Select the account code below and copy it.'); }
   }
   return <main className="leadership-portal">
-    <header><Link href="/#basecamp" className="portal-brand"><Mountain size={27}/><span>SUMMIT</span></Link><Link href="/#basecamp" className="portal-back"><ArrowLeft size={16}/> Back to the club</Link></header>
+    <header><Link href="/#basecamp" className="portal-brand" aria-label="SUMMIT home"><SummitMark/><SummitWordmark/></Link><Link href="/#basecamp" className="portal-back"><ArrowLeft size={16}/> Back to the club</Link></header>
     <div className="portal-body"><div className="portal-intro"><p>FOR THE PEOPLE MAKING IT HAPPEN</p><h1>Club<br/>leadership.</h1><span>Bring the crew together.<br/>Plan what’s next.</span></div>
       <section className="portal-panel" aria-label="Leadership access">
         {!account ? <><span className="portal-label">SIGN IN</span><h2>Your club, in one place.</h2><p>View registrations, student ideas, outing votes, and event RSVPs.</p><a href={signInHref} target="_top" className="portal-button">Sign in with ChatGPT</a><p className="portal-small">The leadership desk is available to approved club leaders.</p></>

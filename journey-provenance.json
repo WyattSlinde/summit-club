@@ -107,5 +107,12 @@
       "durationSeconds": 18.041667,
       "sourceResolution": "1920×1080, AI enhanced to 3840×2160"
     }
+  },
+  "currentDelivery": {
+    "frameCount": 530,
+    "preservedOriginalFrames": "0–340",
+    "continuation": "reveal-provenance.json",
+    "arrival": "Last delivered HD frame, identical on the intro and club hero",
+    "viewportRunway": 11.6
   }
 }

@@ -18,7 +18,7 @@ test('the camera holds at the peak while SUMMIT rises, then travels beyond it', 
   for (const p of [WALK_END,.57,.63,.68,DESCENT_START]) assert.equal(frameForProgress(p,321,192),192);
   assert.equal(trailJourney(.5).title,0);
   assert.ok(trailJourney(.54).titleY > trailJourney(.60).titleY);
-  assert.equal(trailJourney(.65).titleY,0);
+  assert.equal(trailJourney(.675).titleY,0);
   assert.equal(trailJourney(.65).title,1);
   assert.ok(frameForProgress(.8,321,192)>192);
   assert.equal(frameForProgress(.9,321,192),320);

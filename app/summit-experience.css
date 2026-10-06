@@ -124,3 +124,22 @@
 .sx-trail-story>.sx-eyebrow::before{background:#e9b78d}
 @media(max-width:700px){.sx-opening-copy{font-size:15px}.sx-school{font-size:9px}.sx-trail-stories{bottom:31%;width:86%}.sx-trail-story h2{font-size:42px;max-width:320px}.sx-trail-story p{font-size:15px;max-width:310px}.sx-route{gap:16px;left:6%;right:6%;justify-content:space-between}.sx-route button{font-size:11px;gap:7px}.sx-route button:last-child{font-size:10px}.sx-trail-story>.sx-eyebrow{font-size:11px}}
 @media(max-height:580px){.sx-trail-story h2{font-size:36px;margin-block:12px}.sx-trail-story p{font-size:14px;line-height:1.55}.sx-trail-stories{bottom:24%;max-width:60%}.sx-route{left:auto;right:4%;top:35%;bottom:auto;display:grid}.sx-route button{font-size:11px}}
+
+/* The new vector wordmark rises from the actual granite contour. */
+.sx-experience{--sx-runway:1160svh;--sx-invitation:0;--sx-logo-scale:.94}
+.sx-school>.summit-mark{width:38px;height:38px;flex:none}
+.sx-titlecard{top:16%;padding-inline:5%;perspective:1000px}
+.sx-title-rise{transform:translateY(var(--sx-title-y)) scale(var(--sx-logo-scale));transform-origin:50% 80%}
+.sx-titlecard h1{width:min(90vw,1270px);margin:0 auto;line-height:0}
+.sx-titlecard h1>.summit-wordmark{display:block;width:100%;height:auto;filter:drop-shadow(0 5px 16px #142b233b)}
+.sx-title-rise>.sx-eyebrow{font-size:11px;letter-spacing:.15em;margin-bottom:30px}
+.sx-title-rise>.sx-motto{font-size:12px;letter-spacing:.32em;margin-top:31px}
+.sx-summit-invitation{opacity:var(--sx-invitation);bottom:18%}
+.sx-summit-invitation>p{font-size:20px}
+.sx-underlay{padding-top:0}
+.sx-simple .sx-title-rise{transform:none}
+.sx-arrival-strip{background:var(--forest-deep);color:var(--forest-paper);border-color:var(--forest-line)}
+.sx-arrival-strip>button{color:var(--forest-muted)}
+.sx-arrival-strip>span>svg{color:var(--forest-sunset)}
+@media(max-width:700px){.sx-titlecard{top:26%;padding-inline:4%}.sx-titlecard h1{width:92vw}.sx-title-rise>.sx-eyebrow{font-size:8px;margin-bottom:24px;letter-spacing:.08em}.sx-title-rise>.sx-motto{font-size:9px;letter-spacing:.2em;margin-top:24px}.sx-summit-invitation{bottom:24%}.sx-summit-invitation>p{font-size:17px}.sx-school>.summit-mark{width:30px;height:30px}}
+@media(max-height:580px){.sx-titlecard{top:14%}.sx-titlecard h1{width:min(63vw,720px)}.sx-title-rise>.sx-eyebrow{margin-bottom:12px;font-size:8px}.sx-title-rise>.sx-motto{margin-top:16px;font-size:9px}.sx-summit-invitation{bottom:10%}.sx-summit-invitation>p{font-size:14px}}

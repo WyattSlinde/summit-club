@@ -1,5 +1,5 @@
 {
-  "frameCount": 433,
+  "frameCount": 530,
   "width": 2560,
   "height": 1440,
   "mobileWidth": 1008,
@@ -7,10 +7,12 @@
   "fps": 24,
   "summitFrame": 340,
   "path": "/ascent-hd",
-  "version": "responsive-trail-4",
+  "version": "summit-reveal-5",
   "motionPath": "/ascent-motion",
   "motionWidth": 960,
   "motionHeight": 540,
   "motionMobileWidth": 540,
-  "motionMobileHeight": 960
+  "motionMobileHeight": 960,
+  "revealPath": "/ridge-hd",
+  "revealMotionPath": "/ridge-motion"
 }

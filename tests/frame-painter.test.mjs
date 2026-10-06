@@ -57,7 +57,7 @@ test('the real sequence reaches the peak and reverses without falling back throu
       assert.ok(Math.abs(painted.at(-1)-framePositionForProgress(progress,433,340))<.00001);
     }
     assert.equal(errors,0,'render scheduling must not be mistaken for a failed Higgsfield frame');
-    assert.equal(trailJourney(.60).phase,'summit');assert.ok(trailJourney(.60).titleY>0);assert.equal(trailJourney(.65).titleY,0,'the logo rises while the camera holds at the summit');
+    assert.equal(trailJourney(.60).phase,'summit');assert.ok(trailJourney(.60).titleY>0);assert.equal(trailJourney(.675).titleY,0,'the logo rises while the camera holds at the summit');
     const count=painted.length;await settle();assert.equal(painted.length,count,'motion still stops with the visitor');
   }finally{
     painter.dispose();sequence.dispose();globalThis.fetch=originals.fetch;globalThis.createImageBitmap=originals.bitmap;
