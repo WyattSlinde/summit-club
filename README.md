@@ -58,6 +58,12 @@ The starter simulates sign-in only in local development. Clicking Sign in with C
 
 For a built-worker preview, stop the development server and run `npm run preview:production` after building. This mode does not provide the development sign-in simulation.
 
+## Temporary Vercel preview
+
+`npm run build:vercel-preview` builds the same React hike, club pages, registration page, and leadership entry as a standalone static preview. It writes a Vercel Build Output API directory under `outputs/vercel-preview/.vercel/output`; deploy that directory with Vercel CLI using `deploy --prebuilt --temporary --yes`. The CLI returns the actual preview URL and its expiry/claim information. Do not infer a live URL from the project name.
+
+This preview is separate from the full Sites application. It copies only public assets and client bundles. Its `/api/basecamp` returns an explicitly marked, read-only preview status; all other API actions return 503. Registration, voting, suggestions, and leadership are visibly unavailable. It contains no student records and does not collect personal details. The original local/Sites API and authentication stay unchanged. Vercel preview account details and generated output remain ignored by Git.
+
 ## Production setup
 
 Reuse project `appgprj_6abf0fbf6f848191a6ae788a7cd47a39`. The application uses the Sites D1 binding `DB`; schema migrations are in `drizzle/`.

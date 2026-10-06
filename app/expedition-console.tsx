@@ -19,11 +19,12 @@ type Props = {
   votes?: { adventure_id: string; count: number }[];
   votesFailed?: boolean;
   packedItems?: string[];
+  previewOnly?: boolean;
 };
 const labels = ['A group hike', 'Beach cleanup', 'Trail project'];
 const formatVotes = (count: number) => `${count} ${count === 1 ? 'vote' : 'votes'}`;
 
-export default function ExpeditionConsole({ selected, onSelect, onOpenNotes, onVote, voted, busy, voteCount = 0, votesReady = true, votes, votesFailed = false, packedItems = [] }: Props) {
+export default function ExpeditionConsole({ selected, onSelect, onOpenNotes, onVote, voted, busy, voteCount = 0, votesReady = true, votes, votesFailed = false, packedItems = [], previewOnly = false }: Props) {
   const active = Math.max(0, Math.min(adventures.length - 1, selected));
   const trip = adventures[active];
   const photo = outingPhotos[active];
@@ -32,14 +33,14 @@ export default function ExpeditionConsole({ selected, onSelect, onOpenNotes, onV
     return count === null || !Number.isFinite(count) ? null : Math.max(0, Math.floor(count));
   });
   const topCount = Math.max(1, ...counts.filter((count): count is number => count !== null));
-  const countLabel = (index: number) => votesFailed ? 'Votes unavailable' : !votesReady ? 'Loading votes…' : counts[index] === null ? 'Votes unavailable' : formatVotes(counts[index]);
+  const countLabel = (index: number) => previewOnly ? 'Voting opens at launch' : votesFailed ? 'Votes unavailable' : !votesReady ? 'Loading votes…' : counts[index] === null ? 'Votes unavailable' : formatVotes(counts[index]);
   const packedCount = trip.bring.filter(item => packedItems.includes(item)).length;
 
   return <Tabs className="xc-console xc-field-guide" value={String(active)} onValueChange={value => onSelect(Number(value))}>
     <TabsList className="xc-tabs" aria-label="Choose an outing idea">
       {adventures.map((adventure, index) => <TabsTrigger key={adventure.id} value={String(index)} className="xc-tab" aria-label={`${labels[index]}. ${adventure.category}. ${countLabel(index)}.`}>
         <span className="xc-tab-image" aria-hidden="true"><ClubPhoto photo={outingPhotos[index]} sizes="(max-width: 750px) 28vw, 96px"/><span className="xc-tab-number">{adventure.number}</span></span>
-        <span className="xc-tab-copy"><span className="xc-tab-category">{adventure.category}</span><span className="xc-tab-name">{labels[index]}</span><span className="xc-tab-count">{countLabel(index)}</span><span className="xc-vote-track" aria-hidden="true"><i style={{ width: `${votesReady && !votesFailed ? (counts[index] ?? 0) / topCount * 100 : 0}%` }}/></span></span>
+        <span className="xc-tab-copy"><span className="xc-tab-category">{adventure.category}</span><span className="xc-tab-name">{labels[index]}</span><span className="xc-tab-count">{countLabel(index)}</span><span className="xc-vote-track" aria-hidden="true"><i style={{ width: `${votesReady && !votesFailed && !previewOnly ? (counts[index] ?? 0) / topCount * 100 : 0}%` }}/></span></span>
       </TabsTrigger>)}
     </TabsList>
     <TabsContent className="xc-body" value={String(active)}>
@@ -51,7 +52,7 @@ export default function ExpeditionConsole({ selected, onSelect, onOpenNotes, onV
         <div className="xc-copy"><p className="xc-category">Help choose our next outing</p><h3>{trip.name}</h3><p className="xc-description">{trip.description}</p></div>
         <dl className="xc-facts"><div><dt>Time outside</dt><dd>{trip.duration}</dd></div><div><dt>The plan</dt><dd>{trip.level}</dd></div><div><dt>Dates &amp; location</dt><dd>To be confirmed</dd></div></dl>
         <div className="xc-actions">
-          <button type="button" className={`xc-vote ${voted ? 'is-voted' : ''}`} onClick={onVote} aria-label={`${voted ? 'Remove your vote for' : 'Vote for'} ${trip.name}. ${countLabel(active)}.`} aria-pressed={voted} disabled={busy}>{busy ? <Loader2 size={17} className="spin"/> : voted ? <Check size={17}/> : <Heart size={17}/>}<span>{busy ? 'Saving…' : voted ? 'You voted for this' : 'Vote for this outing'}</span><b>{votesReady && !votesFailed && counts[active] !== null ? formatVotes(counts[active]) : '—'}</b></button>
+          <button type="button" className={`xc-vote ${voted ? 'is-voted' : ''}`} onClick={onVote} aria-label={`${voted ? 'Remove your vote for' : 'Vote for'} ${trip.name}. ${countLabel(active)}.`} aria-pressed={voted} disabled={busy || previewOnly}>{busy ? <Loader2 size={17} className="spin"/> : voted ? <Check size={17}/> : <Heart size={17}/>}<span>{previewOnly ? 'Voting opens at launch' : busy ? 'Saving…' : voted ? 'You voted for this' : 'Vote for this outing'}</span><b>{votesReady && !votesFailed && !previewOnly && counts[active] !== null ? formatVotes(counts[active]) : '—'}</b></button>
           <p className="xc-vote-note">Vote for more than one. Leadership confirms the plan.</p>
         </div>
         <div className="xc-field-notes">

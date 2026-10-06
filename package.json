@@ -16,7 +16,8 @@
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate",
     "test": "node --experimental-strip-types --test tests/*.test.mjs",
-    "test:backend": "node --experimental-strip-types --test tests/backend.test.mjs tests/leader-data.test.mjs"
+    "test:backend": "node --experimental-strip-types --test tests/backend.test.mjs tests/leader-data.test.mjs",
+    "build:vercel-preview": "node scripts/build-vercel-preview.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

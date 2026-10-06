@@ -1,6 +1,7 @@
 export type Member = { name: string; grade: string; interest: string; created_at: string };
 export type VoteState = { votes: { adventure_id: string; count: number }[]; myVotes: { adventure_id: string }[] };
 export type BasecampState = VoteState & {
+  previewOnly?: boolean;
   signedIn: boolean; leader: boolean; member: Member | null;
   events: { id: string; title: string; starts_at: string; location: string; details: string; status: string }[];
   rsvps: { event_id: string }[];

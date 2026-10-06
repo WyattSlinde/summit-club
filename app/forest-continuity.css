@@ -201,3 +201,5 @@ body{background:var(--forest-deep);color:var(--forest-paper)}
 .vote-confirmation>p{font-size:16px;line-height:1.75;color:#536156;margin-bottom:22px}.vote-confirmation>.fine{font-size:13px}.vote-confirmation>.button{margin-top:3px}
 
 .camp-content .club-signup .registration-summary-status{font:10px/1.6 var(--mono);text-transform:uppercase;letter-spacing:.09em;color:#e9b78d;margin:0 0 12px}
+
+.camp-content>.deployment-preview-note{width:88%;max-width:1200px;margin:0 auto 30px;padding:16px 0;border-bottom:1px solid #e9b78d44;color:#e9b78d;font-size:12px;line-height:1.7}
