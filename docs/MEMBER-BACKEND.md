@@ -18,7 +18,7 @@ The hiking sequence, scroll timeline, mountain reveal, and animated identity are
 ## Activate the hosted backend
 
 1. Obtain the owner's organization choice and cost approval, then create a dedicated SUMMIT Supabase project. Do not reuse another application's database.
-2. Apply `supabase/migrations/20261006203942_member_profiles_and_friends.sql` to the new project. The file was created with Supabase CLI `migration new`.
+2. Apply every SQL file in `supabase/migrations/` to the new project in timestamp order: member profiles first, then hike ratings and the gallery. Both files were created with Supabase CLI `migration new`.
 3. Configure Auth Site URL as `https://wyattslinde.github.io/summit-club/`. Allow these exact redirects:
    - `https://wyattslinde.github.io/summit-club/profile/`
    - `https://wyattslinde.github.io/summit-club/profile/?recovery=1`
