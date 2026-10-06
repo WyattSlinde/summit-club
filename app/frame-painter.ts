@@ -8,8 +8,10 @@ export class FramePainter<T> {
   private request: (callback: FrameRequestCallback) => number;
   private cancel: (id: number) => void;
   constructor(paint: (value: T) => void,
-    request: (callback: FrameRequestCallback) => number = requestAnimationFrame,
-    cancel: (id: number) => void = cancelAnimationFrame) {
+    // Native browser methods require Window as their receiver. Saving a bare
+    // method here would call it with this FramePainter and throw on the first frame.
+    request: (callback: FrameRequestCallback) => number = callback => window.requestAnimationFrame(callback),
+    cancel: (id: number) => void = id => window.cancelAnimationFrame(id)) {
     this.paint = paint; this.request = request; this.cancel = cancel;
   }
   queue(value: T) {
