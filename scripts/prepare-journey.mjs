@@ -7,18 +7,23 @@ if (!source) throw new Error('Usage: FFMPEG_PATH=/path/to/ffmpeg node scripts/pr
 const ffmpeg = process.env.FFMPEG_PATH || 'ffmpeg';
 const directory = process.argv[3] || 'journey';
 if (!/^[a-z0-9-]+$/.test(directory)) throw new Error('Use a simple media directory name');
+const motionDirectory = process.argv[5] || `${directory.replace(/-hd$/, '')}-motion`;
+if (!/^[a-z0-9-]+$/.test(motionDirectory) || motionDirectory === directory) throw new Error('Use a separate motion directory');
 const summitFrame = process.argv[4] === undefined ? undefined : Number(process.argv[4]);
 if (summitFrame !== undefined && (!Number.isInteger(summitFrame) || summitFrame < 0)) throw new Error('Invalid summit frame');
 const fps = 24;
 const root = resolve('public', directory);
+const motionRoot = resolve('public', motionDirectory);
 // Match frameFocalX: keep the opening deer visible before centering on the climb.
 const focal = "0.5*pow(min(t/3,1),2)*(3-2*min(t/3,1))";
 const variants = [
-  {name:'desktop',width:2560,height:1440,quality:84,filter:'scale=2560:1440:flags=lanczos'},
-  {name:'mobile',width:1008,height:1792,quality:82,filter:`crop=ih*9/16:ih:x='(iw-ow)*(${focal})':y=0,scale=1008:1792:flags=lanczos`},
+  {name:'desktop',root,width:2560,height:1440,quality:84,filter:'scale=2560:1440:flags=lanczos'},
+  {name:'mobile',root,width:1008,height:1792,quality:82,filter:`crop=ih*9/16:ih:x='(iw-ow)*(${focal})':y=0,scale=1008:1792:flags=lanczos`},
+  {name:'desktop',root:motionRoot,width:960,height:540,quality:62,filter:'scale=960:540:flags=lanczos'},
+  {name:'mobile',root:motionRoot,width:540,height:960,quality:62,filter:`crop=ih*9/16:ih:x='(iw-ow)*(${focal})':y=0,scale=540:960:flags=lanczos`},
 ];
 for (const variant of variants) {
-  const destination = resolve(root,variant.name);
+  const destination = resolve(variant.root,variant.name);
   await mkdir(destination,{recursive:true});
   // Do not mix a new sequence with stale frames. Existing outputs require a new destination.
   if ((await readdir(destination)).some(name => name.endsWith('.webp'))) throw new Error(`${destination} already contains a sequence.`);
@@ -34,10 +39,14 @@ await copyFile(resolve(root,'desktop',files[0]),resolve(root,'trailhead.webp'));
 const peak = Math.min(files.length - 1, Math.max(0, summitFrame ?? files.length - 1));
 await copyFile(resolve(root,'desktop',files[peak]),resolve(root,'overlook.webp'));
 await copyFile(resolve(root,'desktop',files[peak]),resolve(root,'summit.webp'));
-const manifest={frameCount:files.length,width:2560,height:1440,mobileWidth:1008,mobileHeight:1792,fps,summitFrame:peak,path:`/${directory}`,version:'sunset-hd-3'};
+for (const variant of variants) {
+  const count=(await readdir(resolve(variant.root,variant.name))).filter(name=>name.endsWith('.webp')).length;
+  if(count!==files.length) throw new Error('Incomplete motion or detail variant');
+}
+const manifest={frameCount:files.length,width:2560,height:1440,mobileWidth:1008,mobileHeight:1792,fps,summitFrame:peak,path:`/${directory}`,motionPath:`/${motionDirectory}`,motionWidth:960,motionHeight:540,motionMobileWidth:540,motionMobileHeight:960,version:'responsive-trail-4'};
 await writeFile('app/journey-media.json',JSON.stringify(manifest,null,2)+'\n');
 for (const variant of variants) {
-  const bytes=(await Promise.all(files.map(file=>stat(resolve(root,variant.name,file))))).reduce((sum,file)=>sum+file.size,0);
-  console.log(`${variant.name}: ${files.length} frames, ${(bytes/1024/1024).toFixed(1)} MiB`);
+  const bytes=(await Promise.all(files.map(file=>stat(resolve(variant.root,variant.name,file))))).reduce((sum,file)=>sum+file.size,0);
+  console.log(`${variant.root}/${variant.name}: ${files.length} frames, ${(bytes/1024/1024).toFixed(1)} MiB`);
 }
 console.log('Restart the development server to refresh its public-asset index.');

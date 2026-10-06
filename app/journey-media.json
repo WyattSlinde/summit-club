@@ -7,5 +7,10 @@
   "fps": 24,
   "summitFrame": 340,
   "path": "/ascent-hd",
-  "version": "sunset-hd-3"
+  "version": "responsive-trail-4",
+  "motionPath": "/ascent-motion",
+  "motionWidth": 960,
+  "motionHeight": 540,
+  "motionMobileWidth": 540,
+  "motionMobileHeight": 960
 }

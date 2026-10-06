@@ -1,4 +1,4 @@
-.sx-experience{--sx-runway:340svh;--sx-intro:1;--sx-title:0;--sx-ui:1;--sx-camp:0;--sx-shadow:.03;--sx-paper:#f2efe7;--sx-forest:#10251d;position:relative;isolation:isolate;color:var(--sx-paper);background:var(--sx-forest);scroll-margin-top:0}
+.sx-experience{--sx-runway:340svh;--sx-intro:1;--sx-title:0;--sx-ui:1;--sx-camp:0;--sx-shadow:.03;--sx-paper:var(--forest-paper,#f4eee4);--sx-forest:var(--forest-ink,#142b23);position:relative;isolation:isolate;color:var(--sx-paper);background:var(--sx-forest);scroll-margin-top:0}
 .sx-backdrop{position:sticky;top:0;height:100svh;margin-bottom:-100svh;z-index:0;overflow:hidden;pointer-events:none}
 .sx-world,.sx-world-shade,.sx-poster,.sx-world canvas{position:absolute;inset:0;width:100%;height:100%}
 .sx-poster{object-fit:cover;object-position:left center}.sx-simple .sx-poster{object-position:center}
@@ -28,7 +28,7 @@
 .sx-trail-story p{font:15px/1.7 'DM Sans',sans-serif;color:#f2efe7e6;max-width:370px}
 .sx-route{position:absolute;right:4.5%;top:42%;display:grid;gap:5px;pointer-events:auto;opacity:var(--sx-ui)}
 .sx-route-line{position:absolute;left:5px;top:21px;bottom:22px;width:1px;background:#f2efe74d}
-.sx-route-line>i{display:block;height:var(--sx-distance,0%);width:1px;background:#f2efe7}
+.sx-route-line>i{display:block;height:100%;width:1px;background:#f4eee4;clip-path:inset(0 0 calc(100% - var(--sx-distance,0%)) 0)}
 .sx-route button{display:flex;align-items:center;gap:17px;position:relative;min-height:44px;background:none;border:0;color:#f2efe7bf;font:11px/1.4 'DM Sans',sans-serif;padding:0;text-shadow:0 2px 12px #07140b}
 .sx-route button>i{width:11px;height:11px;border:1px solid #f2efe7a3;background:#213f2c;border-radius:50%}
 .sx-route button[aria-current=step]{color:#fff}.sx-route button[aria-current=step]>i{background:#f2efe7;border-color:#f2efe7}
@@ -69,12 +69,12 @@
 @media(prefers-reduced-motion:reduce){.sx-trail-story{transition:none}}
 .sx-stage[data-phase=summit] .sx-topbar{visibility:hidden}
 /* The club is physically behind the scene; the last scroll moves over the ridge into it. */
-.sx-experience{--sx-runway:420svh;--sx-cover:112%;--sx-foreground:0;--sx-title-y:48vh;--sx-page-y:0px;--sx-page-angle:8deg;--sx-page-scale:.92;--sx-scene-scale:1;--sx-scene-y:0vh}
+.sx-experience{--sx-runway:420svh;--sx-cover:112%;--sx-foreground:0;--sx-title-y:48vh;--sx-page-y:0px;--sx-scene-scale:1;--sx-scene-y:0vh}
 .sx-backdrop{z-index:4;mask-image:linear-gradient(to bottom,#000 calc(var(--sx-cover) - 14%),transparent calc(var(--sx-cover) + 14%));-webkit-mask-image:linear-gradient(to bottom,#000 calc(var(--sx-cover) - 14%),transparent calc(var(--sx-cover) + 14%))}
 .sx-world{transform:translateY(var(--sx-scene-y)) scale(var(--sx-scene-scale));transform-origin:50% 80%;will-change:transform}
 .sx-journey{z-index:5;pointer-events:none}
 .sx-stage{pointer-events:none}
-.sx-underlay{z-index:2;opacity:var(--sx-camp);transform:perspective(1800px) translate3d(0,var(--sx-page-y),0) rotateX(var(--sx-page-angle)) scale(var(--sx-page-scale));transform-origin:center top;will-change:transform;background:#10251d}
+.sx-underlay{z-index:2;opacity:var(--sx-camp);transform:translateY(var(--sx-page-y));background:var(--sx-forest)}
 .sx-stage[data-phase=descending] .sx-topbar,.sx-stage[data-phase=descending] .sx-route,.sx-stage[data-phase=descending] .sx-trail-stories{visibility:hidden}
 .sx-titlecard{z-index:1;top:15%;bottom:auto;height:70%;justify-content:flex-start;padding:0 4%;text-shadow:0 3px 30px #0c201e45}
 .sx-title-rise{transform:translateY(var(--sx-title-y));will-change:transform;width:100%}
@@ -105,3 +105,9 @@
 .sx-underlay{padding-top:76px}
 @media(max-width:750px){.sx-underlay{padding-top:69px}}
 .sx-stage[data-phase=descending] .sx-summit-invitation{visibility:hidden}
+
+.sx-experience[data-journey-ended=true] .sx-underlay{transform:none}
+.sx-experience[data-journey-ended=true] .sx-backdrop{visibility:hidden}
+.sx-simple[data-journey-ended=true] .sx-backdrop{visibility:visible}
+.sx-arrival-strip{background:var(--forest-paper);color:var(--forest-ink);border-color:var(--forest-rule)}
+.sx-arrival-strip>span>svg{color:var(--forest-signal)}

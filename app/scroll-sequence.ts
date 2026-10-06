@@ -1,95 +1,239 @@
 import { frameWindow } from './trail-journey.ts';
+
 type Options = {
   count: number;
   url: (frame: number) => string;
+  /** Small images of the identical camera poses, used while the visitor scrolls. */
+  previewUrl?: (frame: number) => string;
   onFrame: (image: ImageBitmap, frame: number) => void;
   onError: () => void;
   maxDecoded?: number;
+  maxPreviewDecoded?: number;
 };
-/** Bounded decoded-image cache. Scroll/resize/load events are the only paint triggers. */
+type Layer = 'motion' | 'detail';
+type Request = { frame: number; layer: Layer; controller: AbortController };
+type Decode = { frame: number; layer: Layer };
+type Cache = {
+  images: Map<number, ImageBitmap>;
+  blobs: Map<number, Blob>;
+  failed: Set<number>;
+};
+const cache = (): Cache => ({ images: new Map(), blobs: new Map(), failed: new Set() });
+const key = (layer: Layer, frame: number) => `${layer}:${frame}`;
+
+/** Scroll chooses the pose. Async work may only finish that pose or sharpen it. */
 export class ScrollSequence {
-  private blobs = new Map<number, Blob>();
-  private images = new Map<number, ImageBitmap>();
-  private failed = new Set<number>();
-  private inFlight = new Set<number>();
-  private controller = new AbortController();
+  private motion = cache();
+  private detail = cache();
+  private requests = new Map<string, Request>();
+  private decoding = new Map<string, Decode>();
   private wanted = 0;
   private shown = -1;
+  private shownImage: ImageBitmap | undefined;
   private direction = 1;
+  private started = false;
   private stopped = false;
-  private maxDecoded: number;
+  private reportedError = false;
+  private detailWanted: number | undefined;
+  private detailTimer: ReturnType<typeof setTimeout> | undefined;
+  private maxMotion: number;
+  private maxDetail: number;
   private decodeRadius: number;
+  private fetchRadius: number;
   private options: Options;
+
   constructor(options: Options) {
     this.options = options;
-    this.maxDecoded = Math.max(4, options.maxDecoded ?? 32);
-    this.decodeRadius = Math.min(10, Math.floor((this.maxDecoded - 2) / 2));
+    this.maxMotion = Math.max(4, options.previewUrl ? options.maxPreviewDecoded ?? 32 : options.maxDecoded ?? 32);
+    this.maxDetail = Math.max(1, options.maxDecoded ?? 3);
+    this.decodeRadius = Math.min(options.previewUrl ? 24 : 10, Math.floor((this.maxMotion - 2) / 2));
+    this.fetchRadius = Math.max(12, Math.min(48, this.decodeRadius * 2));
   }
+
   seek(frame: number) {
     if (this.stopped) return;
-    const next = Math.min(this.options.count - 1, Math.max(0, Math.round(frame)));
+    const next = Math.min(Math.max(0, this.options.count - 1), Math.max(0, Math.round(Number.isFinite(frame) ? frame : 0)));
+    if (this.started && next === this.wanted) return;
     if (next !== this.wanted) this.direction = next > this.wanted ? 1 : -1;
+    this.started = true;
     this.wanted = next;
-    if (this.failed.has(next)) { this.options.onError(); return; }
-    this.paint(); this.pump();
+    clearTimeout(this.detailTimer);
+    this.detailWanted = undefined;
+
+    // The closest cached pose moves immediately with input. Never overshoot the
+    // requested pose or let a neighbor finishing its download move the camera.
+    this.paintCached();
+    this.cancelObsoleteRequests();
+    this.trim();
+    if (this.motion.failed.has(next)) this.motionFailure(next);
+    if (this.options.previewUrl && this.detailWanted === undefined) {
+      this.detailTimer = setTimeout(() => {
+        if (this.stopped || this.wanted !== next) return;
+        this.detailWanted = next;
+        this.pump();
+      }, 100);
+    }
+    this.pump();
   }
-  private paint() {
-    if (this.stopped || !this.images.has(this.wanted)) return;
-    this.shown = this.wanted;
-    this.options.onFrame(this.images.get(this.wanted)!, this.wanted);
+
+  private paintCached() {
+    if (this.present(this.wanted)) return;
+    if (this.shown < 0) return;
+    const low = Math.min(this.shown, this.wanted), high = Math.max(this.shown, this.wanted);
+    const candidates = [...this.motion.images.keys(), ...this.detail.images.keys()].filter(index => index >= low && index <= high);
+    candidates.sort((a, b) => Math.abs(a - this.wanted) - Math.abs(b - this.wanted));
+    if (candidates.length) this.present(candidates[0]);
   }
-  private pump() {
-    if (this.stopped) return;
-    const priorities = frameWindow(this.wanted, this.options.count, this.direction, this.decodeRadius);
-    const compressed = frameWindow(this.wanted, this.options.count, this.direction, 32);
-    while (this.inFlight.size < 4) {
-      let index = priorities.find(i => !this.images.has(i) && !this.inFlight.has(i) && !this.failed.has(i));
-      // Fetch only the nearby trail. Do not download the whole HD sequence while idle.
-      if (index === undefined) {
-        index = compressed.find(i => !this.blobs.has(i) && !this.inFlight.has(i) && !this.failed.has(i));
-      }
-      if (index === undefined) break;
-      this.inFlight.add(index);
-      void this.load(index);
+
+  private present(index: number) {
+    const image = this.detail.images.get(index) ?? this.motion.images.get(index);
+    if (this.stopped || !image) return false;
+    if (image === this.shownImage && index === this.shown) return true;
+    this.shown = index;
+    this.shownImage = image;
+    this.options.onFrame(image, index);
+    return true;
+  }
+
+  private cancelRequest(id: string, request: Request) {
+    // Free the network slot immediately, even if a transport settles abort late.
+    this.requests.delete(id);
+    request.controller.abort();
+  }
+
+  private cancelObsoleteRequests() {
+    for (const [id, request] of this.requests) {
+      if (request.layer === 'detail' || Math.abs(request.frame - this.wanted) > this.fetchRadius) this.cancelRequest(id, request);
+    }
+    // A current-frame request must never wait behind four speculative downloads.
+    const wanted = key('motion', this.wanted);
+    if (!this.motion.images.has(this.wanted) && !this.motion.blobs.has(this.wanted) && !this.requests.has(wanted)) {
+      const speculative = [...this.requests].filter(([, request]) => request.layer === 'motion')
+        .sort((a, b) => Math.abs(b[1].frame - this.wanted) - Math.abs(a[1].frame - this.wanted));
+      if (speculative.length >= 4) this.cancelRequest(...speculative[0]);
     }
   }
-  private async load(index: number) {
+
+  private pump() {
+    if (this.stopped || !this.started) return;
+    const priorities = frameWindow(this.wanted, this.options.count, this.direction, this.decodeRadius);
+    const compressed = frameWindow(this.wanted, this.options.count, this.direction, this.fetchRadius);
+    const needsFetch = (layer: Layer, frame: number) => {
+      const stored = this[layer];
+      return !stored.images.has(frame) && !stored.blobs.has(frame) && !stored.failed.has(frame) && !this.requests.has(key(layer, frame));
+    };
+    for (const index of compressed) {
+      if ([...this.requests.values()].filter(request => request.layer === 'motion').length >= 4) break;
+      if (needsFetch('motion', index)) this.fetchFrame('motion', index);
+    }
+    if (this.detailWanted !== undefined && needsFetch('detail', this.detailWanted)) this.fetchFrame('detail', this.detailWanted);
+
+    const decodeOrder: Decode[] = [{ layer: 'motion', frame: this.wanted }];
+    if (this.detailWanted !== undefined) decodeOrder.push({ layer: 'detail', frame: this.detailWanted });
+    decodeOrder.push(...priorities.slice(1).map(frame => ({ layer: 'motion' as const, frame })));
+    for (const job of decodeOrder) {
+      if (this.decoding.size >= 2) break;
+      const stored = this[job.layer], id = key(job.layer, job.frame);
+      if (stored.images.has(job.frame) || !stored.blobs.has(job.frame) || stored.failed.has(job.frame) || this.decoding.has(id)) continue;
+      // Reserve a decoder for the requested pose while its bytes are arriving.
+      const waitingForPose = !this.motion.images.has(this.wanted) && !this.detail.images.has(this.wanted)
+        && !this.decoding.has(key('motion', this.wanted)) && !this.decoding.has(key('detail', this.wanted));
+      if (waitingForPose && job.frame !== this.wanted && this.decoding.size >= 1) continue;
+      this.decoding.set(id, job);
+      void this.decodeFrame(job, stored.blobs.get(job.frame)!);
+    }
+  }
+
+  private fetchFrame(layer: Layer, frame: number) {
+    const id = key(layer, frame), request = { layer, frame, controller: new AbortController() };
+    this.requests.set(id, request);
+    void this.load(request, id);
+  }
+
+  private async load(request: Request, id: string) {
+    const { layer, frame, controller } = request;
     try {
-      let blob = this.blobs.get(index);
-      if (!blob) {
-        const signal = AbortSignal.any([this.controller.signal, AbortSignal.timeout(12000)]);
-        const response = await fetch(this.options.url(index), { signal, cache: 'force-cache' });
-        if (!response.ok) throw new Error(`Frame ${index}: ${response.status}`);
-        blob = await response.blob();
-        if (this.stopped) return;
-        this.blobs.set(index, blob);
-        if (this.blobs.size > 96) {
-          const farthest = [...this.blobs.keys()].sort((a, b) => Math.abs(b - this.wanted) - Math.abs(a - this.wanted));
-          while (this.blobs.size > 96) this.blobs.delete(farthest.shift()!);
-        }
+      const url = layer === 'motion' ? this.options.previewUrl ?? this.options.url : this.options.url;
+      const signal = AbortSignal.any([controller.signal, AbortSignal.timeout(12000)]);
+      const response = await fetch(url(frame), {
+        signal, cache: 'force-cache', priority: frame === this.wanted && layer === 'motion' ? 'high' : 'low',
+      } as RequestInit & { priority: 'high' | 'low' });
+      if (!response.ok) throw new Error(`Frame ${frame}: ${response.status}`);
+      const blob = await response.blob();
+      if (this.stopped || controller.signal.aborted || this.requests.get(id) !== request) return;
+      this[layer].blobs.set(frame, blob);
+      this.trim();
+    } catch {
+      if (!this.stopped && !controller.signal.aborted && this.requests.get(id) === request) {
+        this[layer].failed.add(frame);
+        if (layer === 'motion') this.motionFailure(frame);
+        else if (frame === this.wanted && this.motion.failed.has(frame)) this.error();
       }
-      if (Math.abs(index - this.wanted) <= this.decodeRadius) {
-        const image = await createImageBitmap(blob);
-        if (this.stopped) { image.close(); return; }
-        this.images.set(index, image);
-        this.paint();
-        // Pin the last displayed bitmap until its replacement is available (resize may redraw it).
-        const farthest = [...this.images.keys()].filter(i => i !== this.shown).sort((a, b) => Math.abs(b - this.wanted) - Math.abs(a - this.wanted));
-        while (this.images.size > this.maxDecoded) {
-          const evicted = farthest.shift()!;
-          this.images.get(evicted)?.close(); this.images.delete(evicted);
-        }
-      }
+    } finally {
+      if (this.requests.get(id) === request) this.requests.delete(id);
+      this.pump();
+    }
+  }
+
+  private async decodeFrame(job: Decode, blob: Blob) {
+    const { layer, frame } = job, id = key(layer, frame);
+    try {
+      const image = await createImageBitmap(blob);
+      const relevant = layer === 'motion' ? Math.abs(frame - this.wanted) <= this.decodeRadius : frame === this.wanted;
+      if (this.stopped || !relevant) { image.close(); return; }
+      this[layer].images.set(frame, image);
+      // Complete only the latest scroll request; out-of-order neighbors stay cached.
+      if (frame === this.wanted) this.present(frame);
+      this.trim();
     } catch {
       if (!this.stopped) {
-        this.failed.add(index);
-        if (index === this.wanted || this.failed.size >= 8) this.options.onError();
+        this[layer].failed.add(frame);
+        if (layer === 'motion') this.motionFailure(frame);
+        else if (frame === this.wanted && this.motion.failed.has(frame)) this.error();
       }
-    } finally { this.inFlight.delete(index); this.pump(); }
+    } finally {
+      if (this.decoding.get(id) === job) this.decoding.delete(id);
+      this.pump();
+    }
   }
+
+  private motionFailure(frame: number) {
+    if (frame !== this.wanted) return;
+    if (this.options.previewUrl && !this.detail.failed.has(frame)) this.detailWanted = frame;
+    else this.error();
+  }
+
+  private error() {
+    if (this.stopped || this.reportedError) return;
+    this.reportedError = true;
+    this.options.onError();
+  }
+
+  private trim() {
+    for (const layer of ['motion', 'detail'] as const) {
+      const stored = this[layer], maxImages = layer === 'motion' ? this.maxMotion : this.maxDetail;
+      const imageOrder = [...stored.images.keys()].filter(index => stored.images.get(index) !== this.shownImage)
+        .sort((a, b) => Math.abs(b - this.wanted) - Math.abs(a - this.wanted));
+      while (stored.images.size > maxImages && imageOrder.length) {
+        const index = imageOrder.shift()!;
+        stored.images.get(index)?.close();
+        stored.images.delete(index);
+      }
+      const maxBlobs = layer === 'motion' ? Math.max(96, this.maxMotion * 4) : Math.max(4, this.maxDetail * 2);
+      const blobOrder = [...stored.blobs.keys()].sort((a, b) => Math.abs(b - this.wanted) - Math.abs(a - this.wanted));
+      while (stored.blobs.size > maxBlobs) stored.blobs.delete(blobOrder.shift()!);
+    }
+  }
+
   dispose() {
-    this.stopped = true; this.controller.abort();
-    this.images.forEach(image => image.close());
-    this.images.clear(); this.blobs.clear();
+    if (this.stopped) return;
+    this.stopped = true;
+    clearTimeout(this.detailTimer);
+    for (const [id, request] of this.requests) this.cancelRequest(id, request);
+    for (const stored of [this.motion, this.detail]) {
+      stored.images.forEach(image => image.close());
+      stored.images.clear(); stored.blobs.clear(); stored.failed.clear();
+    }
+    this.shownImage = undefined;
   }
 }

@@ -29,11 +29,21 @@ export function trailJourney(scrollProgress: number, reducedMotion = false) {
     phase: reducedMotion ? 'summit' : progress >= CLUB_START ? 'revealed' : progress >= DESCENT_START ? 'descending' : progress >= WALK_END ? 'summit' : progress > .10 ? 'climbing' : 'opening',
   } as const;
 }
-export function frameForProgress(scrollProgress: number, frameCount: number, summitFrame = Math.round((frameCount - 1) * .6)) {
+/** Start moving with the first scroll; brake only in the final 3.5% of a leg. */
+const cameraTravel = (value: number) => {
+  const t = clamp(value), braking = .035, normalization = 1 - braking / 2;
+  if (t <= 1 - braking) return t / normalization;
+  const tail = t - (1 - braking);
+  return (1 - braking + tail - tail * tail / (2 * braking)) / normalization;
+};
+export function framePositionForProgress(scrollProgress: number, frameCount: number, summitFrame = Math.round((frameCount - 1) * .6)) {
   const p = clamp(scrollProgress), last = Math.max(0, frameCount - 1), summit = Math.max(0, Math.min(last, summitFrame));
-  if (p <= WALK_END) return Math.round(ease(0, WALK_END, p) * summit);
+  if (p <= WALK_END) return cameraTravel(p / WALK_END) * summit;
   if (p <= DESCENT_START) return summit;
-  return Math.round(summit + ease(DESCENT_START, .90, p) * (last - summit));
+  return summit + cameraTravel((p - DESCENT_START) / (.90 - DESCENT_START)) * (last - summit);
+}
+export function frameForProgress(scrollProgress: number, frameCount: number, summitFrame = Math.round((frameCount - 1) * .6)) {
+  return Math.round(framePositionForProgress(scrollProgress, frameCount, summitFrame));
 }
 /** Ordered priorities favor the current frame and the direction of travel. */
 export function frameWindow(frame: number, count: number, direction = 1, radius = 10) {

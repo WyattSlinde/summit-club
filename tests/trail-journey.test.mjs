@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { trailJourney, frameForProgress, frameWindow, WALK_END, DESCENT_START, CLUB_START, reflowScroll, canvasResolution, frameFocalX } from '../app/trail-journey.ts';
+import { trailJourney, frameForProgress, framePositionForProgress, frameWindow, WALK_END, DESCENT_START, CLUB_START, reflowScroll, canvasResolution, frameFocalX } from '../app/trail-journey.ts';
 import { ScrollSequence } from '../app/scroll-sequence.ts';
 
 const tick = () => new Promise(resolve => setTimeout(resolve, 0));
@@ -114,12 +114,15 @@ test('high density screens receive sharp backing pixels with a fixed allocation 
   const large=canvasResolution(3840,2160,3);
   assert.ok(large.width*large.height<8510000);
 });
-test('camera velocity eases into and out of the summit hold', () => {
-  const count=10001,peak=8000;
-  const near=frameForProgress(.52,count,peak)-frameForProgress(.51,count,peak);
-  const middle=frameForProgress(.27,count,peak)-frameForProgress(.26,count,peak);
-  assert.ok(near<middle/10);
-  assert.ok(frameForProgress(.70,count,peak)-peak<10);
+test('the first scroll moves the camera and only a short braking ramp precedes a hold', () => {
+  assert.equal(frameForProgress(.002,433,340),1, 'about eight scroll pixels already move the opening frame');
+  const step=.001, near=framePositionForProgress(WALK_END,10001,8000)-framePositionForProgress(WALK_END-step,10001,8000);
+  const middle=framePositionForProgress(.27,10001,8000)-framePositionForProgress(.27-step,10001,8000);
+  assert.ok(near<middle/10, 'the camera still settles gently at the summit');
+  assert.ok(frameForProgress(DESCENT_START+.004,433,340)>340, 'continued scrolling immediately leaves the peak');
+  const opening=framePositionForProgress(.04,433,340)-framePositionForProgress(.02,433,340);
+  const climbing=framePositionForProgress(.30,433,340)-framePositionForProgress(.28,433,340);
+  assert.ok(Math.abs(opening-climbing)<.00001, 'scroll has a consistent travel speed across the climb');
 });
 test('portrait framing starts with the wildlife and returns to a centered summit', () => {
   assert.equal(frameFocalX(0,24),0);
@@ -140,4 +143,164 @@ test('HD prefetch stays near the visitor and a small cache settles without decod
     for(let i=0;i<10;i++)await tick();assert.equal(decodes,held,'small cache does not endlessly redecode');
     sequence.seek(300);for(let i=0;i<15;i++)await tick();assert.ok(maxLive<=12);
   }finally{sequence.dispose();assert.equal(live,0);globalThis.fetch=oldFetch;globalThis.createImageBitmap=oldBitmap;}
+});
+
+const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+/** A real delayed transport/decode pipeline, including AbortSignal behavior. */
+function delayedMedia({ latency = 70, detailLatency = 300, decodeTime = 8 } = {}) {
+  const originalFetch = globalThis.fetch, originalBitmap = globalThis.createImageBitmap;
+  const requests = [];
+  let live = 0, maxLive = 0, decodes = 0;
+  globalThis.fetch = (url, options = {}) => new Promise((resolve, reject) => {
+    const [layer, number] = String(url).split('/');
+    const request = { layer, frame: Number(number), priority: options.priority, started: performance.now(), aborted: false, completed: false };
+    requests.push(request);
+    const abort = () => {
+      clearTimeout(timer);
+      request.aborted = true;
+      reject(new DOMException('Canceled', 'AbortError'));
+    };
+    const timer = setTimeout(() => {
+      options.signal?.removeEventListener('abort', abort);
+      request.completed = true;
+      resolve({ ok: true, blob: async () => new Blob([JSON.stringify({ layer, frame: Number(number) })]) });
+    }, layer === 'hd' ? detailLatency : latency);
+    options.signal?.addEventListener('abort', abort, { once: true });
+    if (options.signal?.aborted) abort();
+  });
+  globalThis.createImageBitmap = async blob => {
+    const source = JSON.parse(await blob.text());
+    await wait(decodeTime);
+    decodes++; live++; maxLive = Math.max(maxLive, live);
+    let closed = false;
+    return { ...source, width: source.layer === 'hd' ? 2560 : 960, height: source.layer === 'hd' ? 1440 : 540,
+      close() { assert.equal(closed, false, 'bitmaps are released once'); closed = true; live--; } };
+  };
+  return {
+    requests,
+    get stats() { return { live, maxLive, decodes }; },
+    async restore() { await wait(decodeTime + 10); globalThis.fetch = originalFetch; globalThis.createImageBitmap = originalBitmap; },
+  };
+}
+
+test('a new target starts immediately even when all speculative fetch slots are occupied', async () => {
+  const originalFetch = globalThis.fetch, originalBitmap = globalThis.createImageBitmap;
+  const requests = [], paints = [];
+  globalThis.fetch = (url, { signal, priority }) => new Promise(resolve => requests.push({ frame: Number(url), signal, priority,
+    finish: () => resolve({ ok: true, blob: async () => new Blob([String(url)]) }) }));
+  globalThis.createImageBitmap = async () => ({ width: 960, height: 540, close() {} });
+  const sequence = new ScrollSequence({ count: 300, url: String, onFrame: (_, frame) => paints.push(frame), onError: () => assert.fail('aborts are not media failures') });
+  try {
+    sequence.seek(40);
+    assert.deepEqual(requests.map(request => request.frame), [40, 41, 39, 42]);
+    sequence.seek(44);
+    assert.equal(requests.at(-1).frame, 44, 'current input takes a slot synchronously');
+    assert.equal(requests.at(-1).priority, 'high');
+    assert.ok(requests.find(request => request.frame === 39).signal.aborted, 'a low-priority neighbor is canceled');
+    sequence.seek(220);
+    const current = requests.find(request => request.frame === 220);
+    assert.ok(current, 'a distant seek does not wait for stale network work');
+    assert.ok(requests.filter(request => request.frame < 100).every(request => request.signal.aborted));
+    for (const request of requests.filter(request => request.frame < 100)) request.finish();
+    await tick(); assert.deepEqual(paints, [], 'late responses from canceled requests never paint');
+    current.finish(); await tick(); assert.deepEqual(paints, [220]);
+  } finally {
+    sequence.dispose();
+    for (const request of requests) request.finish();
+    await tick(); globalThis.fetch = originalFetch; globalThis.createImageBitmap = originalBitmap;
+  }
+});
+
+test('obsolete decodes release their bitmaps and the latest target gets the next decoder', async () => {
+  const originalFetch = globalThis.fetch, originalBitmap = globalThis.createImageBitmap;
+  const pending = new Map(), paints = [], closed = [];
+  globalThis.fetch = async url => ({ ok: true, blob: async () => new Blob([String(url)]) });
+  globalThis.createImageBitmap = async blob => {
+    const frame = Number(await blob.text());
+    return new Promise(resolve => pending.set(frame, () => resolve({ width: 960, height: 540, close() { closed.push(frame); } })));
+  };
+  const sequence = new ScrollSequence({ count: 300, url: String, onFrame: (_, frame) => paints.push(frame), onError: () => assert.fail('unexpected failure') });
+  try {
+    sequence.seek(10); await tick();
+    assert.deepEqual([...pending.keys()], [10, 11]);
+    sequence.seek(200); await tick();
+    pending.get(10)(); await tick();
+    assert.ok(closed.includes(10)); assert.deepEqual(paints, []);
+    assert.ok(pending.has(200), 'the current target precedes every speculative decode');
+    pending.get(200)(); await tick();
+    assert.deepEqual(paints, [200]);
+    pending.get(11)(); await tick();
+    assert.deepEqual(paints, [200], 'finishing an older camera pose cannot rewind the scene');
+  } finally {
+    sequence.dispose(); for (const finish of pending.values()) finish();
+    await tick(); globalThis.fetch = originalFetch; globalThis.createImageBitmap = originalBitmap;
+  }
+});
+
+test('the motion layer stays responsive through 70ms fetch latency and 8ms image decoding', async t => {
+  const media = delayedMedia(), paints = [];
+  const sequence = new ScrollSequence({ count: 433, previewUrl: frame => `motion/${frame}`, url: frame => `hd/${frame}`,
+    maxPreviewDecoded: 32, maxDecoded: 2, onFrame: (image, frame) => paints.push({ frame, layer: image.layer }), onError: () => assert.fail('unexpected failure') });
+  try {
+    sequence.seek(0); await wait(200);
+    assert.equal(paints.at(-1)?.frame, 0);
+    let immediate = 0;
+    for (let frame = 1; frame <= 32; frame++) {
+      sequence.seek(frame);
+      if (paints.at(-1)?.frame === frame) immediate++;
+      await wait(16);
+    }
+    await wait(90);
+    assert.equal(paints.at(-1)?.frame, 32, 'one late exact correction completes the latest request');
+    assert.ok(immediate >= 28, `${immediate}/32 seeks displayed immediately from the motion cache`);
+    assert.ok(paints.every((paint, index) => index === 0 || paint.frame >= paints[index - 1].frame), 'network completion never moves backward');
+    assert.ok(media.requests.some(request => request.layer === 'hd' && request.aborted), 'scrolling cancels an idle HD refinement');
+    assert.ok(media.stats.maxLive <= 36, `live decoded image bound: ${media.stats.maxLive}`);
+    t.diagnostic(`${immediate}/32 immediate scroll frames with 70ms transport + 8ms decode; maximum ${media.stats.maxLive} live bitmaps`);
+  } finally { sequence.dispose(); await media.restore(); assert.equal(media.stats.live, 0); }
+});
+
+test('HD sharpens only the paused target and settling the cache causes no idle repaint', async () => {
+  const media = delayedMedia({ latency: 3, detailLatency: 35, decodeTime: 2 }), paints = [];
+  const sequence = new ScrollSequence({ count: 433, previewUrl: frame => `motion/${frame}`, url: frame => `hd/${frame}`,
+    maxPreviewDecoded: 8, maxDecoded: 2, onFrame: (image, frame) => paints.push({ frame, layer: image.layer }), onError: () => assert.fail('unexpected failure') });
+  try {
+    sequence.seek(100); await wait(70);
+    assert.deepEqual(paints, [{ frame: 100, layer: 'motion' }]);
+    assert.equal(media.requests.filter(request => request.layer === 'hd').length, 0, 'no HD transfer while input is recent');
+    await wait(100);
+    assert.deepEqual(paints, [{ frame: 100, layer: 'motion' }, { frame: 100, layer: 'hd' }]);
+    const held = paints.length, decoded = media.stats.decodes, fetched = media.requests.length;
+    for (let i = 0; i < 5; i++) sequence.seek(100);
+    await wait(150);
+    assert.equal(paints.length, held, 'same-frame seeks and neighbor completions do not draw again');
+    assert.equal(media.stats.decodes, decoded, 'idle caches do not repeatedly decode evicted neighbors');
+    assert.equal(media.requests.length, fetched);
+    sequence.seek(102); sequence.seek(101); sequence.seek(100);
+    assert.deepEqual(paints.slice(-3).map(paint => paint.frame), [102, 101, 100], 'cached reverse travel follows input immediately');
+    assert.equal(paints.at(-1).layer, 'hd', 'an available detailed pose is not replaced with its preview');
+    sequence.seek(200); await wait(170);
+    sequence.seek(300); await wait(170);
+    assert.deepEqual(paints.at(-1), { frame: 300, layer: 'hd' });
+    assert.ok(media.stats.maxLive <= 12, 'visiting new HD poses evicts old detail without growing decoded memory');
+  } finally { sequence.dispose(); await media.restore(); assert.equal(media.stats.live, 0); }
+});
+
+test('failed optional detail preserves motion and a missing preview can use the exact HD pose', async () => {
+  const originalFetch = globalThis.fetch, originalBitmap = globalThis.createImageBitmap;
+  const paints = [];
+  globalThis.fetch = async url => {
+    const missing = url === 'motion/10' || url === 'hd/20';
+    return missing ? { ok: false, status: 404 } : { ok: true, blob: async () => new Blob([url]) };
+  };
+  globalThis.createImageBitmap = async blob => ({ source: await blob.text(), width: 960, height: 540, close() {} });
+  const sequence = new ScrollSequence({ count: 100, previewUrl: frame => `motion/${frame}`, url: frame => `hd/${frame}`,
+    maxPreviewDecoded: 8, maxDecoded: 2, onFrame: (image, frame) => paints.push({ frame, source: image.source }), onError: () => assert.fail('an available pose should not trigger page fallback') });
+  try {
+    sequence.seek(10); await wait(20);
+    assert.deepEqual(paints.at(-1), { frame: 10, source: 'hd/10' });
+    sequence.seek(20); await wait(150);
+    assert.deepEqual(paints.at(-1), { frame: 20, source: 'motion/20' });
+  } finally { sequence.dispose(); globalThis.fetch = originalFetch; globalThis.createImageBitmap = originalBitmap; }
 });

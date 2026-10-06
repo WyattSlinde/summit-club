@@ -14,31 +14,39 @@ const stops = [
 ];
 type Props = { onJoin: () => void; children: ReactNode; onReveal?: (visible: boolean) => void };
 export default function SummitExperience({ onJoin, children, onReveal }: Props) {
-  const shellRef = useRef<HTMLElement>(null), visualRef = useRef<HTMLDivElement>(null), underlayRef = useRef<HTMLDivElement>(null), canvasRef = useRef<HTMLCanvasElement>(null);
+  const shellRef = useRef<HTMLElement>(null), visualRef = useRef<HTMLDivElement>(null), stageRef = useRef<HTMLDivElement>(null), underlayRef = useRef<HTMLDivElement>(null), canvasRef = useRef<HTMLCanvasElement>(null);
   const enterRef = useRef<() => void>(() => undefined), seekRef = useRef<(p: number) => void>(() => undefined), revealRef = useRef(onReveal);
   const [ready, setReady] = useState(false), [simple, setSimple] = useState(false), [failed, setFailed] = useState(false);
   const [phase, setPhase] = useState('opening'), [stop, setStop] = useState(-1), [underlayVisible, setUnderlayVisible] = useState(false);
   useEffect(() => { revealRef.current = onReveal; }, [onReveal]);
   useEffect(() => {
-    const shell = shellRef.current, visual = visualRef.current, underlay = underlayRef.current, canvas = canvasRef.current;
-    if (!shell || !visual || !underlay || !canvas) return;
-    const context = canvas.getContext('2d', { alpha: false });
+    const shell = shellRef.current, visual = visualRef.current, stage = stageRef.current, underlay = underlayRef.current, canvas = canvasRef.current;
+    if (!shell || !visual || !stage || !underlay || !canvas) return;
+    const context = canvas.getContext('2d', { alpha: false, desynchronized: true });
     const motion = matchMedia('(prefers-reduced-motion: reduce)');
     const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
     let disposed = false, fallback = !context, frame = 0, focusFrame = 0;
     let start = 0, runway = 1, progress = 0, focusDestination: string | null = null;
-    let measured = false, measuredSimple = false, measuredHeight = 0;
+    let measured = false, measuredSimple = false, measuredHeight = 0, measuredWidth = 0;
+    const styleCache = new WeakMap<HTMLElement, Map<string, string>>();
+    function setStyle(element: HTMLElement, name: string, value: number | string) {
+      const text = typeof value === 'number' ? String(Math.round(value * 10000) / 10000) : value;
+      let cache = styleCache.get(element);
+      if (!cache) { cache = new Map(); styleCache.set(element, cache); }
+      if (cache.get(name) !== text) { element.style.setProperty(name, text); cache.set(name, text); }
+    }
     let sequence: ScrollSequence | undefined, currentImage: ImageBitmap | undefined;
     let sequenceMobile: boolean | undefined;
     const isPortraitViewport = () => visual!.clientWidth / Math.max(1, visual!.clientHeight) <= 9 / 16;
     let deadline: ReturnType<typeof setTimeout> | undefined;
-    let previousPhase = '', previousStop = -2, previousAccessible: boolean | undefined, lastDrawn = -1;
+    let previousPhase = '', previousStop = -2, previousAccessible: boolean | undefined, previousEnded: boolean | undefined, lastDrawn = -1;
     const isSimple = () => motion.matches || !!connection?.saveData || fallback;
     function draw(image: ImageBitmap, index: number) {
       if (disposed || !context || !canvas) return;
       currentImage = image;
       const w = canvas.width, h = canvas.height, scale = Math.max(w / image.width, h / image.height);
       const width = image.width * scale, height = image.height * scale;
+      context.imageSmoothingQuality = image.width >= (sequenceMobile ? media.mobileWidth : media.width) ? 'high' : 'medium';
       context.drawImage(image, (w - width) * frameFocalX(index, media.fps), (h - height) / 2, width, height);
       if (lastDrawn < 0) { setReady(true); clearTimeout(deadline); }
       lastDrawn = index;
@@ -54,23 +62,25 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
     function update() {
       frame = 0;
       if (disposed || !shell || !underlay) return;
-      progress = Math.max(0, Math.min(1, (scrollY - start) / Math.max(1, runway)));
+      const currentScroll = scrollY;
+      progress = Math.max(0, Math.min(1, (currentScroll - start) / Math.max(1, runway)));
       const state = trailJourney(progress, isSimple());
-      shell.style.setProperty('--sx-intro', String(state.intro));
-      shell.style.setProperty('--sx-title', String(state.title));
-      shell.style.setProperty('--sx-ui', String(state.controls));
-      shell.style.setProperty('--sx-camp', String(state.camp));
-      shell.style.setProperty('--sx-shadow', String(state.shade));
-      shell.style.setProperty('--sx-title-y', `${state.titleY}vh`);
-      shell.style.setProperty('--sx-foreground', String(state.foreground));
-      shell.style.setProperty('--sx-cover', `${state.cover}%`);
-      shell.style.setProperty('--sx-scene-scale', String(1 + state.approach * .08));
-      shell.style.setProperty('--sx-scene-y', `${-state.approach * 9}vh`);
-      const remaining = Math.max(0, start + runway - scrollY);
-      shell.style.setProperty('--sx-page-y', isSimple() ? '0px' : `${-remaining + (1 - state.approach) * visual!.clientHeight * .32}px`);
-      shell.style.setProperty('--sx-page-angle', `${isSimple() ? 0 : (1 - state.approach) * 8}deg`);
-      shell.style.setProperty('--sx-page-scale', String(isSimple() ? 1 : .92 + state.approach * .08));
-      shell.style.setProperty('--sx-distance', `${state.walk * 100}%`);
+      // Keep changing values on their visual layer, rather than invalidating the entire club tree.
+      setStyle(stage!, '--sx-intro', state.intro);
+      setStyle(stage!, '--sx-title', state.title);
+      setStyle(stage!, '--sx-ui', state.controls);
+      setStyle(stage!, '--sx-title-y', `${state.titleY.toFixed(3)}vh`);
+      setStyle(stage!, '--sx-foreground', state.foreground);
+      setStyle(stage!, '--sx-distance', `${(state.walk * 100).toFixed(3)}%`);
+      setStyle(visual!, '--sx-cover', `${state.cover.toFixed(3)}%`);
+      setStyle(visual!, '--sx-scene-scale', 1 + state.approach * .045);
+      setStyle(visual!, '--sx-scene-y', `${(-state.approach * 5).toFixed(3)}vh`);
+      const remaining = Math.max(0, start + runway - currentScroll);
+      const ended = progress >= 1 || isSimple();
+      setStyle(underlay, 'opacity', state.camp);
+      // No inherited animation variables or 3D texture for the long club page.
+      setStyle(underlay, 'transform', ended || state.camp === 0 ? 'none' : `translateY(${(-remaining + (1 - state.approach) * measuredHeight * .12).toFixed(2)}px)`);
+      if (ended !== previousEnded) { previousEnded = ended; shell.dataset.journeyEnded = String(ended); }
       shell.dataset.journeyProgress = progress.toFixed(4);
       const nextStop = isSimple() ? -1 : stops.findIndex(item => progress >= item.start && progress < item.end);
       if (nextStop !== previousStop) { previousStop = nextStop; setStop(nextStop); }
@@ -88,7 +98,8 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
     function queue() { if (!frame && !disposed) frame = requestAnimationFrame(update); }
     function measure() {
       if (disposed || !shell || !visual || !canvas) return;
-      const reduced = isSimple(), height = visual.clientHeight;
+      const reduced = isSimple(), height = visual.clientHeight, width = visual.clientWidth;
+      if (measured && reduced === measuredSimple && height === measuredHeight && width === measuredWidth) { queue(); return; }
       const newRunway = reduced ? 0 : height * JOURNEY_VIEWPORTS;
       const restore = measured && (reduced !== measuredSimple || height !== measuredHeight)
         ? reflowScroll(scrollY, start, runway, newRunway, measuredHeight, height, measuredSimple, reduced) : null;
@@ -96,13 +107,13 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
       runway = newRunway;
       shell.style.setProperty('--sx-runway', `${runway}px`);
       start = shell.getBoundingClientRect().top + scrollY;
-      measured = true; measuredSimple = reduced; measuredHeight = height;
+      measured = true; measuredSimple = reduced; measuredHeight = height; measuredWidth = width;
       if (restore !== null) scrollTo({ top: restore, behavior: 'instant' });
       // Match object-fit: cover so the title rises behind the same rocks on phones and desktops.
-      const crop = Math.max(visual.clientWidth / 1920, height / 1080);
-      const ox = (visual.clientWidth - 1920 * crop) / 2, oy = (height - 1080 * crop) / 2;
-      shell.style.setProperty('--sx-ridge', `polygon(${ridge.map(([x, y]) => `${x * crop + ox}px ${y * crop + oy}px`).join(',')},100% 100%,0 100%)`);
-      const resolution = canvasResolution(visual.clientWidth, height, devicePixelRatio);
+      const crop = Math.max(width / 1920, height / 1080);
+      const ox = (width - 1920 * crop) / 2, oy = (height - 1080 * crop) / 2;
+      setStyle(stage!, '--sx-ridge', `polygon(${ridge.map(([x, y]) => `${x * crop + ox}px ${y * crop + oy}px`).join(',')},100% 100%,0 100%)`);
+      const resolution = canvasResolution(width, height, devicePixelRatio);
       canvas.width = resolution.width; canvas.height = resolution.height;
       if (context) { context.imageSmoothingEnabled = true; context.imageSmoothingQuality = 'high'; }
       if (sequence && !reduced && sequenceMobile !== isPortraitViewport()) { startSequence(); return; }
@@ -113,7 +124,7 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
       const destination = document.getElementById(id);
       if (!destination || !underlay!.contains(destination)) return;
       measure(); focusDestination = id;
-      // offsetTop is unaffected by the camera's CSS perspective transform.
+      // offsetTop stays stable while the arrival layer moves into view.
       let offset = 0, node: HTMLElement | null = destination;
       while (node && node !== underlay) { offset += node.offsetTop; node = node.offsetParent as HTMLElement | null; }
       const clubStart = isSimple() ? start + underlay!.offsetTop : start + runway;
@@ -150,7 +161,8 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
       const mobile = isPortraitViewport(); sequenceMobile = mobile;
       sequence = new ScrollSequence({ count: media.frameCount,
         url: index => `${media.path}/${mobile ? 'mobile' : 'desktop'}/${String(index).padStart(4, '0')}.webp?v=${media.version}`,
-        maxDecoded: mobile ? 12 : 14, onFrame: draw, onError: fail });
+        previewUrl: index => `${media.motionPath}/${mobile ? 'mobile' : 'desktop'}/${String(index).padStart(4, '0')}.webp?v=${media.version}`,
+        maxDecoded: 2, maxPreviewDecoded: 32, onFrame: draw, onError: fail });
       measure();
     }
     const sizes = new ResizeObserver(measure); sizes.observe(visual); sizes.observe(underlay);
@@ -167,7 +179,7 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
   const atSummit = phase === 'summit', descending = phase === 'descending', hidden = phase === 'revealed';
   return <section id="home" ref={shellRef} className={`sx-experience${simple ? ' sx-simple' : ''}${failed ? ' sx-fallback' : ''}`} aria-label="The hike to SUMMIT">
     <div className="sx-backdrop" ref={visualRef} aria-hidden="true"><div className="sx-world"><img className="sx-poster" src={`${media.path}/${simple ? 'overlook' : 'trailhead'}.webp`} alt="" fetchPriority="high" /><canvas ref={canvasRef} className={ready && !simple ? 'is-ready' : ''} /><div className="sx-world-shade" /></div></div>
-    <div className="sx-journey"><div className="sx-stage" data-phase={phase} data-ready={ready}>
+    <div className="sx-journey"><div ref={stageRef} className="sx-stage" data-phase={phase} data-ready={ready}>
       <div className="sx-cinematic" aria-hidden={hidden} inert={hidden}>
         <div className="sx-topbar" inert={atSummit || descending || simple}><a href="#basecamp" onClick={enter} className="sx-school"><Mountain size={28} strokeWidth={1.3} /><span>CATHEDRAL CATHOLIC<small>THE OUTDOOR CLUB</small></span></a><a className="sx-skip" href="#basecamp" onClick={enter}>Club &amp; signup <ArrowUpRight size={15} /></a></div>
         <div className="sx-opening" aria-hidden={phase !== 'opening'}><span className="sx-eyebrow">CATHEDRAL CATHOLIC’S OUTDOOR CLUB</span><p>It starts<br /><em>with a climb.</em></p><span className="sx-opening-copy">Scroll to climb the mountain.<br />There’s something waiting at the top.</span></div>

@@ -1,8 +1,8 @@
 /* A quiet field journal follows the cinematic hike. */
-:root,.dark{--forest-ink:#10251d;--forest-deep:#0b1b14;--forest-paper:#f2efe7;--forest-moss:#a8b799;--forest-muted:#b9c3b7;--forest-text-muted:#56635a;--forest-line:#f2efe730;--forest-rule:#10251d27;--forest-signal:#c5633b;--ink:var(--forest-ink);--cream:var(--forest-paper);--red:var(--forest-signal);--background:var(--forest-paper);--foreground:var(--forest-ink);--primary:var(--forest-ink);--primary-foreground:var(--forest-paper);--secondary:#e4e8dd;--accent:#e0e6d9;--muted:#e6e9df;--muted-foreground:#56635a;--border:var(--forest-rule);--ring:var(--forest-signal)}
+:root,.dark{--forest-ink:#142b23;--forest-deep:#10231d;--forest-paper:#f4eee4;--forest-moss:#a8b799;--forest-muted:#bcc8b9;--forest-text-muted:#536156;--forest-line:#f4eee432;--forest-rule:#142b2329;--forest-signal:#985538;--forest-sunset:#e9b78d;--forest-granite:#e8ddcd;--ink:var(--forest-ink);--cream:var(--forest-paper);--red:var(--forest-signal);--background:var(--forest-paper);--foreground:var(--forest-ink);--primary:var(--forest-ink);--primary-foreground:var(--forest-paper);--secondary:#e4e8dd;--accent:#e0e6d9;--muted:#e6e9df;--muted-foreground:#56635a;--border:var(--forest-rule);--ring:var(--forest-signal)}
 body{background:var(--forest-deep);color:var(--forest-paper)}
 ::selection{background:#c5633b45;color:inherit}
-.masthead{height:76px;padding-inline:5%;background:#10251df5;border-color:var(--forest-line);backdrop-filter:blur(12px);color:var(--forest-paper)}
+.masthead{height:76px;padding-inline:5%;background:var(--forest-ink);border-color:var(--forest-line);color:var(--forest-paper)}
 .masthead .wordmark>svg{color:var(--forest-paper);width:26px;height:26px}
 .masthead .wordmark>b{font-size:29px;letter-spacing:.2px}
 .masthead .wordmark>span{color:var(--forest-muted);font-size:8px;letter-spacing:.5px;border-color:var(--forest-line);padding-left:17px;margin-left:7px}
@@ -11,11 +11,11 @@ body{background:var(--forest-deep);color:var(--forest-paper)}
 .masthead nav a:hover,.masthead nav a[aria-current=location]{color:var(--forest-paper)}
 .masthead nav a:after{background:var(--forest-signal)}
 .masthead nav a[aria-current=location]:after{transform:scaleX(1)}
-.masthead .join-nav{background:var(--forest-paper);border-color:var(--forest-paper);color:var(--forest-ink);border-radius:2px;gap:20px;padding:11px 17px;font-size:12px;font-weight:500}
-.masthead .join-nav:hover{background:#e1e7d9;border-color:#e1e7d9}
-.journey-nav{transform:translateY(-105%);visibility:hidden;opacity:0;transition:transform .65s cubic-bezier(.22,1,.36,1),opacity .45s,visibility .45s}
+.masthead .join-nav{background:var(--forest-sunset);border-color:var(--forest-sunset);color:var(--forest-ink);border-radius:2px;gap:20px;padding:11px 17px;font-size:12px;font-weight:500}
+.masthead .join-nav:hover{background:#f2c9a6;border-color:#f2c9a6}
+.journey-nav{transform:translateY(-105%);visibility:hidden;opacity:0;transition:transform .28s ease-out,opacity .2s,visibility .2s}
 .journey-nav[data-arrived=true]{transform:translateY(0);visibility:visible;opacity:1}
-.camp-content{position:relative;background:var(--forest-paper);color:var(--forest-ink);padding:0 0 25px}
+.camp-content{position:relative;background:linear-gradient(180deg,#e9dece 0,var(--forest-paper) 340px);color:var(--forest-ink);padding:0 0 25px}
 .camp-content>.section{width:86%;max-width:1180px;margin:0 auto;padding-inline:0}
 .camp-calendar{padding-block:0}
 .camp-calendar .upcoming-events{margin:0;padding:39px 0 0;border:0}
@@ -118,3 +118,28 @@ body{background:var(--forest-deep);color:var(--forest-paper)}
 @media(max-width:1000px){.masthead nav{gap:23px}.masthead .wordmark>span{display:none}.club-signup{gap:40px}.club-signup h2{font-size:31px}.club-signup p{max-width:440px}}
 @media(max-width:750px){.masthead{height:69px;padding-inline:5%;gap:11px}.masthead .wordmark>b{font-size:26px}.masthead .wordmark>svg{width:23px}.masthead .join-nav{font-size:11px;padding:10px 12px;gap:12px}.masthead nav{background:var(--forest-ink);top:69px;border-color:var(--forest-line);padding:16px 6%}.masthead nav a{font-size:14px}.camp-content>.section{width:88%}.camp-content{padding-bottom:16px}.expeditions{padding-top:34px;padding-bottom:20px}.next-heading{display:block;margin-bottom:23px}.next-heading h2{font-size:31px}.next-heading>p{font-size:13px;margin-top:15px;max-width:340px}.next-heading>p br{display:none}.idea-strip{align-items:flex-start;flex-direction:column;gap:20px;padding:27px 0}.idea-strip h2{font-size:25px}.idea-strip p{font-size:14px}.idea-button{min-height:45px;font-size:12px;padding-inline:16px;gap:25px}.club-notes{padding-top:0}.club-notes summary{font-size:11px;min-height:54px}.club-notes-content dl{grid-template-columns:1fr;gap:20px}.club-signup{flex-direction:column;align-items:flex-start;gap:22px;padding-top:25px;padding-bottom:33px}.club-signup h2{font-size:30px}.club-signup p{font-size:14px;margin-top:12px}.club-signup-action{align-items:flex-start;gap:10px}.club-signup-action .button{font-size:12px;gap:25px}.calendar-heading{display:block}.calendar-heading h2{font-size:23px}.calendar-heading p{font-size:10px;margin-top:9px}.camp-calendar .upcoming-events{padding-top:30px}.camp-calendar .event-card{grid-template-columns:50px minmax(0,1fr);gap:16px}.camp-calendar .event-card h3{font-size:21px}.camp-calendar .event-card>.button{grid-column:2;justify-self:start}.camp-calendar .event-card p{font-size:12px}.camp-calendar .event-date{padding-right:13px}.camp-calendar .event-date>strong{font-size:31px}.club-footer{padding:25px 6%;gap:21px;flex-wrap:wrap}.club-footer>span{display:none}.club-footer>p{width:auto;margin-left:auto;font-size:10px;max-width:180px}.club-footer>p small{font-size:9px}.club-footer .wordmark>b{font-size:25px}.summit-dialog{padding:29px!important}.summit-dialog .dialog-title{font-size:28px!important}.summit-dialog .club-form input,.summit-dialog .club-form textarea,.summit-dialog .club-form [data-slot=select-trigger]{font-size:16px}.toast{font-size:12px;padding:13px 16px}}
 @media(prefers-reduced-motion:reduce){.journey-nav{transition:none}.forest-join,.xc-console *,.idea-button{transition:none}}
+
+/* The warm stone below the trees shares the sunset palette of the arrival. */
+.camp-content>.expeditions{padding-top:62px;padding-bottom:40px}
+.next-heading{margin-bottom:30px}
+.next-heading h2{font-size:clamp(30px,3.2vw,44px);letter-spacing:-.035em}
+.next-heading>p{font-size:14px}
+.idea-strip{padding-block:31px}
+.idea-button{min-height:48px;border-color:var(--forest-rule);background:#f8f3eb}
+.idea-button:hover{background:var(--forest-granite);border-color:var(--forest-ink)}
+.camp-content>.club-signup{width:86%;padding:34px 38px;margin-top:18px;margin-bottom:33px;background:var(--forest-ink);border:0;border-radius:4px;color:var(--forest-paper)}
+.club-signup h2{color:var(--forest-paper);font-size:34px}
+.club-signup p{color:var(--forest-muted);font-size:14px}
+.club-signup-action .button{background:var(--forest-sunset);border-color:var(--forest-sunset);color:var(--forest-ink);min-height:50px}
+.club-signup-action .button:hover{background:#f2c9a6;border-color:#f2c9a6}
+.club-signup-action>span{color:var(--forest-muted)}
+.summit-dialog{border-top:4px solid var(--forest-sunset)!important}
+.summit-dialog .club-form label{font-size:14px}
+.summit-dialog .club-form .check-label{font-size:12px}
+.camp-content button:focus-visible,.camp-content a:focus-visible,.camp-content summary:focus-visible{outline:2px solid var(--forest-signal);outline-offset:5px}
+.club-signup button:focus-visible{outline-color:var(--forest-paper)}
+@media(max-width:750px){
+ .camp-content>.expeditions{padding-top:37px;padding-bottom:28px}
+ .camp-content>.club-signup{width:88%;padding:28px 25px;margin-bottom:20px;gap:24px}
+ .club-signup h2{font-size:30px}.next-heading h2{font-size:34px}
+}
