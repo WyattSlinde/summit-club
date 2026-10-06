@@ -2,7 +2,8 @@
 export const WALK_END = .52;
 export const DESCENT_START = .69;
 export const CLUB_START = .965;
-export const JOURNEY_VIEWPORTS = 4.2;
+// A deliberate climb: about four screens of walking, then room for the peak and descent.
+export const JOURNEY_VIEWPORTS = 7.8;
 const clamp = (value: number) => Math.max(0, Math.min(1, Number.isFinite(value) ? value : 0));
 const ease = (from: number, to: number, value: number) => {
   const t = clamp((value - from) / (to - from));

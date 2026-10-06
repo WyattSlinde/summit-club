@@ -1,0 +1,40 @@
+.leader-dialog{width:min(850px,calc(100vw - 32px))!important;max-width:850px!important}
+.desk-heading{display:flex;justify-content:space-between;align-items:center;gap:20px;padding-right:12px}
+.desk-kicker{font:11px/1.5 var(--mono);letter-spacing:.12em;color:var(--forest-signal);margin-bottom:12px}
+.desk-refresh{display:grid;place-items:center;width:44px;height:44px;flex-shrink:0;border:1px solid var(--forest-rule);border-radius:50%;background:transparent;color:var(--forest-ink)}
+.desk-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;padding:25px 0;border-block:1px solid var(--forest-rule);margin-block:12px}
+.desk-summary>div{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;align-items:center}
+.desk-summary strong{font:500 32px/1 'DM Sans',sans-serif;letter-spacing:-.05em}
+.desk-summary svg{color:var(--forest-signal)}
+.desk-summary span{grid-column:1/-1;color:var(--forest-text-muted);font-size:13px}
+.desk-tabs{width:100%;display:grid!important;grid-template-columns:repeat(3,1fr);height:auto!important}
+.summit-dialog .desk-tabs [data-slot=tabs-trigger]{padding:12px 8px;min-height:44px;font-size:14px}
+.desk-filters{display:flex;gap:12px;margin-block:24px 8px}
+.desk-search{display:flex;gap:10px;align-items:center;flex:1;min-width:0;border:1px solid var(--forest-rule);padding:0 12px;color:var(--forest-text-muted)}
+.desk-search input{width:100%;min-width:0;min-height:46px;border:0;background:transparent;outline-offset:4px;color:var(--forest-ink);font-size:16px}
+.desk-filters select{max-width:44%;border:1px solid var(--forest-rule);padding:10px;background:transparent;color:var(--forest-ink);font-size:14px}
+.desk-roster-meta{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;font-size:12px;color:var(--forest-text-muted);margin-bottom:8px}
+.desk-roster-meta .text-button{display:flex;align-items:center;gap:8px;margin:0;font-size:12px}
+.desk-roster article{display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px 16px;padding:20px 0;border-bottom:1px solid var(--forest-rule)}
+.desk-roster strong{font-size:16px;font-weight:500;overflow-wrap:anywhere}
+.desk-roster article>div>span{display:block;font-size:12px;color:var(--forest-text-muted);margin-top:6px}
+.desk-roster article>p{grid-column:1/-1;font-size:13px;line-height:1.7;color:var(--forest-text-muted)}
+.desk-interest{padding:6px 9px;border:1px solid var(--forest-rule);font-size:12px}
+.desk-empty{padding:28px 0;font-size:15px;line-height:1.7;color:var(--forest-text-muted)}
+.desk-votes{padding-block:25px 12px}
+.desk-votes h3,.desk-list>h3{font:500 22px/1.4 'DM Sans',sans-serif;letter-spacing:-.025em;margin:0 0 20px}
+.desk-vote{display:grid;grid-template-columns:1fr auto;gap:10px;margin-bottom:20px;font-size:14px}
+.desk-vote strong{font-size:12px;font-weight:500}
+.desk-vote>div{grid-column:1/-1;height:5px;background:var(--forest-rule)}
+.desk-vote i{display:block;height:100%;background:var(--forest-signal)}
+.desk-interest-summary{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:30px}
+.desk-interest-summary>span{display:flex;gap:18px;align-items:center;padding:8px 12px;background:var(--forest-granite);font-size:13px}
+.desk-list article h4{font:500 20px/1.3 'DM Sans',sans-serif;margin:9px 0}
+.desk-list article p,.desk-events article p{font-size:15px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}
+.desk-list article small{display:block;font-size:12px;color:var(--forest-text-muted);margin-top:12px}
+.desk-create{border-block:1px solid var(--forest-rule);margin-top:20px}
+.desk-create>summary,.desk-attendees>summary{padding:17px 0;cursor:pointer;font-size:14px}
+.desk-create .club-form{padding-block:8px 24px}
+.desk-attendees{margin-top:10px}
+.desk-notice{padding:14px;border:1px solid var(--forest-rule);font-size:14px;line-height:1.6}
+@media(max-width:600px){.desk-summary{gap:12px}.desk-summary strong{font-size:27px}.desk-summary span{font-size:12px}.desk-heading .dialog-title{font-size:26px!important}.summit-dialog .desk-tabs [data-slot=tabs-trigger]{font-size:12px}.desk-filters{flex-wrap:wrap}.desk-search{flex-basis:100%}.desk-filters select{max-width:100%;width:100%;font-size:16px}.desk-roster-meta .text-button{font-size:12px}}

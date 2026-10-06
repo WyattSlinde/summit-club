@@ -2,15 +2,16 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ArrowDown, ArrowUpRight, Mountain, RotateCcw } from 'lucide-react';
 import { ScrollSequence } from './scroll-sequence';
-import { JOURNEY_VIEWPORTS, trailJourney, frameForProgress, reflowScroll, canvasResolution, frameFocalX } from './trail-journey';
+import { JOURNEY_VIEWPORTS, trailJourney, framePositionForProgress, reflowScroll, canvasResolution, frameFocalX } from './trail-journey';
 import media from './journey-media.json';
 import './summit-experience.css';
 
 // The visible granite edge in the summit still, in the source image's coordinates.
 const ridge = [[0,852],[45,797],[90,751],[130,719],[170,698],[210,685],[253,677],[282,680],[327,689],[386,689],[444,694],[500,709],[551,733],[602,776],[616,786],[638,749],[667,709],[706,675],[744,637],[787,610],[834,601],[900,601],[962,610],[1020,628],[1080,659],[1131,695],[1147,675],[1177,656],[1212,650],[1252,667],[1298,688],[1344,715],[1400,756],[1450,797],[1500,799],[1550,792],[1620,806],[1690,814],[1762,830],[1815,855],[1870,890],[1920,902]];
 const stops = [
-  { name: 'The trail', at: .10, start: .12, end: .25, title: 'Explore.', copy: 'Get outside with your Cathedral Catholic crew.' },
-  { name: 'The climb', at: .30, start: .28, end: .40, title: 'Serve. Lead.', copy: 'Give back. Try something new. Help make it happen.' },
+  { name: 'Explore', at: .14, start: .12, end: .235, title: 'A little further outside.', copy: 'Trails, coastlines, and new experiences with your Cathedral Catholic crew. No outdoor experience needed.' },
+  { name: 'Serve', at: .29, start: .265, end: .375, title: 'Leave it better.', copy: 'Beach cleanups, habitat restoration, and service projects. Getting outside is better when we give something back.' },
+  { name: 'Lead', at: .43, start: .405, end: .50, title: 'Make it happen.', copy: 'Pitch an idea. Choose the next adventure. Help plan it with your friends. This is your club to build.' },
 ];
 type Props = { onJoin: () => void; children: ReactNode; onReveal?: (visible: boolean) => void };
 export default function SummitExperience({ onJoin, children, onReveal }: Props) {
@@ -35,28 +36,37 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
       if (!cache) { cache = new Map(); styleCache.set(element, cache); }
       if (cache.get(name) !== text) { element.style.setProperty(name, text); cache.set(name, text); }
     }
-    let sequence: ScrollSequence | undefined, currentImage: ImageBitmap | undefined;
+    let sequence: ScrollSequence | undefined, currentImage: ImageBitmap | undefined, currentNext: ImageBitmap | undefined, currentMix = 0;
     let sequenceMobile: boolean | undefined;
     const isPortraitViewport = () => visual!.clientWidth / Math.max(1, visual!.clientHeight) <= 9 / 16;
     let deadline: ReturnType<typeof setTimeout> | undefined;
     let previousPhase = '', previousStop = -2, previousAccessible: boolean | undefined, previousEnded: boolean | undefined, lastDrawn = -1;
     const isSimple = () => motion.matches || !!connection?.saveData || fallback;
-    function draw(image: ImageBitmap, index: number) {
+    function draw(image: ImageBitmap, index: number, nextImage?: ImageBitmap, mix = 0) {
       if (disposed || !context || !canvas) return;
-      currentImage = image;
-      const w = canvas.width, h = canvas.height, scale = Math.max(w / image.width, h / image.height);
-      const width = image.width * scale, height = image.height * scale;
-      context.imageSmoothingQuality = image.width >= (sequenceMobile ? media.mobileWidth : media.width) ? 'high' : 'medium';
-      context.drawImage(image, (w - width) * frameFocalX(index, media.fps), (h - height) / 2, width, height);
+      currentImage = image; currentNext = nextImage; currentMix = mix;
+      const w = canvas.width, h = canvas.height;
+      const paint = (bitmap: ImageBitmap, pose: number, opacity: number) => {
+        const scale = Math.max(w / bitmap.width, h / bitmap.height);
+        const width = bitmap.width * scale, height = bitmap.height * scale;
+        context.globalAlpha = opacity;
+        context.imageSmoothingQuality = bitmap.width >= (sequenceMobile ? media.mobileWidth : media.width) ? 'high' : 'medium';
+        context.drawImage(bitmap, (w - width) * frameFocalX(pose, media.fps), (h - height) / 2, width, height);
+      };
+      // Fractional scroll positions blend adjacent poses, so small wheel/trackpad
+      // movements do not round to the same still. No clock advances this blend.
+      paint(image, index, 1);
+      if (nextImage && mix > 0) paint(nextImage, index + 1, mix);
+      context.globalAlpha = 1;
       if (lastDrawn < 0) { setReady(true); clearTimeout(deadline); }
       lastDrawn = index;
-      shell!.dataset.frame = String(index);
+      shell!.dataset.frame = (index + mix).toFixed(3);
     }
     function fail() {
       if (disposed) return;
       clearTimeout(deadline);
       fallback = true; setFailed(true); setReady(true);
-      sequence?.dispose(); sequence = undefined; currentImage = undefined;
+      sequence?.dispose(); sequence = undefined; currentImage = undefined; currentNext = undefined;
       measure();
     }
     function update() {
@@ -83,10 +93,15 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
       if (ended !== previousEnded) { previousEnded = ended; shell.dataset.journeyEnded = String(ended); }
       shell.dataset.journeyProgress = progress.toFixed(4);
       const nextStop = isSimple() ? -1 : stops.findIndex(item => progress >= item.start && progress < item.end);
+      const story = stops[nextStop];
+      const edge = story ? Math.max(0, Math.min(1, (progress - story.start) / .016, (story.end - progress) / .016)) : 0;
+      const storyOpacity = edge * edge * (3 - 2 * edge);
+      setStyle(stage!, '--sx-story-opacity', storyOpacity);
+      setStyle(stage!, '--sx-story-y', `${((1 - storyOpacity) * 12).toFixed(2)}px`);
       if (nextStop !== previousStop) { previousStop = nextStop; setStop(nextStop); }
       if (state.phase !== previousPhase) { previousPhase = state.phase; setPhase(state.phase); }
       if (state.accessible !== previousAccessible) { previousAccessible = state.accessible; setUnderlayVisible(state.accessible); revealRef.current?.(state.navigation); }
-      if (!isSimple()) sequence?.seek(frameForProgress(progress, media.frameCount, 'summitFrame' in media ? Number(media.summitFrame) : undefined));
+      if (!isSimple()) sequence?.seek(framePositionForProgress(progress, media.frameCount, 'summitFrame' in media ? Number(media.summitFrame) : undefined));
       if (state.accessible && focusDestination) {
         const destinationId = focusDestination; focusDestination = null;
         focusFrame = requestAnimationFrame(() => {
@@ -117,7 +132,7 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
       canvas.width = resolution.width; canvas.height = resolution.height;
       if (context) { context.imageSmoothingEnabled = true; context.imageSmoothingQuality = 'high'; }
       if (sequence && !reduced && sequenceMobile !== isPortraitViewport()) { startSequence(); return; }
-      if (currentImage && !reduced) draw(currentImage, lastDrawn);
+      if (currentImage && !reduced) draw(currentImage, lastDrawn, currentNext, currentMix);
       queue();
     }
     function goToSection(id: string, immediate = false) {
@@ -155,7 +170,7 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
     };
     function startSequence() {
       clearTimeout(deadline); setReady(false); lastDrawn = -1;
-      sequence?.dispose(); sequence = undefined; currentImage = undefined;
+      sequence?.dispose(); sequence = undefined; currentImage = undefined; currentNext = undefined;
       if (isSimple()) { setReady(true); clearTimeout(deadline); measure(); return; }
       deadline = setTimeout(() => { if (lastDrawn < 0 && !isSimple()) fail(); }, 18000);
       const mobile = isPortraitViewport(); sequenceMobile = mobile;

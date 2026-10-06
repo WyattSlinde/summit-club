@@ -232,3 +232,15 @@
 @media (prefers-reduced-motion: reduce) {
   .forest-story * { transition: none !important; }
 }
+
+/* The same overlook remains behind the arrival, so the ridge opens into a
+   place rather than cutting to a different color or a blank panel. */
+.forest-story{overflow:hidden}
+.forest-story::before{background:linear-gradient(90deg,#142b23f5 0%,#142b23d9 50%,#142b23c2),linear-gradient(0deg,#142b23,transparent 70%),url('/ascent-hd/overlook.webp') center 43%/cover no-repeat}
+.forest-story-inner{padding-block:88px 82px}
+.forest-audience,.forest-meeting-copy,.forest-meeting-place{font-size:16px}
+.forest-lead,.forest-notice-label,.forest-kicker{font-size:13px}
+.forest-join,.forest-next,.forest-calendar-link{font-size:14px}
+.forest-panorama{aspect-ratio:1.7}
+.forest-notice-copy{padding-top:27px}
+@media(max-width:700px){.forest-story-inner{padding-block:46px}.forest-panorama{aspect-ratio:2}.forest-story::before{background:linear-gradient(#142b23c9,#142b23f5 60%,#142b23),url('/ascent-hd/overlook.webp') center top/auto 65% no-repeat}.forest-audience,.forest-meeting-copy,.forest-meeting-place{font-size:16px}}

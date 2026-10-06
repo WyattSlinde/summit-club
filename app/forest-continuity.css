@@ -149,3 +149,42 @@ body{background:var(--forest-deep);color:var(--forest-paper)}
  .camp-content>.club-signup{width:88%;padding:28px 25px;margin-bottom:20px;gap:24px}
  .club-signup h2{font-size:30px}.next-heading h2{font-size:34px}
 }
+
+/* One forest palette from the ridge through the club. The lighter tones are
+   reserved for photographs, controls, and the small signup form. */
+.camp-content{--forest-ink:#f4eee4;--forest-paper:#142b23;--forest-text-muted:#bdc9bb;--forest-rule:#f4eee42b;--forest-signal:#e9b78d;--forest-granite:#243b31;background:#142b23;color:#f4eee4;padding-bottom:42px}
+.camp-content>.expeditions{padding-top:76px;padding-bottom:44px}
+.next-heading>p,.idea-strip p,.club-notes-content>p{font-size:16px;line-height:1.75}
+.camp-content .xc-console{background:#1a3228;border-radius:3px}
+.camp-content .xc-tab[data-state=active]{background:#e9b78d;color:#142b23}
+.camp-content .xc-tab[data-state=active]:hover{background:#f2c9a6;color:#142b23}
+.camp-content .xc-tab[data-state=active]>i{background:#e9b78d}
+.camp-content .xc-tab:hover{background:#263f32;color:#f4eee4}
+.camp-content .xc-landscape>span{color:#f4eee4}
+.camp-content .xc-vote{background:#e9b78d;border-color:#e9b78d;color:#142b23}
+.camp-content .xc-vote:hover{background:#f2c9a6;border-color:#f2c9a6}
+.camp-content .xc-vote.is-voted{background:transparent;color:#e9b78d}
+.camp-content .xc-vote b{border-color:#142b2345}
+.camp-content .xc-vote.is-voted b{border-color:#e9b78d66}
+.camp-content .xc-description{font-size:16px}
+.camp-content .xc-category,.camp-content .xc-facts dt,.camp-content .xc-facts>div:last-child dd,.camp-content .club-photo-credit,.outing-photo-note{font-size:12px}
+.camp-content .xc-facts dd{font-size:14px}
+.camp-content .xc-actions button,.idea-button{font-size:14px}
+.idea-button{background:transparent;border-color:#bdc9bb66}
+.idea-button:hover{background:#243b31;border-color:#e9b78d}
+.camp-content .club-notes summary,.camp-content .saved-ideas summary{font-size:14px;min-height:66px}
+.camp-content .club-notes-content dt{font-size:15px}
+.camp-content .club-notes-content dd{font-size:14px}
+.camp-content>.club-signup{background:#203b2e;border:1px solid #f4eee425;padding:40px;margin-block:30px}
+.camp-content .club-signup h2{color:#f4eee4}
+.camp-content .club-signup p{color:#bdc9bb;font-size:16px}
+.camp-content .club-signup .button{background:#e9b78d;border-color:#e9b78d;color:#142b23;font-size:14px}
+.camp-content .club-signup .button:hover{background:#f2c9a6}
+.camp-content .error{background:#e9b78d0c;color:#f4c9a7;border-color:#e9b78d60}
+.camp-content .event-card .button{background:#e9b78d;border-color:#e9b78d;color:#142b23}
+.camp-content .event-card p{font-size:16px}
+.camp-content .calendar-heading p,.camp-content .event-card>div>span{font-size:13px}
+.sx-arrival-strip{background:#142b23;color:#bdc9bb;border-color:#f4eee42b}
+.sx-arrival-strip>button{color:#bdc9bb}
+.sx-arrival-strip>span>svg{color:#e9b78d}
+@media(max-width:750px){.camp-content>.expeditions{padding-top:42px}.camp-content>.club-signup{padding:28px 24px}.next-heading>p,.idea-strip p,.camp-content .xc-description,.camp-content .club-signup p{font-size:16px}.camp-content .xc-tab[data-slot=tabs-trigger]{font-size:14px}.camp-content .xc-actions{gap:14px 20px}}

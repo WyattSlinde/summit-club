@@ -304,3 +304,28 @@ test('failed optional detail preserves motion and a missing preview can use the 
     assert.deepEqual(paints.at(-1), { frame: 20, source: 'motion/20' });
   } finally { sequence.dispose(); globalThis.fetch = originalFetch; globalThis.createImageBitmap = originalBitmap; }
 });
+
+test('fractional input blends adjacent poses, reverses exactly, and freezes between scroll events', async () => {
+  const media = delayedMedia({ latency: 2, detailLatency: 10, decodeTime: 1 }), paints = [];
+  const sequence = new ScrollSequence({ count: 433, previewUrl: frame => `motion/${frame}`, url: frame => `hd/${frame}`,
+    maxPreviewDecoded: 12, maxDecoded: 2,
+    onFrame: (image, frame, next, mix) => paints.push({ frame, next: next?.frame, mix, layer: image.layer, nextLayer: next?.layer }),
+    onError: () => assert.fail('unexpected media failure') });
+  try {
+    sequence.seek(100.25); await wait(75);
+    assert.equal(paints.at(-1).frame, 100);
+    assert.equal(paints.at(-1).next, 101);
+    assert.equal(paints.at(-1).mix, .25);
+    sequence.seek(100.75);
+    assert.equal(paints.at(-1).mix, .75, 'subframe movement renders immediately without another network request');
+    sequence.seek(100.25);
+    assert.equal(paints.at(-1).mix, .25, 'reversing retraces the same fractional pose');
+    await wait(150);
+    assert.deepEqual(paints.at(-1), { frame: 100, next: 101, mix: .25, layer: 'hd', nextLayer: 'hd' }, 'both HD images refine the same held pose');
+    const held = paints.length;
+    await wait(150); assert.equal(paints.length, held, 'no playback or trailing camera animation');
+    sequence.seek(250.6); await wait(170);
+    sequence.seek(1.1); await wait(170);
+    assert.ok(media.stats.maxLive <= 18, 'both displayed bitmaps remain within a bounded cache');
+  } finally { sequence.dispose(); await media.restore(); assert.equal(media.stats.live, 0); }
+});

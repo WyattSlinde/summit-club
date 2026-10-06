@@ -5,7 +5,7 @@ type Options = {
   url: (frame: number) => string;
   /** Small images of the identical camera poses, used while the visitor scrolls. */
   previewUrl?: (frame: number) => string;
-  onFrame: (image: ImageBitmap, frame: number) => void;
+  onFrame: (image: ImageBitmap, frame: number, nextImage?: ImageBitmap, mix?: number) => void;
   onError: () => void;
   maxDecoded?: number;
   maxPreviewDecoded?: number;
@@ -28,13 +28,16 @@ export class ScrollSequence {
   private requests = new Map<string, Request>();
   private decoding = new Map<string, Decode>();
   private wanted = 0;
+  private position = 0;
   private shown = -1;
   private shownImage: ImageBitmap | undefined;
+  private shownNext: ImageBitmap | undefined;
+  private shownMix = 0;
   private direction = 1;
   private started = false;
   private stopped = false;
   private reportedError = false;
-  private detailWanted: number | undefined;
+  private detailWanted: number[] = [];
   private detailTimer: ReturnType<typeof setTimeout> | undefined;
   private maxMotion: number;
   private maxDetail: number;
@@ -52,24 +55,26 @@ export class ScrollSequence {
 
   seek(frame: number) {
     if (this.stopped) return;
-    const next = Math.min(Math.max(0, this.options.count - 1), Math.max(0, Math.round(Number.isFinite(frame) ? frame : 0)));
-    if (this.started && next === this.wanted) return;
+    const position = Math.min(Math.max(0, this.options.count - 1), Math.max(0, Number.isFinite(frame) ? frame : 0));
+    const next = Math.floor(position);
+    if (this.started && position === this.position) return;
+    const sameWindow = this.started && next === this.wanted;
+    this.position = position;
     if (next !== this.wanted) this.direction = next > this.wanted ? 1 : -1;
     this.started = true;
     this.wanted = next;
     clearTimeout(this.detailTimer);
-    this.detailWanted = undefined;
+    this.detailWanted = [];
 
     // The closest cached pose moves immediately with input. Never overshoot the
     // requested pose or let a neighbor finishing its download move the camera.
     this.paintCached();
-    this.cancelObsoleteRequests();
-    this.trim();
+    if (!sameWindow) { this.cancelObsoleteRequests(); this.trim(); }
     if (this.motion.failed.has(next)) this.motionFailure(next);
-    if (this.options.previewUrl && this.detailWanted === undefined) {
+    if (this.options.previewUrl && !this.detailWanted.length) {
       this.detailTimer = setTimeout(() => {
         if (this.stopped || this.wanted !== next) return;
-        this.detailWanted = next;
+        this.detailWanted = [...new Set([next, Math.ceil(this.position)])];
         this.pump();
       }, 100);
     }
@@ -88,10 +93,15 @@ export class ScrollSequence {
   private present(index: number) {
     const image = this.detail.images.get(index) ?? this.motion.images.get(index);
     if (this.stopped || !image) return false;
-    if (image === this.shownImage && index === this.shown) return true;
+    const fraction = index === this.wanted ? this.position - index : 0;
+    const nextImage = fraction > 0 ? this.detail.images.get(index + 1) ?? this.motion.images.get(index + 1) : undefined;
+    const mix = nextImage ? fraction : 0;
+    if (image === this.shownImage && index === this.shown && nextImage === this.shownNext && mix === this.shownMix) return true;
     this.shown = index;
     this.shownImage = image;
-    this.options.onFrame(image, index);
+    this.shownNext = nextImage;
+    this.shownMix = mix;
+    this.options.onFrame(image, index, nextImage, mix);
     return true;
   }
 
@@ -126,10 +136,11 @@ export class ScrollSequence {
       if ([...this.requests.values()].filter(request => request.layer === 'motion').length >= 4) break;
       if (needsFetch('motion', index)) this.fetchFrame('motion', index);
     }
-    if (this.detailWanted !== undefined && needsFetch('detail', this.detailWanted)) this.fetchFrame('detail', this.detailWanted);
+    for (const index of this.detailWanted) if (needsFetch('detail', index)) this.fetchFrame('detail', index);
 
     const decodeOrder: Decode[] = [{ layer: 'motion', frame: this.wanted }];
-    if (this.detailWanted !== undefined) decodeOrder.push({ layer: 'detail', frame: this.detailWanted });
+    if (this.position > this.wanted) decodeOrder.push({ layer: 'motion', frame: this.wanted + 1 });
+    decodeOrder.push(...this.detailWanted.map(frame => ({ layer: 'detail' as const, frame })));
     decodeOrder.push(...priorities.slice(1).map(frame => ({ layer: 'motion' as const, frame })));
     for (const job of decodeOrder) {
       if (this.decoding.size >= 2) break;
@@ -179,11 +190,11 @@ export class ScrollSequence {
     const { layer, frame } = job, id = key(layer, frame);
     try {
       const image = await createImageBitmap(blob);
-      const relevant = layer === 'motion' ? Math.abs(frame - this.wanted) <= this.decodeRadius : frame === this.wanted;
+      const relevant = layer === 'motion' ? Math.abs(frame - this.wanted) <= this.decodeRadius : frame === this.wanted || frame === Math.ceil(this.position);
       if (this.stopped || !relevant) { image.close(); return; }
       this[layer].images.set(frame, image);
       // Complete only the latest scroll request; out-of-order neighbors stay cached.
-      if (frame === this.wanted) this.present(frame);
+      if (frame === this.wanted || (this.position > this.wanted && frame === this.wanted + 1)) this.present(this.wanted);
       this.trim();
     } catch {
       if (!this.stopped) {
@@ -199,7 +210,7 @@ export class ScrollSequence {
 
   private motionFailure(frame: number) {
     if (frame !== this.wanted) return;
-    if (this.options.previewUrl && !this.detail.failed.has(frame)) this.detailWanted = frame;
+    if (this.options.previewUrl && !this.detail.failed.has(frame)) this.detailWanted = [frame];
     else this.error();
   }
 
@@ -212,7 +223,7 @@ export class ScrollSequence {
   private trim() {
     for (const layer of ['motion', 'detail'] as const) {
       const stored = this[layer], maxImages = layer === 'motion' ? this.maxMotion : this.maxDetail;
-      const imageOrder = [...stored.images.keys()].filter(index => stored.images.get(index) !== this.shownImage)
+      const imageOrder = [...stored.images.keys()].filter(index => stored.images.get(index) !== this.shownImage && stored.images.get(index) !== this.shownNext)
         .sort((a, b) => Math.abs(b - this.wanted) - Math.abs(a - this.wanted));
       while (stored.images.size > maxImages && imageOrder.length) {
         const index = imageOrder.shift()!;
@@ -235,5 +246,6 @@ export class ScrollSequence {
       stored.images.clear(); stored.blobs.clear(); stored.failed.clear();
     }
     this.shownImage = undefined;
+    this.shownNext = undefined;
   }
 }
