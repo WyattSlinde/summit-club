@@ -228,6 +228,10 @@ export function addTrailForest(T: typeof import('three'), options: Options) {
   const standsToAnimate: Array<{ canopy: Three.InstancedMesh; trunks: Three.InstancedMesh; branches?: Three.InstancedMesh; models: Array<{ foliage: Three.BufferGeometry; trunk: Three.BufferGeometry }>; baseLevel: number; level: number; x: number; z: number }> = [];
   const limits = mobile ? [95, 330, 770] : [165, 580, 1350];
   function place(side: number, z: number, offset: number, height: number, variant: number, seed: number, forceNear = false, broadleaf = false) {
+    // A real clearing at the end of the footpath opens the view without lifting
+    // the camera above the forest or moving whole mountain meshes aside.
+    const overlook = Math.exp(-(((z + 1250) / 210) ** 2));
+    if (offset < 20 + overlook * 78 && random(seed, 901) < overlook * .985) return;
     const x = trailX(z) + side * offset, y = terrainHeight(x, z);
     if (!Number.isFinite(y) || y > 1040) return;
     const slopeX = (terrainHeight(x + 3, z) - terrainHeight(x - 3, z)) / 6, slopeZ = (terrainHeight(x, z + 3) - terrainHeight(x, z - 3)) / 6;

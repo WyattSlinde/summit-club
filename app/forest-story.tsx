@@ -8,11 +8,9 @@ export default function ForestStory({ onJoin }: { onJoin: () => void }) {
   const uid = useId().replace(/:/g, '');
 
   return <section id="basecamp" className="forest-story" aria-labelledby={`forest-title-${uid}`}>
-    <div className="forest-photo" aria-hidden="true" />
-    <div className="forest-photo-shade" aria-hidden="true" />
     <div className="forest-story-inner">
       <div className="forest-intro">
-        <p className="forest-kicker"><strong>SUMMIT</strong><span>Cathedral Catholic High School</span></p>
+        <p className="forest-kicker"><strong>01 / BASECAMP</strong><span>Cathedral Catholic High School</span></p>
         <h2 id={`forest-title-${uid}`}>Good people.<br />More outside.</h2>
         <p className="forest-intro-copy">Hikes, service projects, and adventures planned by Cathedral Catholic students.</p>
         <ul className="forest-facts">

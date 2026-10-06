@@ -1,99 +1,36 @@
-.forest-story {
-  --forest-dark: #142d21;
-  --forest-moss: #a8bc89;
-  --forest-paper: #e8e5d4;
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  min-height: 100svh;
-  background: var(--forest-dark);
-  color: var(--forest-paper);
-  scroll-margin-top: 0;
-}
-.forest-photo {
-  position: absolute;
-  inset: 0 0 0 35%;
-  z-index: -2;
-  pointer-events: none;
-  background: url('/forest-basecamp.webp') 67% center / cover no-repeat;
-}
-.forest-photo-shade {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: linear-gradient(90deg, #142d21 0%, #142d21 31%, #142d21eb 40%, #142d2190 50%, #142d2118 68%, #142d2105 100%), linear-gradient(0deg, #142d2170, transparent 24%, transparent 87%, #142d212b);
-}
-.forest-story-inner {
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 86%;
-  max-width: 1360px;
-  min-height: 100svh;
-  margin: 0 auto;
-  padding: 106px 0 52px;
-}
-.forest-intro { width: 48%; max-width: 510px; }
-.forest-kicker { display: flex; align-items: center; flex-wrap: wrap; gap: 5px 15px; margin: 0 0 24px; font-size: 11px; line-height: 1.6; color: #c0cfb5; }
-.forest-kicker > strong { font-size: 12px; letter-spacing: 1.4px; font-weight: 600; color: var(--forest-paper); }
-.forest-kicker > span { border-left: 1px solid #a8bc8952; padding-left: 15px; }
-.forest-intro > h2 { margin: 0; font: 500 clamp(47px, 4.8vw, 68px)/1.055 'DM Sans', Arial, sans-serif; letter-spacing: -.048em; text-transform: none; }
-.forest-intro-copy { max-width: 430px; margin: 24px 0 0; color: #cbd5c6; font-size: 15px; line-height: 1.75; }
-.forest-facts { display: flex; flex-direction: column; gap: 9px; margin: 25px 0 0; padding: 0; list-style: none; }
-.forest-facts > li { display: flex; align-items: baseline; gap: 15px; font-size: 13px; line-height: 1.6; }
+.forest-story { position: relative; isolation: isolate; min-height: 86svh; color: var(--forest-paper); scroll-margin-top: 0; }
+.forest-story::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(90deg, #14291fbd, #14291f80 42%, transparent 78%); }
+.forest-story-inner { display: flex; align-items: center; width: 86%; max-width: 1180px; min-height: 86svh; margin: 0 auto; padding: 118px 0 78px; }
+.forest-intro { width: 58%; max-width: 550px; }
+.forest-kicker { display: flex; align-items: center; flex-wrap: wrap; gap: 7px 16px; margin-bottom: 26px; color: var(--forest-muted); font-size: 12px; line-height: 1.6; }
+.forest-kicker strong { color: var(--forest-moss); font: 11px/1.6 var(--mono); letter-spacing: .09em; }
+.forest-kicker > span { border-left: 1px solid var(--forest-line); padding-left: 16px; }
+.forest-intro > h2 { margin: 0; font: 500 clamp(46px, 4.8vw, 68px)/1.08 'DM Sans', sans-serif; letter-spacing: -.045em; }
+.forest-intro-copy { max-width: 430px; margin: 26px 0 0; color: var(--forest-paper); font-size: 16px; line-height: 1.75; }
+.forest-facts { display: grid; gap: 14px; margin: 30px 0 0; padding: 26px 0 0; list-style: none; border-top: 1px solid var(--forest-line); }
+.forest-facts > li { display: flex; align-items: baseline; gap: 18px; font-size: 14px; line-height: 1.6; }
 .forest-facts strong { flex: 0 0 78px; color: var(--forest-paper); font-weight: 500; }
-.forest-facts span { color: #aec1a4; }
-.forest-join { display: inline-flex; align-items: center; justify-content: center; gap: 32px; min-height: 47px; margin-top: 28px; padding: 12px 20px; border: 1px solid var(--forest-paper); background: var(--forest-paper); color: var(--forest-dark); font-size: 13px; font-weight: 600; transition: background .18s, border-color .18s; }
-.forest-join:hover { background: var(--forest-moss); border-color: var(--forest-moss); }
-.forest-join:focus-visible { outline: 2px solid var(--forest-paper); outline-offset: 6px; }
-.forest-host-note { display: flex; flex-direction: column; gap: 3px; margin-top: 26px; color: #b4c4ab; font-size: 11px; line-height: 1.65; }
-.forest-host-note p { margin: 0; }
-.forest-host-note > span { color: #95aa8b; font-size: 10px; }
-@media (min-width: 1600px) {
-  .forest-story-inner { padding-top: 110px; padding-bottom: 68px; }
+.forest-facts span { color: var(--forest-muted); }
+.forest-join { display: inline-flex; align-items: center; justify-content: center; gap: 32px; min-height: 48px; margin-top: 30px; padding: 13px 20px; border: 1px solid var(--forest-moss); background: var(--forest-moss); color: var(--forest-ink); font-size: 14px; font-weight: 600; }
+.forest-join:hover { background: var(--forest-paper); border-color: var(--forest-paper); }
+.forest-join:focus-visible, .forest-next:focus-visible { outline: 2px solid var(--forest-paper); outline-offset: 6px; }
+.forest-next { display: inline-flex; align-items: center; gap: 14px; margin: 30px 0 0 24px; min-height: 48px; font-size: 14px; color: var(--forest-paper); border-bottom: 1px solid var(--forest-line); }
+.forest-next:hover { border-color: var(--forest-paper); }
+@media (max-width: 750px) {
+  .forest-story, .forest-story-inner { min-height: 85svh; }
+  .forest-story-inner { width: 88%; padding: 105px 0 64px; }
+  .forest-story::before { background: linear-gradient(90deg, #14291fd9, #14291f75); }
+  .forest-intro { width: 100%; max-width: 520px; }
+  .forest-intro > h2 { font-size: clamp(43px, 10.5vw, 60px); }
+  .forest-kicker { font-size: 11px; gap: 7px 12px; }
+  .forest-kicker > span { padding-left: 12px; }
+  .forest-intro-copy { font-size: 16px; max-width: 380px; }
+  .forest-facts > li { gap: 14px; font-size: 14px; }
+  .forest-facts strong { flex-basis: 72px; }
+  .forest-join { gap: 18px; padding-inline: 17px; }
+  .forest-next { margin-left: 18px; font-size: 13px; }
 }
-@media (max-width: 1100px) {
-  .forest-story-inner { width: 88%; padding-top: 105px; padding-bottom: 50px; }
-  .forest-intro { width: 51%; max-width: 480px; }
-  .forest-intro > h2 { font-size: clamp(44px, 5.1vw, 58px); }
-  .forest-intro-copy { font-size: 14px; line-height: 1.75; }
-  .forest-kicker { font-size: 10px; gap: 5px 11px; }
-  .forest-kicker > strong { font-size: 11px; }
-  .forest-kicker > span { padding-left: 11px; }
-  .forest-facts > li { gap: 10px; font-size: 12px; }
-  .forest-facts strong { flex-basis: 71px; }
+@media (max-width: 370px) {
+  .forest-kicker > span { border-left: 0; padding-left: 0; flex-basis: 100%; }
+  .forest-next { margin-left: 12px; gap: 8px; }
 }
-@media (max-width: 680px) {
-  .forest-story-inner { width: 86%; min-height: 100svh; padding: 103px 0 50px; }
-  .forest-photo { inset: 0; background-position: 70% center; }
-  .forest-photo-shade { background: linear-gradient(90deg, #142d21ed, #142d21c4 65%, #142d2176), linear-gradient(0deg, #142d21eb, #142d215c 34%, #142d2126 76%); }
-  .forest-intro { width: 100%; max-width: none; }
-  .forest-kicker { font-size: 9px; margin-bottom: 24px; gap: 5px 10px; }
-  .forest-kicker > strong { font-size: 11px; }
-  .forest-kicker > span { padding-left: 10px; }
-  .forest-intro > h2 { font-size: clamp(45px, 10.4vw, 58px); line-height: 1.06; }
-  .forest-intro-copy { max-width: 420px; font-size: 14px; margin-top: 23px; }
-  .forest-facts { margin-top: 23px; gap: 10px; }
-  .forest-facts > li { font-size: 12px; gap: 10px; }
-  .forest-facts strong { flex-basis: 78px; white-space: nowrap; }
-  .forest-facts span { max-width: 225px; }
-  .forest-join { margin-top: 27px; min-height: 47px; padding-inline: 18px; gap: 28px; font-size: 12px; }
-  .forest-host-note { margin-top: 24px; font-size: 11px; }
-  .forest-host-note > span { font-size: 10px; }
-}
-@media (max-width: 365px) {
-  .forest-story-inner { width: 87%; padding-top: 96px; }
-  .forest-intro > h2 { font-size: 44px; }
-  .forest-kicker { font-size: 8px; gap: 5px 8px; }
-  .forest-kicker > span { padding-left: 8px; }
-  .forest-facts > li { font-size: 11px; gap: 8px; }
-  .forest-facts strong { flex-basis: 73px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .forest-join { transition: none; }
-}
-
-.forest-next{display:inline-flex;align-items:center;gap:16px;margin:28px 0 0 25px;min-height:47px;font-size:13px;color:#e4ead7;border-bottom:1px solid #b6c69c66}
-.forest-next:hover{border-color:#e4ead7}
-@media(max-width:680px){.forest-next{margin-left:20px;font-size:12px}.forest-intro-copy{max-width:300px}}

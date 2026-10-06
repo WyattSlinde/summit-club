@@ -4,9 +4,10 @@ Cathedral Catholic High School outdoor adventure, service, and leadership club.
 
 ## What works
 
-- A real Three.js mountain entrance with a ground-level camera, textured terrain, atmospheric lighting, and a delayed SUMMIT reveal. The real club introduction is mounted behind the 3D stage from the start and becomes the normal page through a soft opening in the mountain scenery.
+- A live Three.js forest whose walking position is driven directly by native page scroll. Stopping holds position; scrolling backward retraces the route. The camera stays about 1.78 m above the ground, and SUMMIT appears after reaching the overlook. There is no video player, frame sequence, automatic walking, or aerial camera lift.
+- One shared 3D landscape continues behind the club introduction, outings, and ideas. The club page emerges over that landscape instead of switching to a separate forest photograph. Forest green, moss, and warm paper colors are shared by the journey, content, and signup dialogs.
 - Reduced-motion and WebGL-error fallbacks, a skip-to-club link, and a navigation bar that arrives with the summit reveal.
-- Three Explore / Serve / Lead stops explain the club during the hike; students can jump to a stop, look left/right, recenter, or drag/swipe sideways.
+- Three Explore / Serve / Lead stops explain the club during the hike; students can jump to a stop, look left/right, recenter, drag to look around on desktop, or swipe sideways on touchscreens while retaining native vertical scrolling.
 - A 27% shorter, sunlit green trail with denser pines, ferns, grasses, wooden markers, fallen timber, stone cairns, grazing deer, rabbits, birds, and subtle daylight pollen. Plant and wildlife motion pauses offscreen; reduced-motion users get a static entrance.
 - Photographic pine-needle, moss-floor and compacted-soil materials on the live 3D landscape, soft irregular track edges, textured bark, gentle tree movement and nearby detail shadows.
 - Rebuilt deer and rabbits with continuous anatomical meshes, fur coloration, articulated limbs and quiet responses as the camera approaches. A binocular button eases into a close-up of nearby wildlife; scrolling, turning or pressing it again restores the wide view.
@@ -60,7 +61,9 @@ Publication has not completed: the current environment rejects the Sites workflo
 
 Earlier local checks covered unauthenticated write rejection, cross-origin rejection, malformed submissions, member privacy, duplicate vote prevention, leadership authorization, event creation, idempotent RSVPs, cancellation, and stale-event rejection. Earlier browser checks covered desktop/mobile layout and the club flows.
 
-The October 5 repair was checked with TypeScript, a production build, HTTP readiness and asset checks, and geometry validation. Terrain clearance stays above 1.79 m along the walking route. CPU estimates for forest and understory geometry at the entrance are about 1.17 million triangles on desktop and 357,000 on mobile; these are not GPU timing measurements. Fresh browser and visual verification was blocked by the browser tool's URL security policy, so the latest scenery, shader rendering, and interactions still require an in-browser check.
+The October 5 repairs were checked with TypeScript, a production build, HTTP readiness and asset checks, and geometry validation. The later scroll-driven revision adds `npm run test:journey`: six regression checks cover paused position, backward travel, human eye height, the overlook reveal, reduced motion, and invalid scroll input. Server-rendered HTML also confirms one shared canvas, the club sections, and no video element. Rendering is held once the club is revealed, avoiding continuous scene rendering behind the lower page.
+
+Earlier CPU estimates for forest and understory geometry at the entrance were about 1.17 million triangles on desktop and 357,000 on mobile; these are not GPU timing measurements. Fresh browser and visual verification was blocked by the browser tool's URL security policy, so the latest scenery and layout still require an in-browser check.
 
 ## Design references
 

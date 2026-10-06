@@ -10,6 +10,7 @@ import { createTrailMaterials } from './trail-materials';
 import { terrainHeight, trailHeight, trailX, trailHalfWidth, terrainRows, terrainColumns } from './trail-terrain';
 import { addTrailLandscape } from './trail-landscape';
 import { addTrailUnderstory } from './trail-understory';
+import { JOURNEY_VIEWPORTS, trailJourney, walkerEyeHeight } from './trail-journey';
 import './summit-experience.css';
 
 const clamp = (n: number) => Math.max(0, Math.min(1, n));
@@ -26,9 +27,9 @@ const noise = (x: number, y: number) => {
   return mix(mix(hash(ix, iy), hash(ix + 1, iy), sx), mix(hash(ix, iy + 1), hash(ix + 1, iy + 1), sx), sy) * 2 - 1;
 };
 const trailStops = [
-  { name: 'Explore', title: 'Find your kind of outside.', copy: 'Hikes, coastal adventures, and new experiences. Every Cathedral Catholic student is welcome. No experience needed.', at: .18, start: .12, end: .245 },
-  { name: 'Serve', title: 'Leave it better.', copy: 'Beach cleanups, trail projects, and helping our community. Adventure means more when we give something back.', at: .31, start: .255, end: .385 },
-  { name: 'Lead', title: 'Make the next move.', copy: 'Pitch an idea. Help choose the adventure. Plan it with your crew. This is a club students help create.', at: .43, start: .395, end: .50 },
+  { name: 'Explore', title: 'Find your kind of outside.', copy: 'Hikes, coastal adventures, and new experiences. Every Cathedral Catholic student is welcome. No experience needed.', at: .18, start: .12, end: .265 },
+  { name: 'Serve', title: 'Leave it better.', copy: 'Beach cleanups, trail projects, and helping our community. Adventure means more when we give something back.', at: .36, start: .29, end: .435 },
+  { name: 'Lead', title: 'Make the next move.', copy: 'Pitch an idea. Help choose the adventure. Plan it with your crew. This is a club students help create.', at: .54, start: .465, end: .62 },
 ];
 
 type Props = { onJoin: () => void; children: ReactNode; onReveal?: (visible: boolean) => void };
@@ -59,15 +60,16 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
     if (!shell || !stage || !visual || !underlay || !canvas) return;
     const motion = matchMedia('(prefers-reduced-motion: reduce)');
     let readyScene = false;
-    let disposed = false, fallback = false, frame = 0, resizeFrame = 0, focusFrame = 0, initialHashFrame = 0, lastTime = 0;
+    let disposed = false, fallback = false, frame = 0, resizeFrame = 0, focusFrame = 0, initialHashFrame = 0, lastTime = 0, sceneryTime = 0;
     let focusClubAfterArrival = false;
     let start = 0, runway = 1, target = 0, progress = 0, inView = true;
     let pointerX = 0, pointerY = 0, lookX = 0, lookY = 0, manualYaw = 0;
-    let drag: { id: number; x: number; y: number; yaw: number } | null = null;
+    let drag: { id: number; x: number; y: number; yaw: number; pitch: number } | null = null;
     let zooming = false, focusMix = 0;
     let focusAt: Three.Vector3 | null = null;
     let focusWildlife: ((position: Three.Vector3) => Three.Vector3 | null) | undefined;
     let aim: Three.Vector3 | undefined;
+    let sceneDirty = true, renderedZ = NaN, renderedYaw = NaN, renderedZoom = NaN;
     const endCloseView = () => { if (zooming) { zooming = false; setCloseView(false); } };
     let previousStop = -2;
     let previousWalking: boolean | undefined;
@@ -78,6 +80,7 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
     let skyMaterial: Three.ShaderMaterial | undefined, trailMaterial: Three.MeshStandardMaterial | undefined, light: Three.DirectionalLight | undefined;
     const resources = new Set<Three.BufferGeometry | Three.Material | Three.Texture>();
     const queue = () => { if (!frame && !disposed && !document.hidden) frame = requestAnimationFrame(paint); };
+    const invalidate = () => { sceneDirty = true; queue(); };
     const isSimple = () => motion.matches || fallback;
     const readScroll = () => {
       const nextTarget = isSimple() ? 0 : clamp((scrollY - start) / Math.max(1, runway));
@@ -90,16 +93,15 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
       if (disposed) return;
       const staticMode = isSimple();
       const vh = staticMode ? innerHeight : visual.clientHeight;
-      runway = staticMode ? 0 : vh * 3.05;
-      const contentHeight = underlay.getBoundingClientRect().height;
+      runway = staticMode ? 0 : vh * JOURNEY_VIEWPORTS;
       shell.style.setProperty('--sx-runway', `${runway}px`);
-      shell.style.setProperty('--sx-content-height', `${contentHeight}px`);
       shell.dataset.runway = String(Math.round(runway));
       start = shell.getBoundingClientRect().top + scrollY;
       if (renderer && camera) {
         renderer.setSize(visual.clientWidth, visual.clientHeight, false);
         camera.aspect = visual.clientWidth / visual.clientHeight;
         camera.updateProjectionMatrix();
+        sceneDirty = true;
       }
       if (staticMode) { target = 0; queue(); } else readScroll();
     };
@@ -107,13 +109,13 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
       measure();
       endCloseView();
       focusClubAfterArrival = true;
-      const y = isSimple() ? underlay.getBoundingClientRect().top + scrollY - 72 : start + runway;
+      const y = underlay.getBoundingClientRect().top + scrollY;
       if (location.hash !== '#basecamp') history.pushState(null, '', '#basecamp');
       scrollTo({ top: Math.max(0, y), behavior: immediate || motion.matches ? 'instant' : 'smooth' });
       queue();
     };
     zoomRef.current = () => {
-      if (isSimple() || !camera || target >= .55) return;
+      if (isSimple() || !camera || target >= .67) return;
       zooming = !zooming;
       if (zooming) focusAt = focusWildlife?.(camera.position)?.clone() || null;
       setCloseView(zooming); queue();
@@ -146,25 +148,22 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
       queue();
     };
     const look = (event: PointerEvent) => {
-      if (isSimple() || !inView || target >= .72) return;
+      if (isSimple() || !inView || target >= .84) return;
       if (drag && drag.id === event.pointerId) {
         const dx = event.clientX - drag.x, dy = event.clientY - drag.y;
         if (Math.abs(dx) > Math.abs(dy) || event.pointerType === 'mouse') {
           manualYaw = Math.max(-1.5, Math.min(1.5, drag.yaw - dx * .006));
+          if (event.pointerType === 'mouse') pointerY = Math.max(-.7, Math.min(.7, drag.pitch + dy * .004));
           pointerX = 0; queue();
         }
         return;
       }
-      if (zooming || event.pointerType !== 'mouse' || (event.target instanceof Element && event.target.closest('button,a'))) return;
-      pointerX = (event.clientX / innerWidth - .5) * 2;
-      pointerY = (event.clientY / innerHeight - .5) * 2;
-      queue();
     };
     const beginLook = (event: PointerEvent) => {
-      if (isSimple() || !inView || target >= .72 || event.button > 0) return;
+      if (isSimple() || !inView || target >= .84 || event.button > 0) return;
       if (event.target instanceof Element && event.target.closest('button,a,input')) return;
       endCloseView();
-      drag = { id: event.pointerId, x: event.clientX, y: event.clientY, yaw: manualYaw };
+      drag = { id: event.pointerId, x: event.clientX, y: event.clientY, yaw: manualYaw, pitch: pointerY };
       stage.classList.add('sx-dragging');
     };
     const finishLook = () => { drag = null; stage.classList.remove('sx-dragging'); };
@@ -185,42 +184,35 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
       if (disposed || !stage || !shell || document.hidden) return;
       const desiredYaw = Math.max(-1.7, Math.min(1.7, manualYaw + pointerX * .22));
       const cameraMoving = Math.abs(target - progress) > .0003 || Math.abs(desiredYaw - lookX) > .002 || Math.abs(pointerY - lookY) > .002;
-      // Keep travel responsive; gentle wildlife motion needs fewer idle frames.
+      // Walking has no clock or inertia. Only explicit look/zoom controls ease.
       if (readyScene && !cameraMoving && time - lastTime < (innerWidth < 750 ? 40 : 32)) { queue(); return; }
       const dt = Math.min((time - lastTime) / 1000 || .016, .05);
       lastTime = time;
       const damping = 1 - Math.exp(-dt * 9);
-      progress += (target - progress) * damping;
+      progress = target;
       focusMix += ((zooming ? 1 : 0) - focusMix) * damping;
       lookX += (desiredYaw - lookX) * damping;
       lookY += (pointerY - lookY) * damping;
-      const staticMode = isSimple(), p = staticMode ? .64 : progress;
-      const climb = smooth(0, .58, p), rise = smooth(.49, .69, p);
-      const part = staticMode ? 0 : smooth(.735, .985, p);
-      const title = staticMode ? 1 : smooth(.515, .605, p) * (1 - smooth(.71, .795, p));
-      const ui = staticMode ? 0 : 1 - smooth(.65, .74, p);
-      const sceneOpacity = staticMode ? 1 : 1 - smooth(.955, .992, p);
-      const intro = staticMode ? 0 : 1 - smooth(.06, .115, p);
-      stage.style.setProperty('--sx-intro', String(intro));
-      stage.style.setProperty('--sx-title', String(title));
-      stage.style.setProperty('--sx-ui', String(ui));
-      stage.style.setProperty('--sx-title-y', `${(1 - smooth(.515, .605, p)) * 42}px`);
-      stage.style.setProperty('--sx-scene-opacity', String(sceneOpacity));
-      stage.style.setProperty('--sx-aperture', `${staticMode ? 0 : part * 128}%`);
-      stage.style.setProperty('--sx-shadow', String(.025 + title * .16));
-      stage.style.setProperty('--sx-note', String(staticMode ? 0 : smooth(.2, .28, p) * (1 - smooth(.40, .48, p))));
+      const staticMode = isSimple(), p = progress;
+      const journey = trailJourney(p, staticMode);
+      shell.style.setProperty('--sx-intro', String(journey.intro));
+      shell.style.setProperty('--sx-title', String(journey.title));
+      shell.style.setProperty('--sx-ui', String(journey.controls));
+      shell.style.setProperty('--sx-title-y', `${(1 - smooth(.70, .76, p)) * 24}px`);
+      shell.style.setProperty('--sx-camp', String(journey.camp));
+      shell.style.setProperty('--sx-shadow', String(journey.shade));
       shell.dataset.journeyProgress = p.toFixed(3);
       shell.dataset.lookAngle = String(Math.round(lookX * 180 / Math.PI));
-      stage.style.setProperty('--sx-distance', `${clamp(p / .58) * 100}%`);
+      shell.style.setProperty('--sx-distance', `${journey.walk * 100}%`);
       const nextStop = staticMode ? -1 : trailStops.findIndex(item => p >= item.start && p < item.end);
       if (nextStop !== previousStop) { previousStop = nextStop; setStop(nextStop); }
-      const isWalking = !staticMode && p < .55;
+      const isWalking = journey.exploring;
       if (isWalking !== previousWalking) { previousWalking = isWalking; setWalking(isWalking); }
-      const nextPhase = staticMode ? 'summit' : p >= .993 ? 'revealed' : p >= .58 && p < .795 ? 'summit' : p > .18 ? 'climbing' : 'opening';
+      const nextPhase = journey.phase;
       if (nextPhase !== previousPhase) { previousPhase = nextPhase; setPhase(nextPhase); }
-      const revealed = staticMode || p >= .605;
+      const revealed = journey.navigation;
       if (revealed !== previousRevealed) { previousRevealed = revealed; revealRef.current?.(revealed); }
-      const accessible = staticMode || p >= .955;
+      const accessible = journey.accessible;
       if (accessible !== previousUnderlay) { previousUnderlay = accessible; setUnderlayVisible(accessible); }
       if (accessible && focusClubAfterArrival) {
         focusClubAfterArrival = false;
@@ -230,38 +222,40 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
         });
       }
 
-      if (!fallback && inView && renderer && scene && camera && left && right && sky && skyMaterial && light && trail && trailMaterial && sceneOpacity > .001) {
-        const z = 620 - climb * 1810;
+      if (!fallback && inView && renderer && scene && camera && left && right && sky && skyMaterial && light && trail && trailMaterial) {
+        const z = journey.z;
         const x = trailX(z);
-        const eye = trailHeight(z) + 1.82 + rise * 700;
-        const bob = staticMode ? 0 : Math.sin(climb * 94) * (1 - rise) * .065;
-        camera.position.set(x, eye + bob, z);
-        const ahead = 42 + rise * 108;
+        const eye = walkerEyeHeight(terrainHeight(x, z), journey.walk, staticMode);
+        camera.position.set(x, eye, z);
+        const ahead = 24;
         const trailYaw = Math.atan2(trailX(z - ahead) - x, ahead);
-        const lookFreedom = (1 - smooth(.64, .755, p));
+        const lookFreedom = journey.lookFreedom;
         const yaw = trailYaw + (staticMode ? 0 : lookX * lookFreedom);
         if (zooming && focusAt) {
           const movingAnimal = focusWildlife?.(camera.position);
           if (movingAnimal) focusAt.lerp(movingAnimal, damping);
         }
-        aim?.set(x + Math.sin(yaw) * 150, trailHeight(z - ahead) + 5.2 + rise * 685 - (staticMode ? 0 : lookY * 15 * lookFreedom), z - Math.cos(yaw) * 150);
+        const pitch = Math.atan2(trailHeight(z - ahead) - trailHeight(z), ahead) * (1 - smooth(.88, 1, journey.walk));
+        aim?.set(x + Math.sin(yaw) * 150, eye + Math.tan(pitch) * 150 - (staticMode ? 0 : lookY * 15 * lookFreedom), z - Math.cos(yaw) * 150);
         if (aim && focusAt && focusMix > .001) aim.lerp(focusAt, focusMix);
         if (aim) camera.lookAt(aim);
         const baseFov = innerWidth < 750 ? 68 : 62, nextFov = baseFov + (24 - baseFov) * focusMix;
         if (Math.abs(camera.fov - nextFov) > .015) { camera.fov = nextFov; camera.updateProjectionMatrix(); }
         shell.dataset.closeView = zooming ? 'true' : 'false';
-        const clearEdges = smooth(.7, 1, part);
-        left.position.set(-clearEdges * 160, 0, 0);
-        right.position.set(clearEdges * 160, 0, 0);
-        trailMaterial.opacity = 1 - smooth(.015, .14, part);
+        shell.dataset.cameraZ = z.toFixed(3);
         sky.position.copy(camera.position);
         skyMaterial.uniforms.uOpacity.value = 1;
         light.position.set(x - 1150, eye + 2200, z - 1750);
         light.target.position.set(x, eye - 3, z - 20);
-        if (!staticMode) details?.animate(time / 1000);
-        renderer.render(scene, camera);
+        const ambient = !staticMode && p < .94;
+        if (sceneDirty || ambient || z !== renderedZ || yaw !== renderedYaw || focusMix !== renderedZoom) {
+          if (ambient) sceneryTime = time / 1000;
+          details?.animate(staticMode ? 0 : sceneryTime);
+          renderer.render(scene, camera);
+          sceneDirty = false; renderedZ = z; renderedYaw = yaw; renderedZoom = focusMix;
+        }
       }
-      if (Math.abs(target - progress) > .00003 || Math.abs(desiredYaw - lookX) > .002 || Math.abs(pointerY - lookY) > .002 || (!staticMode && readyScene && inView && sceneOpacity > .001)) queue();
+      if (Math.abs(desiredYaw - lookX) > .002 || Math.abs(pointerY - lookY) > .002 || Math.abs((zooming ? 1 : 0) - focusMix) > .002 || (!staticMode && readyScene && inView && p < .94)) queue();
     }
 
     async function buildScene() {
@@ -308,7 +302,7 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
         const skyGeometry = new T.SphereGeometry(13000, 48, 24); resources.add(skyGeometry);
         sky = new T.Mesh(skyGeometry, skyMaterial); sky.renderOrder = -20; sky.frustumCulled = false; scene.add(sky);
 
-        const materials = createTrailMaterials(T, { resources, isDisposed: () => disposed, onReady: queue });
+        const materials = createTrailMaterials(T, { resources, isDisposed: () => disposed, onReady: invalidate });
         const rockMaterial = materials.terrain, boulderMaterial = materials.stone;
         trailMaterial = materials.path;
         left = new T.Group(); right = new T.Group(); scene.add(left, right);
@@ -368,7 +362,7 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
         const pathGeometry = new T.BufferGeometry(); pathGeometry.setAttribute('position', new T.Float32BufferAttribute(pathPositions, 3)); pathGeometry.setAttribute('uv', new T.Float32BufferAttribute(pathUV, 2)); pathGeometry.setAttribute('color', new T.Float32BufferAttribute(pathColors, 3)); pathGeometry.setAttribute('pathEdge', new T.Float32BufferAttribute(pathEdges, 1)); pathGeometry.setIndex(pathIndices); pathGeometry.computeVertexNormals(); resources.add(pathGeometry);
         trail = new T.Mesh(pathGeometry, trailMaterial); trail.receiveShadow = true; scene.add(trail);
 
-        const forest = addTrailForest(T, { mobile, left, right, terrainHeight, trailX, resources, isDisposed: () => disposed, onReady: queue });
+        const forest = addTrailForest(T, { mobile, left, right, terrainHeight, trailX, resources, isDisposed: () => disposed, onReady: invalidate });
         // Let input and the loading state paint before constructing the remaining details.
         await new Promise<void>(resolve => setTimeout(resolve, 0));
         if (disposed || fallback) return;
@@ -436,23 +430,25 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
   }, []);
 
   const enter = (event: React.MouseEvent<HTMLAnchorElement>) => { event.preventDefault(); enterRef.current(); };
-  const summitActionsVisible = phase === 'summit' && !simple;
+  const summitActionsVisible = phase === 'summit';
   return <section id="home" ref={shellRef} className={`sx-experience${simple ? ' sx-simple' : ''}${failed ? ' sx-fallback' : ''}`} aria-label="The ascent to SUMMIT">
+    <div className="sx-backdrop" ref={visualRef} aria-hidden="true"><div className="sx-world"><canvas ref={canvasRef} />{failed && <div className="sx-fallback-image" />}<div className="sx-world-shade" /></div></div>
+    <div className="sx-journey">
     <div className="sx-stage" ref={stageRef} data-phase={phase} data-ready={ready} data-walking={walking} data-close-view={closeView}>
-      <div className="sx-underlay" ref={underlayRef} aria-hidden={!underlayVisible} inert={!underlayVisible}>{children}</div>
-      <div className="sx-cinematic" ref={visualRef} aria-hidden={phase === 'revealed'} inert={phase === 'revealed'}>
-        <div className="sx-world" aria-hidden="true"><canvas ref={canvasRef} />{failed && <div className="sx-fallback-image" />}<div className="sx-world-shade" /></div>
+      <div className="sx-cinematic" aria-hidden={phase === 'revealed'} inert={phase === 'revealed'}>
         {!ready && <span className="sx-loading">FINDING THE TRAIL<span /></span>}
-        <div className="sx-topbar"><span>CATHEDRAL CATHOLIC<span>OUTDOOR ADVENTURE CLUB</span></span><a href="#basecamp" onClick={enter}>Skip to the club <ArrowDown size={14} /></a></div>
-        <div className="sx-opening"><span className="sx-eyebrow">GOOD PEOPLE. OPEN AIR. A LITTLE FURTHER.</span><p>Meet SUMMIT<br />at the top.</p><span className="sx-opening-copy">Follow the trail. Meet the club.<br />Scroll to take the first step.</span></div>
+        <div className="sx-topbar" inert={!walking || simple}><span>CATHEDRAL CATHOLIC<span>OUTDOOR ADVENTURE CLUB</span></span><a href="#basecamp" onClick={enter}>Skip to the club <ArrowDown size={14} /></a></div>
+        <div className="sx-opening"><span className="sx-eyebrow">GOOD PEOPLE. OPEN AIR. A LITTLE FURTHER.</span><p>Meet SUMMIT<br />at the top.</p><span className="sx-opening-copy">A club for every Cathedral Catholic student.<br />Your scroll sets the pace.</span></div>
         <div className="sx-trail-stories" aria-live="polite" aria-atomic="true">{trailStops.map((item, index) => <article key={item.name} className="sx-trail-story" data-active={stop === index} aria-hidden={stop !== index}><span className="sx-eyebrow">0{index + 1} / {item.name.toUpperCase()}</span><h2>{item.title}</h2><p>{item.copy}</p></article>)}</div>
         <nav className="sx-trail-stops" aria-label="Stops along the SUMMIT trail" inert={!walking || simple}><span className="sx-trail-progress" aria-hidden="true"><i /></span>{trailStops.map((item, index) => <button key={item.name} onClick={() => stopRef.current(item.at)} aria-current={stop === index ? 'step' : undefined}><span>0{index + 1}</span>{item.name}</button>)}</nav>
-        <div className="sx-look-controls" role="group" aria-label="Look around the scenery" inert={!walking || simple}><span>{closeView ? 'A LITTLE CLOSER · SCROLL TO CONTINUE' : 'LOOK AROUND'}</span><div><button aria-label="Look left" onClick={() => turnRef.current(-.45)}><ChevronLeft size={18} /></button><button aria-label="Face the trail" onClick={() => turnRef.current(null)}><Compass size={19} /></button><button aria-label="Look right" onClick={() => turnRef.current(.45)}><ChevronRight size={18} /></button><button aria-label={closeView ? 'Return to the wide view' : 'Look closer at the wildlife'} title="Look closer" aria-pressed={closeView} onClick={() => zoomRef.current()}><Binoculars size={18} /></button></div><small><span className="sx-mouse-hint">Move your cursor or drag sideways</span><span className="sx-touch-hint">Swipe sideways to look</span></small></div>
+        <div className="sx-look-controls" role="group" aria-label="Look around the scenery" inert={!walking || simple}><span>{closeView ? 'A LITTLE CLOSER · SCROLL TO CONTINUE' : 'LOOK AROUND'}</span><div><button aria-label="Look left" onClick={() => turnRef.current(-.45)}><ChevronLeft size={18} /></button><button aria-label="Face the trail" onClick={() => turnRef.current(null)}><Compass size={19} /></button><button aria-label="Look right" onClick={() => turnRef.current(.45)}><ChevronRight size={18} /></button><button aria-label={closeView ? 'Return to the wide view' : 'Look closer at the wildlife'} title="Look closer" aria-pressed={closeView} onClick={() => zoomRef.current()}><Binoculars size={18} /></button></div><small><span className="sx-mouse-hint">Drag left or right to look</span><span className="sx-touch-hint">Swipe sideways to look</span></small></div>
         <div className="sx-titlecard"><span className="sx-eyebrow">THE VIEW IS JUST THE BEGINNING.</span><h1>SUMMIT</h1><span className="sx-motto">EXPLORE. SERVE. LEAD.</span><p>Cathedral Catholic’s outdoor adventure,<br />service &amp; leadership club.</p><div className="sx-arrival-actions" aria-hidden={!summitActionsVisible}><a className="sx-enter" href="#basecamp" onClick={enter} tabIndex={summitActionsVisible ? 0 : -1}>Enter SUMMIT <ArrowDown size={17} /></a><button onClick={onJoin} tabIndex={summitActionsVisible ? 0 : -1}>Join SUMMIT <Plus size={16} /></button></div></div>
-        <div className="sx-scroll-cue"><span className="sx-scroll-stem" aria-hidden="true" /><span>{phase === 'summit' ? 'SCROLL TO ENTER' : 'SCROLL TO CLIMB'}<small>{phase === 'summit' ? 'YOUR CREW IS JUST AHEAD.' : 'PAUSE ANYWHERE. TAKE A LOOK AROUND.'}</small></span></div>
+        <div className="sx-scroll-cue"><span className="sx-scroll-stem" aria-hidden="true" /><span>{phase === 'summit' ? 'SCROLL INTO BASECAMP' : 'SCROLL TO WALK'}<small>{phase === 'summit' ? 'YOUR CREW IS JUST AHEAD.' : 'STOP TO LOOK. SCROLL BACK TO RETURN.'}</small></span></div>
 
       </div>
       <p className="sx-screen-reader">A scroll-controlled journey through an illustrative three-dimensional alpine landscape. SUMMIT is Cathedral Catholic High School’s student-led outdoor adventure, service, and leadership club.</p>
     </div>
+    </div>
+    <div className="sx-underlay" ref={underlayRef} aria-hidden={!underlayVisible} inert={!underlayVisible}>{children}</div>
   </section>;
 }
