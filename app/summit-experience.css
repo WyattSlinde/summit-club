@@ -127,7 +127,7 @@
 
 /* The new vector wordmark rises from the actual granite contour. */
 .sx-experience{--sx-runway:1160svh;--sx-invitation:0;--sx-logo-scale:.94}
-.sx-school>.summit-mark{width:38px;height:38px;flex:none}
+.sx-school>.summit-mark{width:44px;height:44px;flex:none}
 .sx-titlecard{top:16%;padding-inline:5%;perspective:1000px}
 .sx-title-rise{transform:translateY(var(--sx-title-y)) scale(var(--sx-logo-scale));transform-origin:50% 80%}
 .sx-titlecard h1{width:min(90vw,1270px);margin:0 auto;line-height:0}
@@ -141,5 +141,5 @@
 .sx-arrival-strip{background:var(--forest-deep);color:var(--forest-paper);border-color:var(--forest-line)}
 .sx-arrival-strip>button{color:var(--forest-muted)}
 .sx-arrival-strip>span>svg{color:var(--forest-sunset)}
-@media(max-width:700px){.sx-titlecard{top:26%;padding-inline:4%}.sx-titlecard h1{width:92vw}.sx-title-rise>.sx-eyebrow{font-size:8px;margin-bottom:24px;letter-spacing:.08em}.sx-title-rise>.sx-motto{font-size:9px;letter-spacing:.2em;margin-top:24px}.sx-summit-invitation{bottom:24%}.sx-summit-invitation>p{font-size:17px}.sx-school>.summit-mark{width:30px;height:30px}}
+@media(max-width:700px){.sx-titlecard{top:26%;padding-inline:4%}.sx-titlecard h1{width:92vw}.sx-title-rise>.sx-eyebrow{font-size:8px;margin-bottom:24px;letter-spacing:.08em}.sx-title-rise>.sx-motto{font-size:9px;letter-spacing:.2em;margin-top:24px}.sx-summit-invitation{bottom:24%}.sx-summit-invitation>p{font-size:17px}.sx-school>.summit-mark{width:34px;height:34px}}
 @media(max-height:580px){.sx-titlecard{top:14%}.sx-titlecard h1{width:min(63vw,720px)}.sx-title-rise>.sx-eyebrow{margin-bottom:12px;font-size:8px}.sx-title-rise>.sx-motto{margin-top:16px;font-size:9px}.sx-summit-invitation{bottom:10%}.sx-summit-invitation>p{font-size:14px}}

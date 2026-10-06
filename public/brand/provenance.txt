@@ -1,0 +1,17 @@
+SUMMIT living forest identity — October 6, 2026
+
+Motion source: Higgsfield, Kling 3.0 Pro, five seconds, silent.
+Generation ID: e94df2c3-1975-4516-b0cf-53123007a1b7
+Source and final reference: SUMMIT's original generated summit-arrival/overlook.webp.
+
+Direction: locked camera, preserve the forest and mountain sunset composition,
+gentle pine movement and light mist, no letters or new objects.
+
+The browser uses a 24-frame, 4-column WebP sprite sheet (768 x 432 per frame).
+SUMMIT lettering, the mountain crest, pine silhouettes, trail and sun are original
+SVG artwork. The generated scenery is clipped inside these sharp vector shapes.
+The source video is a production asset; no video player is embedded on the site.
+
+The corner animation settles after 4.2 seconds and replays on hover or focus.
+The mountain wordmark's texture and details are controlled by scroll position.
+Reduced-motion preferences show the settled identity without decorative movement.

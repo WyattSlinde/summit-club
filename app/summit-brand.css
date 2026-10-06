@@ -1,0 +1,21 @@
+/* The lettering stays vector-sharp. Only the forest inside it changes pose. */
+.summit-mark,.summit-wordmark{overflow:visible}
+.brand-forest-texture{overflow:hidden;pointer-events:none;opacity:.52}
+.brand-forest-frames{transform:translate(var(--brand-frame-x,var(--brand-final-x)),var(--brand-frame-y,var(--brand-final-y)))}
+.brand-pine{transform-box:fill-box;transform-origin:50% 100%;transform:scaleY(var(--brand-grow,1)) rotate(var(--brand-wind,0deg))}
+.brand-letter-pines{fill:var(--forest-ink,#142b23);opacity:.34}
+.brand-letter-edge{fill:none;stroke:var(--forest-paper,#f4eee4);stroke-width:.65;opacity:.75}
+.brand-type-trail{fill:none;stroke:var(--forest-paper,#f4eee4);stroke-width:1.1;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:var(--brand-trail,0);opacity:.7}
+.brand-sunlight{transform:translateX(var(--brand-light-x,630px));mix-blend-mode:screen;opacity:.8}
+.brand-sun{transform:translateY(var(--brand-sun-y,0px))}
+.brand-sun-orbit{stroke:currentColor;stroke-width:.6;opacity:.35}
+.brand-crest-pines{fill:currentColor;opacity:.87}
+.brand-crest-trail{stroke-dasharray:1;stroke-dashoffset:var(--brand-trail,0)}
+.summit-living-mark .brand-forest-texture{opacity:.9}
+.sx-school,.masthead .wordmark{min-height:44px}
+@media(prefers-reduced-motion:reduce){
+  .brand-forest-frames{transform:translate(var(--brand-final-x),var(--brand-final-y))!important}
+  .brand-pine,.brand-sun{transform:none!important}
+  .brand-type-trail,.brand-crest-trail{stroke-dashoffset:0!important}
+  .brand-sunlight{display:none}
+}

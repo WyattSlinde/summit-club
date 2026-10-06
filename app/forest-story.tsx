@@ -13,11 +13,12 @@ type Props = {
   onJoin: () => void;
   member?: boolean;
   nextEvent?: { title: string; starts_at: string; location: string } | null;
+  brandActive?: boolean;
   loading?: boolean;
   loadFailed?: boolean;
 };
 
-export default function ForestStory({ onJoin, member = false, nextEvent, loading = false, loadFailed = false }: Props) {
+export default function ForestStory({ onJoin, member = false, brandActive = true, nextEvent, loading = false, loadFailed = false }: Props) {
   const uid = useId().replace(/:/g, '');
   const meetingTitle = nextEvent?.title || (loading ? 'Checking the calendar…' : loadFailed ? 'Calendar unavailable' : 'First meeting being planned.');
   const meetingDate = nextEvent ? new Date(nextEvent.starts_at).toLocaleString('en-US', { timeZone: 'America/Los_Angeles', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : null;
@@ -32,7 +33,7 @@ export default function ForestStory({ onJoin, member = false, nextEvent, loading
       <div className="forest-story-inner">
         <div className="forest-intro">
           <p className="forest-kicker">Cathedral Catholic High School · Outdoor Club</p>
-          <h2 id={`forest-title-${uid}`} aria-label="SUMMIT"><SummitWordmark/></h2>
+          <h2 id={`forest-title-${uid}`} aria-label="SUMMIT"><SummitWordmark motion="entrance" active={brandActive}/></h2>
           <p className="forest-arrival-line">Outside is better together.</p>
           <p className="forest-intro-copy">Outdoor adventures. Service that matters. A student-led crew open to every Cathedral student.</p>
           <div className="forest-actions">

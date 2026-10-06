@@ -80,6 +80,7 @@ Full backend publication has not completed: the current environment rejects the 
 
 ## Content and demo boundaries
 
+- The animated identity uses a short Higgsfield forest generation inside the original SVG logo. Corner crests and the club wordmark animate once when visible, then settle; hover or keyboard focus can replay the crest. The mountain title uses the same forest, pine, and trail treatment, driven reversibly by scroll. Reduced motion settles these details immediately. The 1.3 MiB sprite is shared across the logos; it does not replace or autoplay the hiking sequence. Provenance is in `public/brand/provenance.txt`.
 - The interactive intro uses generated Higgsfield scenery. The club page uses four real photographs: a mountain sunset, a group hike in the Tetons, a Fire Island beach cleanup, and Joshua Tree trail volunteers. These illustrate possible experiences, not completed SUMMIT trips or confirmed future locations. Each photo has a visible source credit; full license details are in `public/photos/credits.txt`. Asset prompts and historical provenance remain in ASSET-NOTES.txt.
 - Three initial activities are proposals; no unconfirmed meeting dates are presented as real.
 - Saved registration records club interest; outing RSVPs and any required permissions are handled separately.

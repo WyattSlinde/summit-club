@@ -6,6 +6,7 @@ import { FramePainter } from './frame-painter';
 import { JOURNEY_VIEWPORTS, trailJourney, framePositionForProgress, reflowScroll, canvasResolution, frameFocalX } from './trail-journey';
 import media from './journey-media.json';
 import { sitePath } from '@/lib/site-path';
+import { paintBrandPose } from '@/lib/brand-motion';
 import { journeyFrameUrl } from './journey-source';
 import { SummitMark, SummitWordmark } from './summit-brand';
 import './summit-experience.css';
@@ -31,7 +32,7 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
     const motion = matchMedia('(prefers-reduced-motion: reduce)');
     const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
     let disposed = false, fallback = !context, frame = 0, focusFrame = 0;
-    let start = 0, runway = 1, progress = 0, focusDestination: string | null = null;
+    let start = 0, runway = 1, progress = 0, previousBrandRise = -1, focusDestination: string | null = null;
     let measured = false, measuredSimple = false, measuredHeight = 0, measuredWidth = 0;
     const styleCache = new WeakMap<HTMLElement, Map<string, string>>();
     function setStyle(element: HTMLElement, name: string, value: number | string) {
@@ -87,6 +88,7 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
       setStyle(stage!, '--sx-title', state.title);
       setStyle(stage!, '--sx-invitation', state.invitation);
       setStyle(stage!, '--sx-logo-scale', .94 + state.rise * .06);
+      if (state.rise !== previousBrandRise) { paintBrandPose(stage!, state.rise); previousBrandRise = state.rise; }
       setStyle(stage!, '--sx-ui', state.controls);
       setStyle(stage!, '--sx-title-y', `${state.titleY.toFixed(3)}vh`);
       setStyle(stage!, '--sx-foreground', state.foreground);
@@ -208,12 +210,12 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
     <div className="sx-backdrop" ref={visualRef} aria-hidden="true"><div className="sx-world"><img className="sx-poster" src={sitePath(simple ? '/summit-arrival/overlook.webp' : `${media.path}/trailhead.webp`)} alt="" fetchPriority="high" /><canvas ref={canvasRef} className={ready && !simple ? 'is-ready' : ''} /><div className="sx-world-shade" /></div></div>
     <div className="sx-journey"><div ref={stageRef} className="sx-stage" data-phase={phase} data-ready={ready}>
       <div className="sx-cinematic" aria-hidden={hidden} inert={hidden}>
-        <div className="sx-topbar" inert={atSummit || descending || simple}><a href="#basecamp" onClick={enter} className="sx-school"><SummitMark /><span>CATHEDRAL CATHOLIC<small>THE OUTDOOR CLUB</small></span></a><a className="sx-skip" href="#basecamp" onClick={enter}>Club &amp; signup <ArrowUpRight size={15} /></a></div>
+        <div className="sx-topbar" inert={atSummit || descending || simple}><a href="#basecamp" onClick={enter} className="sx-school"><SummitMark motion="entrance" active={!atSummit && !descending && !hidden && !simple}/><span>CATHEDRAL CATHOLIC<small>THE OUTDOOR CLUB</small></span></a><a className="sx-skip" href="#basecamp" onClick={enter}>Club &amp; signup <ArrowUpRight size={15} /></a></div>
         <div className="sx-opening" aria-hidden={phase !== 'opening'}><span className="sx-eyebrow">CATHEDRAL CATHOLIC’S OUTDOOR CLUB</span><p>It starts<br /><em>with a climb.</em></p><span className="sx-opening-copy">Scroll to climb the mountain.<br />There’s something waiting at the top.</span></div>
         <div className="sx-trail-stories" aria-live="polite" aria-atomic="true">{stops.map((item, index) => <article key={item.name} className="sx-trail-story" data-active={stop === index} aria-hidden={stop !== index}><span className="sx-eyebrow">0{index + 1} — {item.name.toUpperCase()}</span><h2>{item.title}</h2><p>{item.copy}</p></article>)}</div>
         <nav className="sx-route" aria-label="Along the trail" inert={atSummit || descending || simple}><span className="sx-route-line"><i /></span>{stops.map((item, index) => <button key={item.name} onClick={() => seekRef.current(item.at)} aria-current={stop === index ? 'step' : undefined}><i />{item.name}</button>)}<button onClick={() => seekRef.current(.675)}><Mountain size={13} />The summit</button></nav>
         <div className="sx-titlecard" aria-hidden={!atSummit}>
-          <div className="sx-title-rise"><span className="sx-eyebrow">CATHEDRAL CATHOLIC HIGH SCHOOL</span><h1 aria-label="SUMMIT"><SummitWordmark /></h1><span className="sx-motto">EXPLORE. SERVE. LEAD.</span></div>
+          <div className="sx-title-rise"><span className="sx-eyebrow">CATHEDRAL CATHOLIC HIGH SCHOOL</span><h1 aria-label="SUMMIT"><SummitWordmark motion="scroll"/></h1><span className="sx-motto">EXPLORE. SERVE. LEAD.</span></div>
         </div>
         <div className="sx-peak-foreground" aria-hidden="true"><img src={sitePath(`${media.path}/summit.webp`)} alt="" /><div className="sx-world-shade" /></div>
         <div className="sx-summit-invitation" aria-hidden={!atSummit} inert={!atSummit}><p>Adventure. Service. Your people.</p><span>KEEP SCROLLING. COME OVER THE TOP. <ArrowDown size={16}/></span><button onClick={onJoin}>Join SUMMIT <ArrowUpRight size={15}/></button></div>
