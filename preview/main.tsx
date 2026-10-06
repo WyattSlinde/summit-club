@@ -4,7 +4,8 @@ import Registration from '../app/register/registration';
 import LeadershipPortal from '../app/leadership/portal';
 import '../app/globals.css';
 
-const path = window.location.pathname;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const path = window.location.pathname.slice(base.length).replace(/\/$/, '') || '/';
 const page = path === '/register'
   ? <Registration signInHref="/register" signOutHref="/register" localPreview={false}/>
   : path === '/leadership'

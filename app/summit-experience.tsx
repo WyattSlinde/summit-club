@@ -5,6 +5,7 @@ import { ScrollSequence } from './scroll-sequence';
 import { FramePainter } from './frame-painter';
 import { JOURNEY_VIEWPORTS, trailJourney, framePositionForProgress, reflowScroll, canvasResolution, frameFocalX } from './trail-journey';
 import media from './journey-media.json';
+import { sitePath } from '@/lib/site-path';
 import { journeyFrameUrl } from './journey-source';
 import { SummitMark, SummitWordmark } from './summit-brand';
 import './summit-experience.css';
@@ -186,8 +187,8 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
       deadline = setTimeout(() => { if (lastDrawn < 0 && !isSimple()) fail(); }, 18000);
       const mobile = isPortraitViewport(); sequenceMobile = mobile;
       sequence = new ScrollSequence({ count: media.frameCount,
-        url: index => journeyFrameUrl(media, index, mobile),
-        previewUrl: index => journeyFrameUrl(media, index, mobile, true),
+        url: index => sitePath(journeyFrameUrl(media, index, mobile)),
+        previewUrl: index => sitePath(journeyFrameUrl(media, index, mobile, true)),
         maxDecoded: 2, maxPreviewDecoded: 32, onFrame: receiveFrame, onError: fail });
       measure();
     }
@@ -204,7 +205,7 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
   const enter = (event: React.MouseEvent<HTMLAnchorElement>) => { event.preventDefault(); enterRef.current(); };
   const atSummit = phase === 'summit', descending = phase === 'descending', hidden = phase === 'revealed';
   return <section id="home" ref={shellRef} className={`sx-experience${simple ? ' sx-simple' : ''}${failed ? ' sx-fallback' : ''}`} aria-label="The hike to SUMMIT">
-    <div className="sx-backdrop" ref={visualRef} aria-hidden="true"><div className="sx-world"><img className="sx-poster" src={simple ? '/summit-arrival/overlook.webp' : `${media.path}/trailhead.webp`} alt="" fetchPriority="high" /><canvas ref={canvasRef} className={ready && !simple ? 'is-ready' : ''} /><div className="sx-world-shade" /></div></div>
+    <div className="sx-backdrop" ref={visualRef} aria-hidden="true"><div className="sx-world"><img className="sx-poster" src={sitePath(simple ? '/summit-arrival/overlook.webp' : `${media.path}/trailhead.webp`)} alt="" fetchPriority="high" /><canvas ref={canvasRef} className={ready && !simple ? 'is-ready' : ''} /><div className="sx-world-shade" /></div></div>
     <div className="sx-journey"><div ref={stageRef} className="sx-stage" data-phase={phase} data-ready={ready}>
       <div className="sx-cinematic" aria-hidden={hidden} inert={hidden}>
         <div className="sx-topbar" inert={atSummit || descending || simple}><a href="#basecamp" onClick={enter} className="sx-school"><SummitMark /><span>CATHEDRAL CATHOLIC<small>THE OUTDOOR CLUB</small></span></a><a className="sx-skip" href="#basecamp" onClick={enter}>Club &amp; signup <ArrowUpRight size={15} /></a></div>
@@ -214,7 +215,7 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
         <div className="sx-titlecard" aria-hidden={!atSummit}>
           <div className="sx-title-rise"><span className="sx-eyebrow">CATHEDRAL CATHOLIC HIGH SCHOOL</span><h1 aria-label="SUMMIT"><SummitWordmark /></h1><span className="sx-motto">EXPLORE. SERVE. LEAD.</span></div>
         </div>
-        <div className="sx-peak-foreground" aria-hidden="true"><img src={`${media.path}/summit.webp`} alt="" /><div className="sx-world-shade" /></div>
+        <div className="sx-peak-foreground" aria-hidden="true"><img src={sitePath(`${media.path}/summit.webp`)} alt="" /><div className="sx-world-shade" /></div>
         <div className="sx-summit-invitation" aria-hidden={!atSummit} inert={!atSummit}><p>Adventure. Service. Your people.</p><span>KEEP SCROLLING. COME OVER THE TOP. <ArrowDown size={16}/></span><button onClick={onJoin}>Join SUMMIT <ArrowUpRight size={15}/></button></div>
         <div className="sx-bottom"><div className="sx-scroll-cue"><ArrowDown size={19} strokeWidth={1.3} /><span>{descending ? 'JUST OVER THE RIDGE' : atSummit ? 'YOU MADE IT' : 'SCROLL TO CLIMB'}<small>{descending ? 'Scroll into your club.' : atSummit ? 'The view is only the beginning.' : 'You set the pace. Scroll back to return.'}</small></span></div><span className="sx-field-note">{!ready ? 'PREPARING THE TRAIL…' : atSummit ? 'THE SUMMIT' : descending ? 'BASECAMP, AHEAD' : 'KEEP CLIMBING.'}</span></div>
       </div>

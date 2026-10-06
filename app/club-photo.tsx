@@ -1,11 +1,12 @@
+import { sitePath } from '@/lib/site-path';
 import type { clubPhotos } from '@/lib/club-photos';
 
 type Photo = (typeof clubPhotos)[keyof typeof clubPhotos];
 
 export function ClubPhoto({ photo, sizes }: { photo: Photo; sizes: string }) {
   return <img
-    src={`/photos/${photo.name}-1600.webp`}
-    srcSet={`/photos/${photo.name}-800.webp 800w, /photos/${photo.name}-1600.webp 1600w`}
+    src={sitePath(`/photos/${photo.name}-1600.webp`)}
+    srcSet={`${sitePath(`/photos/${photo.name}-800.webp`)} 800w, ${sitePath(`/photos/${photo.name}-1600.webp`)} 1600w`}
     sizes={sizes}
     width={photo.width}
     height={photo.height}

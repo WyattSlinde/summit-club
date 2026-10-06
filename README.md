@@ -36,7 +36,7 @@ The `/leadership` page provides a dedicated sign-in entry, sign-out/account swit
 
 The public source repository is [WyattSlinde/summit-club](https://github.com/WyattSlinde/summit-club). Collaborators can clone it or fork it and open a pull request. Direct pushes require repository write access from the owner. Environment files, credentials, dependencies, build output, and local database records are excluded from Git.
 
-This repository URL shares the code, not a hosted website. No GitHub Pages deployment is configured. Follow the local setup below to run the application and its database-backed features.
+The website preview is published separately at [SUMMIT on GitHub Pages](https://wyattslinde.github.io/summit-club/). It includes the scroll-controlled hike and club pages, with registration and voting visibly disabled until a live backend is connected. Follow the local setup below to run the application and its database-backed features.
 
 ## Local development
 
@@ -62,7 +62,13 @@ For a built-worker preview, stop the development server and run `npm run preview
 
 `npm run build:vercel-preview` builds the same React hike, club pages, registration page, and leadership entry as a standalone static preview. It writes a Vercel Build Output API directory under `outputs/vercel-preview/.vercel/output`; deploy that directory with Vercel CLI using `deploy --prebuilt --temporary --yes`. The CLI returns the actual preview URL and its expiry/claim information. Do not infer a live URL from the project name.
 
-This preview is separate from the full Sites application. It copies only public assets and client bundles. Its `/api/basecamp` returns an explicitly marked, read-only preview status; all other API actions return 503. Registration, voting, suggestions, and leadership are visibly unavailable. It contains no student records and does not collect personal details. The original local/Sites API and authentication stay unchanged. Vercel preview account details and generated output remain ignored by Git.
+This preview is separate from the full Sites application. It copies only public assets and client bundles. The preview client uses an explicitly marked, read-only status and rejects writes without sending personal details. Vercel also serves that status at `/api/basecamp`; all other API actions return 503. Registration, voting, suggestions, and leadership are visibly unavailable. It contains no student records. The original local/Sites API and authentication stay unchanged. Vercel preview account details and generated output remain ignored by Git.
+
+## GitHub Pages preview
+
+`npm run build:github-preview` prepares the same read-only preview in `outputs/github-pages`, with asset and navigation paths based at `/summit-club/`. Direct `/register/` and `/leadership/` entries have their own HTML files, and `.nojekyll` preserves the built files without a Jekyll conversion. Only this output directory is intended for Pages publication; do not include the local database, server credentials, or the full workspace. This command prepares files locally and does not enable Pages or publish them.
+
+Pages serves the root of the `gh-pages` branch over HTTPS. To update it, rebuild and publish the contents of `outputs/github-pages` to that branch. Source changes on `main` do not automatically redeploy this preview. It does not depend on the local Mac server or the temporary Vercel deployment.
 
 ## Production setup
 
@@ -70,7 +76,7 @@ Reuse project `appgprj_6abf0fbf6f848191a6ae788a7cd47a39`. The application uses t
 
 Set the hosted `SUMMIT_LEADER_IDS` environment variable to a comma-separated list of the club leaders' Site-scoped authenticated user IDs. The existing single `SUMMIT_LEADER_ID` variable remains supported. Do not use a name, browser parameter, or unverified email as a substitute. Leadership endpoints fail closed when it is unset. Once published, each intended leader signs in at `/leadership` and provides their displayed account code to the owner. Add only approved codes to `SUMMIT_LEADER_IDS`, then have the leader reload the page. Local preview codes are not hosted account codes. Authentication is provided by Sites, not by an app password database.
 
-Publication has not completed: the current environment rejects the Sites workflow credential-input action because required sandbox approval is disabled. The local preview and production build are available, but there is no verified live URL.
+Full backend publication has not completed: the current environment rejects the Sites workflow credential-input action because required sandbox approval is disabled. The local app and production build are available. The static previews above do not connect to a hosted club database or provide hosted sign-in.
 
 ## Content and demo boundaries
 

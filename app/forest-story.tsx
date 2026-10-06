@@ -1,5 +1,6 @@
 'use client';
 
+import { sitePath } from '@/lib/site-path';
 import { useId } from 'react';
 import { ArrowDownRight, ArrowRight } from 'lucide-react';
 import { SummitWordmark } from './summit-brand';
@@ -24,8 +25,8 @@ export default function ForestStory({ onJoin, member = false, nextEvent, loading
   return <section id="basecamp" className="forest-story" aria-labelledby={`forest-title-${uid}`}>
     <div className="forest-arrival">
       <picture className="forest-arrival-scene">
-        <source media="(max-aspect-ratio: 9/16)" srcSet="/summit-arrival/overlook-mobile.webp"/>
-        <img src="/summit-arrival/overlook.webp" alt="" width={media.width} height={media.height} loading="eager" fetchPriority="low" decoding="async"/>
+        <source media="(max-aspect-ratio: 9/16)" srcSet={sitePath('/summit-arrival/overlook-mobile.webp')}/>
+        <img src={sitePath('/summit-arrival/overlook.webp')} alt="" width={media.width} height={media.height} loading="eager" fetchPriority="low" decoding="async"/>
       </picture>
       <div className="forest-arrival-shade"/>
       <div className="forest-story-inner">

@@ -16,6 +16,7 @@ import { SummitMark, SummitWordmark } from './summit-brand';
 import './forest-continuity.css';
 import { adventures } from '@/lib/adventures';
 import { signInFor, readSignInIntent, signInForVote, readVoteIntent } from '@/lib/signin-intent';
+import { sitePath } from '@/lib/site-path';
 import { basecampRequest, type BasecampState as State, type VoteState } from '@/lib/basecamp-client';
 const values=[['S','Serve your community','Use our time and abilities to make a positive difference.'],['U','Unplug and get outside','Step away from screens and experience more of the world around us.'],['M','Move beyond your comfort zone','Try something new, challenge yourself, and grow.'],['M','Make an impact','Leave our school, community, and outdoor spaces better than we found them.'],['I','Inspire others','Bring people together and encourage others to participate.'],['T','Take the lead','Develop the confidence to contribute ideas, organize, serve, and lead.']];
 const peaks=[['P','Push your limits','Challenge yourself physically, personally, and as a leader.'],['E','Explore what’s out there','Experience new places, activities, people, and perspectives.'],['A','Act with service','Look for opportunities to help rather than waiting to be asked.'],['K','Keep climbing','Continue growing, learning, and moving forward.']];
@@ -67,7 +68,7 @@ useEffect(()=>{
  const frame=requestAnimationFrame(()=>{
    history.replaceState(history.state,'',url.pathname+url.search+url.hash);setError('');
    if(outing){setSelected(adventures.findIndex(item=>item.id===outing));setModal('vote');window.dispatchEvent(new CustomEvent('summit:navigate',{detail:'expeditions'}));}
-   else if(intent==='join'){location.replace('/register');}
+   else if(intent==='join'){location.replace(sitePath('/register'));}
    else if(intent==='idea'){setModal('idea');requestId.current=crypto.randomUUID();}
  });
  return()=>cancelAnimationFrame(frame);
@@ -109,7 +110,7 @@ return <><a className="skip" href="#basecamp" onClick={enterClub}>Skip to club b
       <section className="expeditions section" id="expeditions" aria-labelledby="outings-title">
         <div className="next-heading"><div><span className="field-guide-kicker">THE SUMMIT FIELD GUIDE</span><h2 id="outings-title">Where should we go next?</h2></div><p>Three starting points. Your votes help choose what happens next.</p></div>
         <ExpeditionConsole selected={selected} onSelect={setSelected} onOpenNotes={()=>open('trip')} onVote={()=>vote(trip.id)} voted={!!state?.myVotes.some(v=>v.adventure_id===trip.id)} busy={!!busy} voteCount={state?.votes.find(v=>v.adventure_id===trip.id)?.count??0} votesReady={!!state} votes={state?.votes} votesFailed={!!loadError} packedItems={packed} previewOnly={state?.previewOnly}/>
-        <p className="outing-photo-note">Photos show examples of adventure and service, not past SUMMIT trips. <a href="/photos/credits.txt" target="_blank" rel="noopener noreferrer">Photo credits &amp; licenses</a></p>
+        <p className="outing-photo-note">Photos show examples of adventure and service, not past SUMMIT trips. <a href={sitePath('/photos/credits.txt')} target="_blank" rel="noopener noreferrer">Photo credits &amp; licenses</a></p>
         {(error||loadError)&&!modal&&<div className="error" role="alert">{error||loadError} <button disabled={loading} onClick={retryBasecamp}>{loading?'Connecting…':'Retry'}</button></div>}
       </section>
       <section className="board section" id="board" aria-labelledby="ideas-title">
@@ -122,7 +123,7 @@ return <><a className="skip" href="#basecamp" onClick={enterClub}>Skip to club b
     </div>
   </SummitExperience>
 </main>
-<LeaderDesk open={leaderOpen} onOpenChange={setLeaderOpen} onChanged={retryBasecamp}/><footer className="club-footer"><a className="wordmark" href="#home" aria-label="SUMMIT home"><SummitMark/><SummitWordmark/></a>{state?.leader&&<button className="text-button" onClick={()=>setLeaderOpen(true)}>Leadership desk</button>}{!state?.leader&&<a className="text-button" href="/leadership">Club leadership</a>}{state?.signedIn&&<a className="text-button" href="/signout-with-chatgpt?return_to=/%23basecamp" target="_top">Sign out</a>}<p>Cathedral Catholic High School<br/><small>Student-led outdoor adventure club</small></p></footer>
+<LeaderDesk open={leaderOpen} onOpenChange={setLeaderOpen} onChanged={retryBasecamp}/><footer className="club-footer"><a className="wordmark" href="#home" aria-label="SUMMIT home"><SummitMark/><SummitWordmark/></a>{state?.leader&&<button className="text-button" onClick={()=>setLeaderOpen(true)}>Leadership desk</button>}{!state?.leader&&<a className="text-button" href={sitePath('/leadership')}>Club leadership</a>}{state?.signedIn&&<a className="text-button" href="/signout-with-chatgpt?return_to=/%23basecamp" target="_top">Sign out</a>}<p>Cathedral Catholic High School<br/><small>Student-led outdoor adventure club</small></p></footer>
 {notice&&<div className="toast" role="status"><CheckCircle2 size={20}/>{notice}</div>}
 <Dialog open={modal!==null} onOpenChange={v=>{if(!v)setModal(null)}}><DialogContent className="summit-dialog"><DialogTitle className="dialog-title">{modal==='idea'?'Share an outing idea.':modal==='vote'?`Vote for ${trip.name.toLowerCase()}`:trip.name}</DialogTitle><DialogDescription>{modal==='idea'?'Pitch an adventure or service idea to club leadership.':modal==='vote'?'Help the crew choose what to plan next.':'Proposed experience · final details to be confirmed.'}</DialogDescription>
 {modal==='vote'&&(!state?connectionPrompt:!state.signedIn?<div className="auth-prompt"><p>Your choice is <strong>{trip.name}</strong>. Sign in to save your vote; you’ll return to this outing to confirm it.</p><a className="button" href={signInForVote(trip.id)} target="_top">Sign in with ChatGPT</a><p className="fine">Voting helps choose the plan. It doesn’t register you for an outing.</p></div>:<div className="vote-confirmation"><p>{trip.description}</p>{state.myVotes.some(v=>v.adventure_id===trip.id)?<><p className="registration-state"><CheckCircle2 size={18} aria-hidden="true"/>Your vote is already saved.</p><button className="button" onClick={()=>setModal(null)}>Back to outing ideas</button></>:<><p className="fine">You can vote for more than one idea. Leadership confirms dates and details.</p><button className="button" disabled={!!busy} onClick={async()=>{if(await vote(trip.id))setModal(null)}}>{busy===trip.id?'Saving…':'Confirm my vote'}</button></>}</div>)}
