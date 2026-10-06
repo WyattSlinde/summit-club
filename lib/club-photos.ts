@@ -12,7 +12,7 @@ export const clubPhotos = {
   hike: {
     name: 'group-hike',
     alt: 'A group of backpackers follows a sunlit forest trail below rocky peaks in the Tetons.',
-    caption: 'On the trail · Teton County, Wyoming',
+    caption: 'Example group hike · Teton County, Wyoming',
     credit: 'Kevin Doran / Unsplash',
     source: 'https://unsplash.com/photos/MH0Oxx6h550',
     width: 1600, height: 2133,

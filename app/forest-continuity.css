@@ -197,3 +197,5 @@ body{background:var(--forest-deep);color:var(--forest-paper)}
 .club-footer .wordmark>.summit-wordmark{width:125px;height:auto;color:var(--forest-paper)}
 @media(max-width:750px){.masthead .join-nav{min-height:44px;white-space:nowrap}.masthead .mobile-menu{width:44px;height:44px;flex:none;padding:0;align-items:center;justify-content:center}}
 @media(max-width:380px){.masthead .wordmark>.summit-mark{display:none}.masthead .join-nav{gap:8px;padding-inline:10px}}
+.field-guide-kicker{display:block;color:#e9b78d;font:10px/1.6 var(--mono);letter-spacing:.11em;margin-bottom:15px}
+.vote-confirmation>p{font-size:16px;line-height:1.75;color:#536156;margin-bottom:22px}.vote-confirmation>.fine{font-size:13px}.vote-confirmation>.button{margin-top:3px}

@@ -56,7 +56,7 @@ export default function ForestStory({ onJoin, member = false, nextEvent, loading
         {nextEvent ? <><p className="forest-meeting-date"><time dateTime={nextEvent.starts_at}>{meetingDate} Pacific</time></p><p className="forest-meeting-place">{nextEvent.location}</p><a href="#calendar" className="forest-calendar-link">Details &amp; RSVP<ArrowRight size={16} strokeWidth={1.6} aria-hidden="true"/></a></>
           : <p className="forest-meeting-copy">{loading ? 'Looking for the latest club plans.' : loadFailed ? 'We couldn’t load the latest plans. Try reconnecting below.' : 'The date and place will appear here once confirmed.'}</p>}
       </aside>
-      <figure className="forest-photo"><div className="forest-panorama"><ClubPhoto photo={clubPhotos.arrival} sizes="(max-width: 700px) 88vw, 24vw"/></div><PhotoCredit photo={clubPhotos.arrival}/></figure>
+      <figure className="forest-photo"><div className="forest-panorama"><ClubPhoto photo={clubPhotos.hike} sizes="(max-width: 700px) 88vw, 24vw"/></div><PhotoCredit photo={clubPhotos.hike}/></figure>
     </div>
   </section>;
 }
