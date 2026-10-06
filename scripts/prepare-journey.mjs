@@ -5,7 +5,10 @@ import { resolve } from 'node:path';
 const source = process.argv[2];
 if (!source) throw new Error('Usage: FFMPEG_PATH=/path/to/ffmpeg node scripts/prepare-journey.mjs /path/to/source.mp4');
 const ffmpeg = process.env.FFMPEG_PATH || 'ffmpeg';
-const root = resolve('public/journey');
+const directory = process.argv[3] || 'journey';
+if (!/^[a-z0-9-]+$/.test(directory)) throw new Error('Use a simple media directory name');
+const summitFrame = Number(process.argv[4] || 0);
+const root = resolve('public', directory);
 const variants = [{name:'desktop',width:1600,quality:70},{name:'mobile',width:960,quality:65}];
 for (const variant of variants) {
   const destination = resolve(root,variant.name);
@@ -21,8 +24,10 @@ const files=(await readdir(resolve(root,'desktop'))).filter(name=>name.endsWith(
 const mobile=(await readdir(resolve(root,'mobile'))).filter(name=>name.endsWith('.webp')).sort();
 if (files.length!==mobile.length || files.length<2) throw new Error('Incomplete variants');
 await copyFile(resolve(root,'desktop',files[0]),resolve(root,'trailhead.webp'));
-await copyFile(resolve(root,'desktop',files.at(-1)),resolve(root,'overlook.webp'));
-const manifest={frameCount:files.length,width:1600,height:900,mobileWidth:960,mobileHeight:540,fps:20,path:'/journey',version:'higgsfield-1'};
+const peak = Math.min(files.length - 1, Math.max(0, summitFrame || files.length - 1));
+await copyFile(resolve(root,'desktop',files[peak]),resolve(root,'overlook.webp'));
+await copyFile(resolve(root,'desktop',files[peak]),resolve(root,'summit.webp'));
+const manifest={frameCount:files.length,width:1600,height:900,mobileWidth:960,mobileHeight:540,fps:20,summitFrame:peak,path:`/${directory}`,version:'summit-overpass-2'};
 await writeFile('app/journey-media.json',JSON.stringify(manifest,null,2)+'\n');
 for (const variant of variants) {
   const bytes=(await Promise.all(files.map(file=>stat(resolve(root,variant.name,file))))).reduce((sum,file)=>sum+file.size,0);

@@ -56,9 +56,12 @@ export default defineConfig(async ({ command }) => {
       ...(managedLinux
         ? { host: "0.0.0.0", allowedHosts: ["terminal.local"] }
         : { strictPort: true }),
-      ...(isCodexSeatbeltSandbox
-        ? { watch: { useFsEvents: false, usePolling: true } }
-        : {}),
+      watch: {
+        // Frame exports and worker state are not source modules. Hundreds of
+        // invalidations here can exhaust Vinext's request-scope registry.
+        ignored: ["**/public/ascent/**", "**/public/journey/**", "**/dist/**", "**/.wrangler/**"],
+        ...(isCodexSeatbeltSandbox ? { useFsEvents: false, usePolling: true } : {}),
+      },
     },
     plugins: [
       vinext(),

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { trailJourney, frameForProgress, frameWindow, WALK_END, CLUB_START } from '../app/trail-journey.ts';
+import { trailJourney, frameForProgress, frameWindow, WALK_END, DESCENT_START, CLUB_START, reflowScroll } from '../app/trail-journey.ts';
 import { ScrollSequence } from '../app/scroll-sequence.ts';
 
 const tick = () => new Promise(resolve => setTimeout(resolve, 0));
@@ -14,13 +14,31 @@ test('reverse scroll retraces exactly the same image frames', () => {
   for(let i=500;i>=0;i--){assert.equal(frameForProgress(i/500,241),forward[i]);if(i>0)assert.ok(forward[i]>=forward[i-1]);}
   assert.equal(forward[0],0);assert.equal(forward.at(-1),240);
 });
-test('the overlook holds while SUMMIT and then the club appear', () => {
-  for (const p of [WALK_END,.85,CLUB_START,1,10]) assert.equal(frameForProgress(p,241),240);
-  assert.equal(trailJourney(.87).title,1);
+test('the camera holds at the peak while SUMMIT rises, then travels beyond it', () => {
+  for (const p of [WALK_END,.57,.63,.68,DESCENT_START]) assert.equal(frameForProgress(p,321,192),192);
+  assert.equal(trailJourney(.5).title,0);
+  assert.ok(trailJourney(.54).titleY > trailJourney(.60).titleY);
+  assert.equal(trailJourney(.65).titleY,0);
+  assert.equal(trailJourney(.65).title,1);
+  assert.ok(frameForProgress(.8,321,192)>192);
+  assert.equal(frameForProgress(.9,321,192),320);
   assert.equal(trailJourney(1).title,0);
   assert.equal(trailJourney(1).camp,1);
   assert.equal(trailJourney(CLUB_START).accessible,true);
   assert.equal(trailJourney(.5).accessible,false);
+});
+test('the descent uncovers the club only after the summit hold', () => {
+  assert.equal(trailJourney(.65).approach,0);
+  assert.equal(trailJourney(.65).camp,0);
+  let last=0;
+  for(let i=69;i<=100;i++){
+    const state=trailJourney(i/100);
+    assert.ok(state.approach>=last);last=state.approach;
+    assert.ok(state.cover>=-18 && state.cover<=112);
+  }
+  assert.equal(trailJourney(1).approach,1);
+  assert.equal(trailJourney(1).cover,-18);
+  assert.equal(trailJourney(.75).phase,'descending');
 });
 test('reduced motion exposes club content without a walking sequence', () => {
   for(const p of [0,.5,1]){const state=trailJourney(p,true);assert.equal(state.walk,1);assert.equal(state.accessible,true);assert.equal(state.camp,1);assert.equal(state.controls,0);}
@@ -79,4 +97,12 @@ test('a prefetched failure cannot strand a later seek on an old frame', async ()
     sequence.seek(0);for(let i=0;i<10;i++)await tick();assert.equal(paints.at(-1),0);assert.equal(errors,0);
     sequence.seek(40);await tick();assert.equal(errors,1);
   }finally{sequence.dispose();globalThis.fetch=oldFetch;globalThis.createImageBitmap=oldBitmap;}
+});
+
+test('resize and fallback preserve club reading offset instead of jumping to the footer', () => {
+  assert.equal(reflowScroll(4080,0,3780,0,900,900,false,true),1200);
+  assert.equal(reflowScroll(4080,0,3780,4200,900,1000,false,false),4500);
+  assert.equal(reflowScroll(1890,0,3780,4200,900,1000,false,false),2100);
+  assert.equal(reflowScroll(1200,0,0,3780,900,900,true,false),4080);
+  assert.equal(reflowScroll(1890,0,3780,0,900,900,false,true),900);
 });

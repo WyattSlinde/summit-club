@@ -1,19 +1,20 @@
 {
   "provider": "Higgsfield",
-  "imageJob": "13d10e31-a6ef-49d0-b83c-359fa880c22a",
-  "sequenceJob": "a54ac5a4-4a21-49d5-bde6-4a0a661919e3",
+  "imageJob": "eaac144b-d7ed-46df-9d16-8a74099de895",
+  "sequenceJob": "ecef7843-85fe-496b-965f-f7a1765dbd3c",
+  "bridgeJob": "556a2ca0-caa8-4324-80f8-874da46af589",
   "date": "2026-10-05",
   "image": {
     "model": "gpt_image_2_5",
-    "count": 1,
     "aspect_ratio": "16:9",
-    "prompt": "Create an extraordinarily realistic outdoor photograph, the opening view of a first-person mountain hike, absolutely photographic not an illustration or game render. Camera at standing eye height 1.7m, wide 26mm natural lens. A narrow warm sandy switchback footpath starts at bottom center, curls gently right through lush green montane forest and climbs uphill toward a sunlit rocky overlook in the middle distance. Large textured living Jeffrey pine trunks frame both edges, mature irregular pine branches overhead, rich emerald and fresh lime green foliage, delicate ferns and golden grasses beside the trail, a few purple lupines and yellow wildflowers, uneven granite rocks embedded naturally in the soil. On the left about 10 meters away a realistic mule deer quietly grazes among plants, small in the composition, natural accurate anatomy, not facing the camera. In the far distance between trees is a breathtaking Sierra Nevada granite mountain range and a deep forested valley under a bright blue sky with thin white clouds. A warm clear spring morning, sunlight from upper left makes realistic dappled shadows. Complex actual forest ecology, rich detail, believable atmosphere, inviting and colorful but natural. Foreground fully in focus; beautiful distant aerial perspective. No people, no text, no branding, no signs, no overlays, no lens flare, no oversaturation, no fantasy. The trail and the distant overlook are part of a single continuous walkable landscape. Composition suitable as the beginning of an interactive cinematic journey for a school hiking club."
+    "count": 1,
+    "prompt": "Photorealistic outdoor landscape photograph for the FIRST FRAME of a continuous uphill mountain hike. Human eye level, wide 24mm lens. We are midway UP a beautiful green granite mountain, looking directly UP a clear narrow switchback hiking path that rises steeply from bottom center toward a rocky summit ridge only 15 meters ahead, about 4 meters above our eye level. The visible path climbs natural stone steps and curves gently left then right to that nearby crest. The mountain ridge fills the middle of the image and BLOCKS the far valley view: the panorama will only become visible AFTER walking up to the ridge. Tall irregular Jeffrey pines frame both sides, vibrant spring green undergrowth, small golden grasses and purple lupines, detailed rough warm-gray granite with natural fissures, realistic dry sandy footbed. A small anatomically correct mule deer stands among the plants far left, away from the path. Bright inviting California mountain morning, warm sun from upper left, true blue sky and delicate clouds in upper third. Rich ecological variation, textured bark, naturally scattered stones, realistic proportions. Actual landscape photography look, excellent detail, believable depth, natural color, no fantasy, no CGI/game look, no painting. No people, no signs, no words or logos. The main subject is an UNMISTAKABLY UPHILL PATH TO A NEARBY SUMMIT, not a flat trail, not a downward path, not a view from an already reached overlook."
   },
   "sequence": {
     "model": "seedance_2_5",
     "mode": "omni_reference",
     "count": 1,
-    "duration": 12,
+    "duration": 16,
     "resolution": "1080p",
     "aspect_ratio": "16:9",
     "generate_audio": false,
@@ -21,12 +22,50 @@
     "medias": [
       {
         "role": "start_image",
-        "value": "13d10e31-a6ef-49d0-b83c-359fa880c22a"
+        "value": "eaac144b-d7ed-46df-9d16-8a74099de895"
       }
     ],
-    "prompt": "ONE SINGLE CONTINUOUS UNBROKEN FIRST-PERSON WALK, no cuts, no edits, no transitions, no montage. Starting exactly from the supplied forest photograph, the camera physically walks forward at steady human walking speed along this SAME sandy footpath for the full 12 seconds, about 16 meters total. Camera remains at human eye height 1.7m above the actual ground at every point, never flies. The camera follows the visible gently curving path uphill and slightly right. Immediate foreground pine trunks, fern leaves, flowers, and rocks pass to either side with convincing three dimensional parallax. The same small mule deer from the image briefly raises its head naturally on the left while continuing to graze, anatomically correct. Branches sway very slightly in a light breeze. Everything stays geographically stable and realistic. The distant granite Sierra Nevada mountains remain the SAME mountains for the entire shot, slowly becoming unobstructed as the walker passes the last nearby trees and approaches the sunlit rocky overlook. For the final 2 seconds the walk gently settles at the overlook, still at walking height on the granite ledge: magnificent uninterrupted panoramic view of the same forest valley and rugged mountain range, vibrant green trees on the slopes, bright blue sky and thin wispy clouds. This is real outdoor landscape documentary photography, not game graphics, no CGI appearance. Bright inviting spring morning, beautiful realistic warm sunlight and richly detailed natural colors. No people, no hands, no text, no signs, no overlays, no voice or music, no fades, no dissolves, absolutely NO scene change, NO jump cut, NO morphing. Stable smooth gimbal walk with almost no head bob. The physical continuous walking journey is the entire purpose of the shot."
+    "prompt": "Create ONE completely continuous unbroken camera journey beginning exactly in the supplied photo. This is a visibly UPHILL hike to the summit, followed by a graceful camera move OVER that summit and DOWN toward the forest beyond. No cuts or transitions of any kind. The camera first advances straight along the SAME visible rising stone-step path, following its small bends, physically climbing roughly 5 meters in elevation over 15 meters of path. Maintain first-person human eye height above the steps throughout the climb, smoothly stabilised, no hands or people. Trees and granite pass close beside the lens with strong real parallax. The deer stays in the original left-hand undergrowth as we leave it behind. The rocky crest grows closer, passing BELOW the camera as the camera reaches the actual summit about nine seconds into the single take. Now a spectacular deep forested valley and majestic distant granite mountains are REVEALED for the very first time BEHIND the crest. This is a reward view after the climb. Keep the camera here briefly with the summit's textured rock edge in the bottom foreground, the expansive mountain panorama across the middle, plenty of blue sky above. Then, still in the SAME unbroken take, gently carry the camera forward OVER the near rock crest, and smoothly pitch the lens DOWN toward the sunlit green forest and a small grassy clearing immediately beyond the ridge. The crest slides DOWN and out of the bottom of frame with this forward movement. End looking downward toward the nearby lush forest clearing, surrounded by irregular green pine canopies and granite, as if about to settle into this beautiful place. This last move can become a smooth cinematic crane move but never jumps to another location. The route, trees and terrain remain geometrically stable throughout. All motion smooth and deliberate, no whip pan, no cuts, no edits, no dissolves, no camera teleport, no object morphing. Exact natural photographic quality of the starting image, warm spring sunshine, vivid but believable forest greenery, delicate wildflowers, authentic granite, natural blue sky. No text, logos, signs, UI, people, narration or sound."
   },
-  "delivery": "241 individually addressable WebP frames, 20 samples per source second. Only user scroll selects displayed frames. No autoplay or video element. The camera path is fixed.",
-  "review": "Visually inspected source contact sheet at one-second intervals. FFmpeg scene threshold 0.24 detected no abrupt scene cuts.",
-  "disclosure": "Generated landscape and wildlife. Not a documented club outing or a verified real trail."
+  "bridge": {
+    "model": "seedance_2_5",
+    "mode": "omni_reference",
+    "count": 1,
+    "duration": 4,
+    "resolution": "1080p",
+    "aspect_ratio": "16:9",
+    "generate_audio": false,
+    "bitrate_mode": "high",
+    "medias": [
+      {
+        "role": "start_image",
+        "value": "1d20b714-420c-4380-9383-b4ac28d5c7c1"
+      },
+      {
+        "role": "end_image",
+        "value": "f5ce4690-cee8-4aa3-8648-160a3b3dbfdd"
+      }
+    ],
+    "prompt": "A SINGLE smooth physically continuous four-second forward camera move that CONNECTS these two exact photographs. Start at the exact first photograph, looking up the last few granite steps. Walk up those last steps, rising with the terrain, passing the rock crest closely, gently rounding the rock to reach the exact second photograph's viewpoint atop the same rocky summit. Foreground rock passes near the lens with strong parallax and naturally occludes the transition; the valley is gradually revealed beyond the rock as we crest it. Maintain the same warm light, same trees and same granite geology. This is the missing continuous camera movement between two positions on one hiking trail. NO EDIT, NO CUT, NO DISSOLVE, NO FADE, NO sudden camera jump, NO zoom transition, NO teleport, no people or text. Do not simply crossfade the photographs. Physically travel through the intervening 3D space in one continuous stabilized forward and upward walking move. Camera movement begins immediately and continues evenly for the full shot. Photorealistic."
+  },
+  "assembly": {
+    "head": {
+      "start": 0.25,
+      "end": 8.5,
+      "speed": 1.2
+    },
+    "bridge": {
+      "start": 0,
+      "end": 4
+    },
+    "tail": {
+      "start": 8.625,
+      "end": 16.041667
+    },
+    "blendSeconds": 0.125,
+    "summitFrame": 283
+  },
+  "delivery": "364 individually addressable WebP frames at 20 samples per source second; desktop 1600×900 and mobile 960×540. Only user scroll selects frames. No autoplay, video element, or playback clock.",
+  "review": "Inspected source and bridge contact sheets and join frames. Original source had a hard cut at 8.5 seconds; a generated bridge replaces it, with a brief blend into the tail. Minor generative artifacts may remain. Rendered browser verification remains blocked by browser URL policy.",
+  "disclosure": "Generated landscape and wildlife, not a documented club outing or a verified real trail."
 }

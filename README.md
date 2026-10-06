@@ -4,20 +4,24 @@ Cathedral Catholic High School outdoor adventure, service, and leadership club.
 
 ## What works
 
-- A Higgsfield-generated photographic mountain hike, delivered as 241 local WebP frames. Native page scroll chooses the exact frame: stop to hold the view, scroll backward to retrace the path. There is no video element, autoplay, playback clock, or automatic camera motion.
-- A continuous forest-to-overlook shot with vibrant pines, ferns, flowers, rocky trail and a grazing deer. SUMMIT appears at the overlook; the club field journal rises into view below it.
+- A Higgsfield-generated photographic mountain hike, delivered as 364 local WebP frames. Native page scroll chooses the exact frame: stop to hold the view, scroll backward to retrace the path. There is no video element, autoplay, playback clock, or automatic camera motion.
+- An uphill forest-and-granite climb with a fixed camera hold at the peak. SUMMIT rises from behind the foreground ridge, then continued scrolling carries the camera over the crest and down into the club page. Every stage can be reversed with scroll.
 - Separate desktop/mobile frames, four concurrent requests, compressed prefetch, a bounded decoded-image cache, a static poster while loading, per-request timeouts, and an accessible still-image fallback.
 - Reduced-motion and data-saver visitors receive a static overlook and ordinary club page. Everyone has a skip-to-club link.
 - Explore / Serve / Lead trail stops, reversible scrubbing, and a replay link. The cinematic camera is fixed to the generated path; free 3D turning is not part of this version.
-- A concise forest-green and warm-paper club page: what the club does, who can join, real meeting status, Tobias Kell's leadership, signup, outing votes and suggestions. Full SUMMIT/PEAK values are expandable.
+- A calm forest-green arrival and warm-paper club page: what the club does, who can join, real meeting status, Tobias Kell's leadership, signup, outing votes and suggestions. Full SUMMIT/PEAK values are expandable.
 - Three selectable outing proposals, live vote counts, downloadable notes, and a device-local packing checklist.
-- Authenticated interest registration, a downloadable SVG club pass, database-backed voting and proposals, event RSVPs, and a leadership desk.
+- Plain authenticated interest registration with a simple saved-details confirmation, database-backed voting and proposals, event RSVPs, and a leadership desk. There is no ticket or pass.
 
 ## Journey media
 
-The generated source clip is a production asset, not a website player. Its source job and generation prompts are recorded in `journey-provenance.json`. The website ships only the derived frames and two stills in `public/journey/`; no external Higgsfield URL is needed at runtime. The desktop sequence is about 29.6 MiB and the mobile sequence about 15.0 MiB, prefetched progressively. Only one variant loads per visit.
+The generated source clip is a production asset, not a website player. Its source job and generation prompts are recorded in `journey-provenance.json`. The website ships only the derived frames and three stills in `public/ascent/`; no external Higgsfield URL is needed at runtime. The desktop sequence is about 42.3 MiB and the mobile sequence about 22.0 MiB, prefetched progressively. Only one variant loads per visit.
 
-To prepare replacement media, use `FFMPEG_PATH=/path/to/ffmpeg node scripts/prepare-journey.mjs /path/to/source.mp4` with empty frame output folders. The script produces both sizes and updates `app/journey-media.json`. FFmpeg is an authoring tool and is not required to run the site.
+To prepare replacement media, use `FFMPEG_PATH=/path/to/ffmpeg node scripts/prepare-journey.mjs /path/to/source.mp4 ascent 283` with a fresh media directory and the chosen summit-frame index. The script produces both sizes and updates `app/journey-media.json`. FFmpeg is an authoring tool and is not required to run the site.
+
+## Private GitHub repository
+
+The code is at https://github.com/WyattSlinde/summit-club and remains private. Sign in to the **WyattSlinde** GitHub account (or an account explicitly granted access); GitHub returns 404 to accounts without permission. This repository URL is source-code storage, not a hosted website. No GitHub Pages deployment is configured.
 
 ## Local development
 
@@ -33,7 +37,7 @@ npm run dev
 
 Open http://127.0.0.1:4173/ or http://localhost:4173/. Both `npm run dev` and `npm start` run the development server on port 4173. Keep its terminal running while using the local website; restarting the computer or stopping the server makes this local address unavailable.
 
-After the first setup, double-click `Start SUMMIT.command` on macOS, or run `npm run preview:local`. The launcher checks for an existing SUMMIT server, starts one if needed, waits for a successful response, and opens the address. It leaves unrelated processes alone. Use `node scripts/open-local.mjs --check` for a readiness check without opening a browser. The development server fails explicitly on a port conflict instead of silently choosing another port.
+After the first setup, double-click `Start SUMMIT.command` on macOS, or run `npm run preview:local`. The launcher checks for an existing SUMMIT server, starts one if needed, waits for a successful response, and opens the address. It leaves unrelated processes alone. Use `node scripts/open-local.mjs --check` for a readiness check without opening a browser. The development server fails explicitly on a port conflict instead of silently choosing another port. Generated frame exports, build output, and local Worker state are excluded from the development reload watcher to avoid mass invalidations while media is prepared.
 
 The starter simulates sign-in only in local development. Clicking Sign in with ChatGPT locally uses its demo identity. That demo identity can open Leadership desk in the footer. This local-only permission is compiled out of the production build.
 
@@ -51,7 +55,7 @@ Publication has not completed: the current environment rejects the Sites workflo
 
 - The photographic landscapes are generated illustrations of an outdoor setting, not verified outing locations or school photography. Asset prompts and provenance are in ASSET-NOTES.txt.
 - Three initial activities are proposals; no unconfirmed meeting dates are presented as real.
-- A saved club pass records interest, not confirmed membership, an outing reservation, or a permission slip.
+- Saved registration records club interest; outing RSVPs and any required permissions are handled separately.
 - Local development data is separate from the future hosted database. Demo test records are not included in the downloadable source.
 - Real dates, permissions, trip details, and leadership access need club review before public launch.
 
@@ -59,9 +63,9 @@ Publication has not completed: the current environment rejects the Sites workflo
 
 Earlier API checks covered unauthenticated write rejection, cross-origin rejection, malformed submissions, member privacy, duplicate vote prevention, leadership authorization, event creation, idempotent RSVPs, cancellation, and stale-event rejection.
 
-The cinematic revision is checked with TypeScript, scoped ESLint, a production build, HTTP readiness and asset validation, and `npm run test:journey`. Journey tests cover exact pause/reverse mapping, reveal bounds, reduced motion, directional prefetch, cache limits/disposal, out-of-order decoding and missing-media fallback. Club UI server-render checks cover loading/error states, a real meeting date, populated votes and unknown vote counts.
+The cinematic revision is checked with TypeScript, scoped ESLint, a production build, HTTP readiness and asset validation, and `npm run test:journey`. Journey tests cover exact pause/reverse mapping, summit title hold and descent, reveal bounds, resize/fallback reading position, reduced motion, directional prefetch, cache limits/disposal, out-of-order decoding and missing-media fallback. Club UI server-render checks cover loading/error states, a real meeting date, populated votes and unknown vote counts.
 
-The generated source was visually inspected as a contact sheet and checked for abrupt scene cuts. Browser automation for localhost was rejected by the browser URL security policy; the rebuilt page still needs a fresh interactive browser check. These source/HTTP checks do not establish final rendered layout or scroll smoothness on a physical phone.
+The generated source and both joins were inspected as contact sheets. A discontinuity in the original generation was replaced with a separately generated four-second climb; a brief blend eases the second join. The landscape is generated, so minor geometry/motion artifacts remain possible. Browser automation for localhost was rejected by the browser URL security policy; the rebuilt page still needs a fresh interactive browser check. These source/HTTP checks do not establish final rendered layout or scroll smoothness on a physical phone.
 
 ## Design references
 

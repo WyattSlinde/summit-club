@@ -15,10 +15,8 @@ body{background:var(--forest-deep);color:var(--forest-paper)}
 .masthead .join-nav:hover{background:#e1e7d9;border-color:#e1e7d9}
 .journey-nav{transform:translateY(-105%);visibility:hidden;opacity:0;transition:transform .65s cubic-bezier(.22,1,.36,1),opacity .45s,visibility .45s}
 .journey-nav[data-arrived=true]{transform:translateY(0);visibility:visible;opacity:1}
-.camp-content{position:relative;background:var(--forest-paper);color:var(--forest-ink);padding:0 0 35px}
+.camp-content{position:relative;background:var(--forest-paper);color:var(--forest-ink);padding:0 0 25px}
 .camp-content>.section{width:86%;max-width:1180px;margin:0 auto;padding-inline:0}
-.section-index{font:10px/1.6 var(--mono);letter-spacing:.8px;color:var(--forest-text-muted);margin:0 0 12px}
-.section-index:before{content:'';display:inline-block;width:6px;height:9px;background:var(--forest-signal);margin-right:9px}
 .camp-calendar{padding-block:0}
 .camp-calendar .upcoming-events{margin:0;padding:39px 0 0;border:0}
 .calendar-heading{display:flex;justify-content:space-between;align-items:baseline;gap:25px;margin-bottom:21px}
@@ -32,15 +30,14 @@ body{background:var(--forest-deep);color:var(--forest-paper)}
 .camp-calendar .event-card>div>span{font-size:11px;color:var(--forest-text-muted);line-height:1.7;margin:7px 0}
 .camp-calendar .event-card p{font-size:13px;color:var(--forest-text-muted);line-height:1.7;max-width:650px}
 .camp-calendar .event-card .button{font-size:12px;padding:12px 17px;min-height:45px;background:var(--forest-ink);border-color:var(--forest-ink);color:var(--forest-paper);font-weight:500;border-radius:2px}
-.expeditions{background:transparent;padding-top:58px;padding-bottom:44px;scroll-margin-top:75px}
-.next-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:35px;margin-bottom:28px}
-.next-heading h2{font:500 clamp(28px,3.1vw,42px)/1.13 'DM Sans',sans-serif;letter-spacing:-.045em;color:var(--forest-ink)}
+.expeditions{background:transparent;padding-top:47px;padding-bottom:27px;scroll-margin-top:75px}
+.next-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:35px;margin-bottom:24px}
+.next-heading h2{font:500 clamp(28px,2.8vw,38px)/1.13 'DM Sans',sans-serif;letter-spacing:-.045em;color:var(--forest-ink)}
 .next-heading>p{max-width:275px;font-size:13px;line-height:1.8;color:var(--forest-text-muted)}
 .board{padding-block:0;background:transparent;scroll-margin-top:90px}
-.idea-strip{display:flex;align-items:center;justify-content:space-between;gap:40px;padding:28px 0 33px;border-bottom:1px solid var(--forest-rule)}
+.idea-strip{display:flex;align-items:center;justify-content:space-between;gap:40px;padding:24px 0 27px;border-bottom:1px solid var(--forest-rule)}
 .idea-strip h2{font:500 26px/1.25 'DM Sans',sans-serif;letter-spacing:-.03em;color:var(--forest-ink)}
-.idea-strip p:not(.section-index){max-width:550px;font-size:14px;line-height:1.75;color:var(--forest-text-muted);margin-top:10px}
-.idea-strip .section-index{margin-bottom:11px}
+.idea-strip p{max-width:550px;font-size:14px;line-height:1.75;color:var(--forest-text-muted);margin-top:10px}
 .idea-button{display:inline-flex;align-items:center;justify-content:center;gap:25px;min-height:47px;border:1px solid var(--forest-ink);background:transparent;color:var(--forest-ink);padding:12px 18px;border-radius:2px;font-size:12px;font-weight:500;white-space:nowrap}
 .idea-button:hover{background:#10251d07}
 .camp-content .text-button{color:var(--forest-ink);border-color:var(--forest-rule)}
@@ -51,7 +48,7 @@ body{background:var(--forest-deep);color:var(--forest-paper)}
 .saved-ideas strong{font-size:14px;font-weight:500;color:var(--forest-ink)}
 .saved-ideas p{font-size:13px;line-height:1.75;color:var(--forest-text-muted);margin-top:7px;white-space:pre-wrap;overflow-wrap:anywhere}
 .club-notes{padding-top:4px;padding-bottom:0}
-.club-notes summary{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:63px;list-style:none;cursor:pointer;color:var(--forest-text-muted);font-size:12px}
+.club-notes summary{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:58px;list-style:none;cursor:pointer;color:var(--forest-text-muted);font-size:12px}
 .club-notes summary::-webkit-details-marker{display:none}
 .club-notes summary:hover{color:var(--forest-ink)}
 .club-notes details[open]>summary svg{transform:rotate(45deg)}
@@ -62,9 +59,9 @@ body{background:var(--forest-deep);color:var(--forest-paper)}
 .club-notes-content dt{display:flex;align-items:center;gap:13px;color:var(--forest-ink);font-size:13px;font-weight:500}
 .club-notes-content dt>span{width:18px;color:var(--forest-signal);font:500 13px/1.5 var(--mono)}
 .club-notes-content dd{margin:7px 0 0 31px;max-width:420px;color:var(--forest-text-muted);font-size:12px;line-height:1.8}
-.club-signup{display:flex;align-items:center;justify-content:space-between;gap:60px;padding-top:32px;padding-bottom:58px;border-top:1px solid var(--forest-rule)}
+.club-signup{display:flex;align-items:center;justify-content:space-between;gap:60px;padding-top:28px;padding-bottom:43px;border-top:1px solid var(--forest-rule)}
 .club-signup h2{font:500 34px/1.2 'DM Sans',sans-serif;letter-spacing:-.04em;color:var(--forest-ink)}
-.club-signup p:not(.section-index){max-width:560px;margin-top:13px;color:var(--forest-text-muted);font-size:14px;line-height:1.75}
+.club-signup p{max-width:560px;margin-top:13px;color:var(--forest-text-muted);font-size:14px;line-height:1.75}
 .club-signup-action{display:flex;flex-direction:column;align-items:flex-end;gap:11px;flex-shrink:0}
 .club-signup-action .button{gap:27px;min-height:49px;padding:13px 19px;border:1px solid var(--forest-ink);border-radius:2px;background:var(--forest-ink);color:var(--forest-paper);font-size:13px;font-weight:500;transform:none}
 .club-signup-action .button:hover{background:#244536;border-color:#244536}
@@ -103,10 +100,21 @@ body{background:var(--forest-deep);color:var(--forest-paper)}
 .summit-dialog .desk-list article,.summit-dialog .desk-events article{border-color:var(--forest-rule)}
 .summit-dialog .desk-list article>span,.summit-dialog .desk-events p{color:var(--forest-text-muted)}
 .summit-dialog .text-button{color:var(--forest-ink);border-color:var(--forest-rule)}
-.summit-pass-wrap{--pass-ink:var(--forest-ink);--pass-snow:var(--forest-paper);--pass-signal:#d29468}
 .error{background:#c5633b0e;border:1px solid #c5633b65;color:#753a24;font-size:13px;line-height:1.7;padding:15px 17px;margin-top:23px}
 .error button{color:inherit;min-height:30px}
 .toast{background:var(--forest-ink);color:var(--forest-paper);border:1px solid var(--forest-line);border-radius:2px;box-shadow:0 8px 28px #0b1b1426;font-size:13px}
-@media(max-width:1000px){.masthead nav{gap:23px}.masthead .wordmark>span{display:none}.club-signup{gap:40px}.club-signup h2{font-size:31px}.club-signup p:not(.section-index){max-width:440px}}
-@media(max-width:750px){.masthead{height:69px;padding-inline:5%;gap:11px}.masthead .wordmark>b{font-size:26px}.masthead .wordmark>svg{width:23px}.masthead .join-nav{font-size:11px;padding:10px 12px;gap:12px}.masthead nav{background:var(--forest-ink);top:69px;border-color:var(--forest-line);padding:16px 6%}.masthead nav a{font-size:14px}.camp-content>.section{width:88%}.camp-content{padding-bottom:16px}.expeditions{padding-top:42px;padding-bottom:24px}.next-heading{display:block;margin-bottom:23px}.next-heading h2{font-size:31px}.next-heading>p{font-size:13px;margin-top:15px;max-width:340px}.next-heading>p br{display:none}.section-index{font-size:9px;margin-bottom:10px}.idea-strip{align-items:flex-start;flex-direction:column;gap:20px;padding:27px 0}.idea-strip h2{font-size:25px}.idea-strip p:not(.section-index){font-size:14px}.idea-button{min-height:45px;font-size:12px;padding-inline:16px;gap:25px}.club-notes{padding-top:0}.club-notes summary{font-size:11px;min-height:60px}.club-notes-content dl{grid-template-columns:1fr;gap:20px}.club-signup{flex-direction:column;align-items:flex-start;gap:22px;padding-top:31px;padding-bottom:39px}.club-signup h2{font-size:30px}.club-signup p:not(.section-index){font-size:14px;margin-top:12px}.club-signup-action{align-items:flex-start;gap:10px}.club-signup-action .button{font-size:12px;gap:25px}.calendar-heading{display:block}.calendar-heading h2{font-size:23px}.calendar-heading p{font-size:10px;margin-top:9px}.camp-calendar .upcoming-events{padding-top:30px}.camp-calendar .event-card{grid-template-columns:50px minmax(0,1fr);gap:16px}.camp-calendar .event-card h3{font-size:21px}.camp-calendar .event-card>.button{grid-column:2;justify-self:start}.camp-calendar .event-card p{font-size:12px}.camp-calendar .event-date{padding-right:13px}.camp-calendar .event-date>strong{font-size:31px}.club-footer{padding:25px 6%;gap:21px;flex-wrap:wrap}.club-footer>span{display:none}.club-footer>p{width:auto;margin-left:auto;font-size:10px;max-width:180px}.club-footer>p small{font-size:9px}.club-footer .wordmark>b{font-size:25px}.summit-dialog{padding:29px!important}.summit-dialog .dialog-title{font-size:28px!important}.summit-dialog .club-form input,.summit-dialog .club-form textarea,.summit-dialog .club-form [data-slot=select-trigger]{font-size:16px}.toast{font-size:12px;padding:13px 16px}}
+.registration-confirmation{padding-top:5px}
+.registration-state{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:500;color:var(--forest-ink)}
+.registration-state>svg{color:#315c41}
+.registration-details{margin:22px 0;display:grid;gap:0}
+.registration-details>div{display:grid;grid-template-columns:85px minmax(0,1fr);gap:18px;padding:13px 0;border-bottom:1px solid var(--forest-rule);align-items:baseline}
+.registration-details>div:first-child{border-top:1px solid var(--forest-rule)}
+.registration-details dt{font-size:12px;color:var(--forest-text-muted)}
+.registration-details dd{margin:0;font-size:14px;line-height:1.6;overflow-wrap:anywhere;color:var(--forest-ink)}
+.registration-confirmation>p:not(.registration-state){font-size:13px;line-height:1.8;color:var(--forest-text-muted)}
+.registration-actions{display:flex;align-items:center;gap:22px;margin-top:23px}
+.registration-close{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 5px;background:none;border:0;border-bottom:1px solid var(--forest-rule);color:var(--forest-ink);font-size:13px}
+.registration-close:hover{border-color:var(--forest-ink)}
+@media(max-width:1000px){.masthead nav{gap:23px}.masthead .wordmark>span{display:none}.club-signup{gap:40px}.club-signup h2{font-size:31px}.club-signup p{max-width:440px}}
+@media(max-width:750px){.masthead{height:69px;padding-inline:5%;gap:11px}.masthead .wordmark>b{font-size:26px}.masthead .wordmark>svg{width:23px}.masthead .join-nav{font-size:11px;padding:10px 12px;gap:12px}.masthead nav{background:var(--forest-ink);top:69px;border-color:var(--forest-line);padding:16px 6%}.masthead nav a{font-size:14px}.camp-content>.section{width:88%}.camp-content{padding-bottom:16px}.expeditions{padding-top:34px;padding-bottom:20px}.next-heading{display:block;margin-bottom:23px}.next-heading h2{font-size:31px}.next-heading>p{font-size:13px;margin-top:15px;max-width:340px}.next-heading>p br{display:none}.idea-strip{align-items:flex-start;flex-direction:column;gap:20px;padding:27px 0}.idea-strip h2{font-size:25px}.idea-strip p{font-size:14px}.idea-button{min-height:45px;font-size:12px;padding-inline:16px;gap:25px}.club-notes{padding-top:0}.club-notes summary{font-size:11px;min-height:54px}.club-notes-content dl{grid-template-columns:1fr;gap:20px}.club-signup{flex-direction:column;align-items:flex-start;gap:22px;padding-top:25px;padding-bottom:33px}.club-signup h2{font-size:30px}.club-signup p{font-size:14px;margin-top:12px}.club-signup-action{align-items:flex-start;gap:10px}.club-signup-action .button{font-size:12px;gap:25px}.calendar-heading{display:block}.calendar-heading h2{font-size:23px}.calendar-heading p{font-size:10px;margin-top:9px}.camp-calendar .upcoming-events{padding-top:30px}.camp-calendar .event-card{grid-template-columns:50px minmax(0,1fr);gap:16px}.camp-calendar .event-card h3{font-size:21px}.camp-calendar .event-card>.button{grid-column:2;justify-self:start}.camp-calendar .event-card p{font-size:12px}.camp-calendar .event-date{padding-right:13px}.camp-calendar .event-date>strong{font-size:31px}.club-footer{padding:25px 6%;gap:21px;flex-wrap:wrap}.club-footer>span{display:none}.club-footer>p{width:auto;margin-left:auto;font-size:10px;max-width:180px}.club-footer>p small{font-size:9px}.club-footer .wordmark>b{font-size:25px}.summit-dialog{padding:29px!important}.summit-dialog .dialog-title{font-size:28px!important}.summit-dialog .club-form input,.summit-dialog .club-form textarea,.summit-dialog .club-form [data-slot=select-trigger]{font-size:16px}.toast{font-size:12px;padding:13px 16px}}
 @media(prefers-reduced-motion:reduce){.journey-nav{transition:none}.forest-join,.xc-console *,.idea-button{transition:none}}

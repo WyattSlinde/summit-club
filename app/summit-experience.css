@@ -68,3 +68,40 @@
 @media(max-height:580px){.sx-topbar{top:15px}.sx-opening{bottom:24%}.sx-opening>p{font-size:48px}.sx-opening>.sx-eyebrow{margin-bottom:14px}.sx-opening-copy{margin-top:16px;font-size:12px}.sx-bottom{bottom:18px}.sx-route{top:35%}.sx-trail-story h2{font-size:40px}.sx-titlecard{padding:45px 5% 60px}.sx-titlecard h1{font-size:clamp(90px,19vw,170px)}.sx-titlecard>.sx-eyebrow{margin-bottom:18px}.sx-motto{margin-top:20px}.sx-titlecard>p{margin-top:14px;font-size:12px}.sx-arrival-actions{margin-top:15px}.sx-scroll-cue small{display:none}}
 @media(prefers-reduced-motion:reduce){.sx-trail-story{transition:none}}
 .sx-stage[data-phase=summit] .sx-topbar{visibility:hidden}
+/* The club is physically behind the scene; the last scroll moves over the ridge into it. */
+.sx-experience{--sx-runway:420svh;--sx-cover:112%;--sx-foreground:0;--sx-title-y:48vh;--sx-page-y:0px;--sx-page-angle:24deg;--sx-page-scale:.74;--sx-scene-scale:1;--sx-scene-y:0vh}
+.sx-backdrop{z-index:4;mask-image:linear-gradient(to bottom,#000 calc(var(--sx-cover) - 6%),transparent calc(var(--sx-cover) + 7%));-webkit-mask-image:linear-gradient(to bottom,#000 calc(var(--sx-cover) - 6%),transparent calc(var(--sx-cover) + 7%))}
+.sx-world{transform:translateY(var(--sx-scene-y)) scale(var(--sx-scene-scale));transform-origin:50% 80%;will-change:transform}
+.sx-journey{z-index:5;pointer-events:none}
+.sx-stage{pointer-events:none}
+.sx-underlay{z-index:2;opacity:var(--sx-camp);transform:perspective(1800px) translate3d(0,var(--sx-page-y),0) rotateX(var(--sx-page-angle)) scale(var(--sx-page-scale));transform-origin:center top;will-change:transform;background:#10251d}
+.sx-stage[data-phase=descending] .sx-topbar,.sx-stage[data-phase=descending] .sx-route,.sx-stage[data-phase=descending] .sx-trail-stories{visibility:hidden}
+.sx-titlecard{z-index:1;top:15%;bottom:auto;height:70%;justify-content:flex-start;padding:0 4%;text-shadow:0 3px 30px #0c201e45}
+.sx-title-rise{transform:translateY(var(--sx-title-y));will-change:transform;width:100%}
+.sx-title-rise>.sx-eyebrow{display:block;margin-bottom:26px;letter-spacing:.16em;font-size:9px}
+.sx-titlecard h1{font-size:clamp(130px,24vw,360px);line-height:.8}
+.sx-title-rise>.sx-motto{display:block;margin-top:25px}
+.sx-peak-foreground{position:absolute;inset:0;z-index:2;opacity:var(--sx-foreground);pointer-events:none;clip-path:var(--sx-ridge,polygon(0 83%,40% 56%,55% 60%,100% 85%,100% 100%,0 100%))}
+.sx-peak-foreground>img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+.sx-summit-invitation{position:absolute;left:0;right:0;bottom:19%;z-index:3;text-align:center;opacity:var(--sx-title);text-shadow:0 2px 20px #061a10c0}
+.sx-summit-invitation>p{font:400 18px/1.5 'DM Sans',sans-serif;margin-bottom:13px}
+.sx-summit-invitation>span{display:flex;justify-content:center;align-items:center;gap:12px;font:9px/1.5 var(--mono);letter-spacing:.08em}
+.sx-summit-invitation>button{display:inline-flex;align-items:center;gap:20px;pointer-events:auto;min-height:46px;border:0;border-bottom:1px solid #f2efe780;padding:9px 0;background:none;color:var(--sx-paper);font:13px/1.5 'DM Sans',sans-serif;margin-top:20px}
+.sx-bottom,.sx-topbar,.sx-route,.sx-opening,.sx-trail-stories{z-index:4}
+.sx-stage[data-phase=summit] .sx-bottom{opacity:.65}
+.sx-simple .sx-backdrop{mask:none;-webkit-mask:none;z-index:0}
+.sx-simple .sx-world{transform:none}
+.sx-simple .sx-underlay{transform:none;opacity:1;will-change:auto}
+.sx-simple .sx-title-rise{transform:none}
+.sx-simple .sx-peak-foreground{display:none}
+.sx-simple .sx-summit-invitation>span{display:none}
+@media(max-width:700px){
+.sx-titlecard{top:23%;padding:0 4%;height:55%}.sx-titlecard h1{font-size:25vw}.sx-title-rise>.sx-eyebrow{font-size:7px;letter-spacing:.09em;margin-bottom:22px}.sx-title-rise>.sx-motto{font-size:8px;letter-spacing:.16em;margin-top:21px}
+.sx-summit-invitation{bottom:23%;padding:0 6%}.sx-summit-invitation>p{font-size:16px}.sx-summit-invitation>span{font-size:8px;gap:8px}.sx-summit-invitation>button{font-size:12px;margin-top:16px}
+.sx-stage[data-phase=summit] .sx-bottom{display:none}.sx-route{gap:22px}.sx-route button:last-child{display:flex}
+}
+@media(max-height:580px){.sx-titlecard{top:13%}.sx-titlecard h1{font-size:min(21vw,160px)}.sx-title-rise>.sx-eyebrow{margin-bottom:14px}.sx-title-rise>.sx-motto{margin-top:13px}.sx-summit-invitation{bottom:13%}.sx-summit-invitation>p{font-size:13px;margin-bottom:6px}.sx-summit-invitation>span{font-size:7px}.sx-summit-invitation>button{margin-top:5px}.sx-stage[data-phase=summit] .sx-bottom{display:none}}
+@media(prefers-reduced-motion:reduce){.sx-underlay,.sx-world,.sx-title-rise{will-change:auto}}
+.sx-underlay{padding-top:76px}
+@media(max-width:750px){.sx-underlay{padding-top:69px}}
+.sx-stage[data-phase=descending] .sx-summit-invitation{visibility:hidden}
