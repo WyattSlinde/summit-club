@@ -1,0 +1,6 @@
+import { sqliteTable, text, primaryKey, index } from 'drizzle-orm/sqlite-core';
+export const members = sqliteTable('members', { userId:text('user_id').primaryKey(), name:text('name').notNull(), grade:text('grade').notNull(), interest:text('interest').notNull(), createdAt:text('created_at').notNull() });
+export const votes=sqliteTable('votes',{userId:text('user_id').notNull(),adventureId:text('adventure_id').notNull(),createdAt:text('created_at').notNull()},t=>[primaryKey({columns:[t.userId,t.adventureId]}),index('idx_votes_adventure').on(t.adventureId)]);
+export const proposals=sqliteTable('proposals',{id:text('id').primaryKey(),userId:text('user_id').notNull(),title:text('title').notNull(),category:text('category').notNull(),description:text('description').notNull(),createdAt:text('created_at').notNull()},t=>[index('idx_proposals_user_created').on(t.userId,t.createdAt)]);
+export const events=sqliteTable('events',{id:text('id').primaryKey(),title:text('title').notNull(),startsAt:text('starts_at').notNull(),location:text('location').notNull(),details:text('details').notNull(),status:text('status').notNull(),createdAt:text('created_at').notNull()});
+export const rsvps=sqliteTable('rsvps',{userId:text('user_id').notNull(),eventId:text('event_id').notNull()},t=>[primaryKey({columns:[t.userId,t.eventId]}),index('idx_rsvps_event').on(t.eventId)]);

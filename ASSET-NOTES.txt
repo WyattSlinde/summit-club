@@ -1,0 +1,59 @@
+SUMMIT FOREST EXPERIENCE — ASSET NOTES
+
+Tool: built-in image_gen (not CLI/API fallback).
+Images were generated for this website, not photographed at a confirmed club outing. They do not depict an identified real trail. WebP files were converted from the generated PNGs with Sharp; no content modifications were made during conversion.
+
+Project assets:
+public/trail-panorama.webp — 1672 × 941
+public/trail-foreground.webp — 1672 × 941, alpha transparency
+public/forest-basecamp.webp — 1672 × 941
+
+FINAL PROMPT — TRAIL PANORAMA
+Use case: photorealistic-natural. Asset type: ultra-wide cinematic background for an immersive first-person hiking website, 16:9 landscape. Create a convincingly real high-end outdoor editorial photograph from a hiker's eye level on a narrow granite mountain trail. The trail enters from bottom center, passes rough granite and tufts of alpine grass, and winds toward a jagged distant peak slightly right of center. Immense pine-forested valley below to the left; receding mountain ranges, layers of pale morning mist and low cloud, soft warm sunrise grazing the rock from right. Natural deep forest green, muted stone gray, restrained warm gold. A real imperfect natural landscape with fine rock grain, natural trees, believable atmospheric perspective, realistic photographic dynamic range, 24mm lens. Feel human scale standing on the trail, NOT aerial, NOT an isolated mountain model, NOT stylized illustration, NOT CGI, no neon, no graphic contour lines. Wide sky and distant valley upper half with breathing room for future website title, foreground rocks lower edge. No people, bodies, hiking poles, text, logos, watermark, interface or typography. Scene should be beautiful, dramatic, peaceful and plausible. This is one continuous landscape photograph, not panels.
+
+FINAL PROMPT — FOREGROUND EXTRACTION
+Use case: background-extraction. Edit target: attached mountain trail photograph. Extract ONLY its nearest foreground as a transparent compositing layer for a parallax website. Preserve the original frame dimensions, original positions and photorealistic pixels/appearance of the big granite boulders and low vegetation along the bottom edge and lower right edge. Keep only the closest foreground rocks and plants (roughly bottom 25–35 percent, extending naturally up the far right rocky edge), with naturally irregular rocky silhouette. Remove distant mountain, sky, valley, trees, lake, horizon, all midground and upper scene to genuine alpha transparency. The output should be a mostly transparent canvas with a detailed realistic lower foreground frame. No new objects, no text, no background fill, no checkerboard painted in, no drop shadow. Match original lighting and crop precisely so this overlays the original photograph.
+
+FINAL PROMPT — FOREST BASECAMP
+Use case: photorealistic-natural. Asset type: understated landscape photo background for a high school outdoor adventure club website, matching a mountain trail sunrise. A real-feeling ground-level view in a quiet mountain pine forest: tall textured conifer trunks, soft moss and ferns, a narrow dirt trail curving gently from lower right toward a sunlit clearing in the mid-right distance, a few granite rocks. Natural early morning sunlight filtering through canopy from upper right, gentle atmospheric mist, believable shadow detail and organic imperfections, restrained deep forest greens and warm soft gold, professional outdoor editorial photograph on a 35mm lens. Wide16:9 framing. Left45% should be naturally darker shaded forest with low detail and no bright highlights so cream website text can be placed there, right55% shows the beautiful forest depth. Peaceful human scale, not enchanted fantasy. No people, tents, signage, logos, text, watermark, UI, collage or illustration. High photorealism, no plastic foliage or neon greens.
+
+
+FINAL PROMPT — GRANITE MATERIAL
+Built-in image_gen; optimized to public/granite-albedo.webp, 1024 square. This texture is applied to real 3D terrain geometry.
+Use case: photorealistic-natural. Asset: seamless tiling albedo texture for actual 3D mountain terrain, square 1024x1024. A close orthographic scan of weathered alpine granite rock, subtle gray-green mineral grain, muted pale tan flecks, small dark fractures and rough craggy grain. Fill the entire image with rock material. Flat diffuse neutral lighting, no directional shadows, no perspective, no large isolated boulders, no scenery, no text. Photogrammetry material appearance with detailed natural irregular stone texture. All four edges must tile seamlessly. Restrained medium gray values, no white highlights or black patches.
+
+Final 3D implementation: the entrance is live Three.js terrain, instanced trees and rocks, with a generated granite material. Pine needles use the generated photographic alpha texture described below, with a procedural CanvasTexture fallback. The photographic forest image is used in the club section and the trail image is a WebGL-error fallback; neither is the 3D entrance.
+
+Trail scenery extension: fern fronds, bark, wood rings, sign lettering, grass geometry, birds and pollen are original procedural code in app/trail-details.ts. No new external photographs or generated raster assets were used for this extension.
+
+Wildlife extension: three deer and two rabbits are original procedural Three.js models in app/trail-wildlife.ts, with grazing, head turns, ear twitches, tail flicks and small rabbit hops. Geometry, fur texture and contact shadows are generated in code; no external animal models, photographs or raster assets were used.
+
+FOREST AND TERRAIN EXTENSION
+Original procedural code in app/trail-terrain.ts, app/trail-landscape.ts, app/trail-forest.ts and app/trail-understory.ts adds rolling banks, narrower irregular trail geometry, granite stones, exposed roots, a recessed flowing brook, multiple ages and profiles of conifers, leafy groves, wildflowers, shrubs, ground litter and butterflies. Reuses the generated photographic materials below; no additional raster assets or external 3D models were added in this extension.
+Visual research: National Park Service Giant Forest trails and Crescent Meadow photographs and descriptions informed the tree/meadow contrast and vegetation variety. These are inspiration references, not assets or a claim that the scene depicts an actual club outing.
+https://www.nps.gov/seki/planyourvisit/gfdayhikesum.htm
+https://home.nps.gov/thingstodo/crescent-meadow.htm
+
+DAYLIGHT AND MEADOW REFINEMENT
+The National Park Service Big Trees Trail photograph was inspected for its warm bark, open sky, meadow light and varied tree sizes. The Three.js entrance was adjusted with brighter lighting, warmer procedural bark, open crowns, a broader entrance valley, smaller foreground boulders and fuller flower colonies. This reference photo was not downloaded or included as an asset.
+https://www.nps.gov/thingstodo/big-trees-trail.htm
+
+REALISM PASS — PHOTOGRAPHIC MATERIALS
+October 5 geometry refinement: smaller pine sprays at the source texture's aspect ratio, articulated exposed branch joints, flared trunks, variable crown gaps, lower foothills, irregular moss/needle-bed shading, a narrower trail and recessed brook. Camera-distance detail controls reduce distant vegetation geometry. Reuses the existing generated photographic materials; no new photographs, external models, or raster assets were added.
+
+public/forest-floor.webp — 1024 square, moss/needle/soil surface.
+public/pine-spray.webp — transparent photographic needle spray, 1024 pixels tall.
+public/trail-soil.webp — 1024 square, compacted trail earth.
+These new assets were generated using the built-in image_gen tool, inspected, resized and converted to WebP with Sharp. Pine alpha was retained. They are textures applied to original three-dimensional geometry, not photographs of confirmed club locations. Original animal meshes were rebuilt as continuous anatomical surfaces with fur shading, articulated limbs, and proximity-aware behavior.
+
+summit_floor
+Built-in image_gen. Final prompt:
+Use case: photorealistic-natural. Asset type: seamless square albedo texture for the ground in a realistic 3D pine forest. Orthographic straight-down scan of a two-meter patch of forest floor. Fine short spring-green moss scattered unevenly among olive grass roots, warm brown pine needles, tiny weathered leaf fragments, dark brown soil and a few very small irregular stones. Moss covers about 65%, realistic soft natural green, not neon. Excellent true fine surface detail; natural random distribution with no obvious focal object and no repeating circular patches. Flat diffuse overcast illumination; no shadows or perspective or vignetting. All four edges must tile seamlessly. Full bleed surface texture only, no trees, no scenery, no large objects, no text or borders. Fine physical detail, restrained contrast, suitable for PBR material.
+
+summit_pine
+Built-in image_gen. Final prompt:
+Use case: photorealistic-natural. Asset type: transparent alpha foliage texture for a 3D pine branch. Square canvas, one single thin natural conifer branch spray oriented vertical with stem starting bottom center and growing up to top center. Many delicate narrow needle clusters extending irregularly to left and right, dense interior but natural airy frayed outline. Photographic texture of true pine needles, approximately 40 cm sprig. Muted fresh forest green tips and deeper green inner needles with a thin reddish brown twig. Entire branch isolated on genuine transparency, no shadow, no background, no cutout white fringe. Even diffuse lighting, not glossy. Front-facing orthographic. Branch must fill the frame with 5% transparent padding, approximately twice as tall as wide. No broad leaves, no flowers, no pot, no graphic illustration, no text, no watermark.
+
+summit_dirt
+Built-in image_gen. Final prompt:
+Use case: photorealistic-natural. Asset type: seamless square tiling albedo for a realistic 3D forest walking trail. Straight down orthographic close scan of a 1.5 meter patch of dry compacted tawny gray brown earth, extremely fine grit and irregular embedded tiny weathered stone chips, occasional pine needles and fragments of dry leaves, slight organic variation from foot traffic. Mostly smooth compacted mineral soil, not a bed of stones, no large pebbles, no polka dot spots. True physical microtexture and naturally uneven earth, realistic photography. Flat diffuse neutral illumination, no cast shadows, no vignette, no perspective. Seamless on all four edges. No objects, grass, plants, footprints, typography, watermark or scenery.
