@@ -40,7 +40,10 @@ test('trail UI saves an actual chosen rating, shares a photo, edits its caption 
   const account = { signedIn: true, member: { name: 'Taylor', grade: '11', interest: 'Explore' }, leader: false, votes: [], myVotes: [], proposals: [], events: [], rsvps: [] };
   try {
     await settle(() => root.render(createElement(TrailCommunity, { account })));
+    await settle(() => { for (const listener of listeners) listener('INITIAL_SESSION', { user: { id: '10000000-0000-4000-8000-000000000001' } }); });
     await click('Rate this hike');
+    await settle(() => { for (const listener of listeners) listener('SIGNED_IN', { user: { id: '10000000-0000-4000-8000-000000000001' } }); });
+    assert.ok(document.querySelector('input[name="stars"]'), 'Same-account refresh keeps the rating form open.');
     const fifthStar = document.querySelector('input[name="stars"][value="5"]'); await settle(() => fifthStar.click());
     await settle(() => document.querySelector('input[name="hiked"]').click());
     await click('Save my rating');

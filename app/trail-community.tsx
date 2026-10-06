@@ -17,7 +17,7 @@ export default function TrailCommunity({ account }: { account: BasecampState | n
   const [ready, setReady] = useState(false), [authRevision, setAuthRevision] = useState(0), [view, setView] = useState<'crew' | 'mine'>('crew'), [filter, setFilter] = useState('');
   const [loading, setLoading] = useState(false), [busy, setBusy] = useState(''), [error, setError] = useState(''), [notice, setNotice] = useState('');
   const [panel, setPanel] = useState<Panel>(null), [stars, setStars] = useState(0), [hoverStar, setHoverStar] = useState(0), [photo, setPhoto] = useState<Blob | null>(null), [preview, setPreview] = useState('');
-  const section = useRef<HTMLElement>(null), requests = useRef(0), photoVersion = useRef(0), pending = useRef(false), uploadId = useRef(''), fileInput = useRef<HTMLInputElement>(null);
+  const section = useRef<HTMLElement>(null), requests = useRef(0), photoVersion = useRef(0), pending = useRef(false), accountId = useRef<string | null>(null), uploadId = useRef(''), fileInput = useRef<HTMLInputElement>(null);
   const canParticipate = cloudConfigured && !!account?.member && !!account.signedIn;
   const today = ratings?.today || pacificDate(), months = monthOptions(today);
   const hikes = ratings?.hikes || trailCatalog.map(hike => ({ ...hike, average: null, rating_count: 0, rank: null, my_rating: null }));
@@ -46,17 +46,18 @@ export default function TrailCommunity({ account }: { account: BasecampState | n
   }, [ready, load, authRevision]);
   useEffect(() => {
     if (!cloudConfigured) return;
-    const { data } = cloudClient().auth.onAuthStateChange(event => {
-      if (event === 'SIGNED_OUT' || event === 'SIGNED_IN') { requests.current++; photoVersion.current++; setPhotos([]); setRatings(null); setPanel(null); setPhoto(null); setAuthRevision(value => value + 1); }
+    const { data } = cloudClient().auth.onAuthStateChange((event, session) => {
+      if (event === 'INITIAL_SESSION') accountId.current = session?.user.id || null;
+      if (event === 'SIGNED_OUT' || (event === 'SIGNED_IN' && session?.user.id !== accountId.current)) { accountId.current = session?.user.id || null; requests.current++; photoVersion.current++; setPhotos([]); setRatings(null); setPanel(null); setPhoto(null); setAuthRevision(value => value + 1); }
     });
     return () => data.subscription.unsubscribe();
   }, []);
   useEffect(() => {
     if (!ready || !cloudConfigured) return;
-    const update = () => { if (!pending.current && document.visibilityState === 'visible') void load(); };
+    const update = () => { if (!pending.current && !panel && photos.length <= 24 && document.visibilityState === 'visible') void load(); };
     window.addEventListener('focus', update); window.addEventListener('summit:gallery-change', update); const timer = window.setInterval(update, 60000);
     return () => { window.removeEventListener('focus', update); window.removeEventListener('summit:gallery-change', update); clearInterval(timer); };
-  }, [ready, load]);
+  }, [ready, load, panel, photos.length]);
   useEffect(() => {
     // Allocate and release only the selected local image's preview resource.
     // eslint-disable-next-line react-hooks/set-state-in-effect
