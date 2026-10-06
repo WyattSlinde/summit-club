@@ -10,7 +10,7 @@ await build({
   base: '/summit-club/',
   build: { outDir: output },
 });
-for (const route of ['register', 'leadership']) {
+for (const route of ['register', 'leadership', 'profile']) {
   await mkdir(path.join(output, route), { recursive: true });
   await copyFile(path.join(output, 'index.html'), path.join(output, route, 'index.html'));
 }

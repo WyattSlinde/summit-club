@@ -1,3 +1,4 @@
+import { cloudConfigured, clubRequest } from './cloud-client';
 export type Member = { name: string; grade: string; interest: string; created_at: string };
 export type VoteState = { votes: { adventure_id: string; count: number }[]; myVotes: { adventure_id: string }[] };
 export type BasecampState = VoteState & {
@@ -9,6 +10,10 @@ export type BasecampState = VoteState & {
 };
 
 export async function basecampRequest<T>(init?: RequestInit): Promise<T> {
+  if (cloudConfigured) {
+    const body = init?.body ? JSON.parse(String(init.body)) : null;
+    return clubRequest<T>(body?.action || 'basecamp', body || {});
+  }
   let response: Response;
   try { response = await fetch('/api/basecamp', { ...init, cache: 'no-store', signal: AbortSignal.timeout(15000) }); }
   catch { throw new Error('Could not reach basecamp. Please check your connection and try again.'); }

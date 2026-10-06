@@ -8,6 +8,9 @@ import { clubPhotos } from '@/lib/club-photos';
 import { ClubPhoto, PhotoCredit } from '../club-photo';
 import { SummitMark, SummitWordmark } from '../summit-brand';
 import './registration.css';
+import '../profile/profile.css';
+import MemberAuth, { MemberSignOut } from '../member-auth';
+import { cloudConfigured } from '@/lib/cloud-client';
 
 export default function Registration({ signInHref, signOutHref, localPreview }: { signInHref: string; signOutHref: string; localPreview: boolean }) {
   const [state, setState] = useState<BasecampState | null>(null);
@@ -22,6 +25,11 @@ export default function Registration({ signInHref, signOutHref, localPreview }: 
   }
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { const reads = readVersion; void load(); return () => { reads.current++; }; }, []);
+  useEffect(() => {
+    const refresh = () => { if (!submitting.current) void load(); };
+    window.addEventListener('summit:member-change', refresh);
+    return () => window.removeEventListener('summit:member-change', refresh);
+  }, []);
   async function register(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (submitting.current) return;
@@ -46,12 +54,13 @@ export default function Registration({ signInHref, signOutHref, localPreview }: 
         {loading && !state ? <p className="registration-loading" role="status"><Loader2 className="spin" size={18}/> Connecting to basecamp…</p>
           : !state ? <button className="registration-primary" disabled={loading} onClick={load}>Try again</button>
           : state.previewOnly ? <><p className="registration-intro">You’re looking at the SUMMIT website preview. Registration and voting will open once the live club backend is connected.</p><p className="registration-fine">No personal details are collected in this preview. Explore the outing ideas and start planning what you’d like to do.</p><Link className="registration-primary" href="/#expeditions">Explore the outing ideas<ArrowUpRight size={18}/></Link></>
+          : !state.signedIn && cloudConfigured ? <MemberAuth onSignedIn={() => void load()}/>
           : !state.signedIn ? <><p className="registration-intro">The outdoor adventure, service, and leadership club for every Cathedral Catholic student. No experience needed.</p><ol className="registration-steps"><li><span>01</span>Sign in to keep your registration private.</li><li><span>02</span>Add your name, grade, and interests.</li><li><span>03</span>Help choose where we go next.</li></ol><a className="registration-primary" href={signInHref} target="_top">Continue to registration<ArrowUpRight size={18}/></a><p className="registration-fine">You’ll sign in with ChatGPT, then return here to finish. Signing in alone doesn’t register you.</p></>
-          : registered && state.member ? <><p className="registration-intro">Your interest is saved with club leadership. Help choose our next outing while the crew confirms the plan.</p><dl className="registration-record"><div><dt>Name</dt><dd>{state.member.name}</dd></div><div><dt>Grade</dt><dd>{state.member.grade}</dd></div><div><dt>Here for</dt><dd>{state.member.interest}</dd></div></dl><Link className="registration-primary" href="/#expeditions">Choose our next outing<ArrowUpRight size={18}/></Link><button className="registration-secondary" onClick={() => { setEditing(true); setSaved(false); setError(''); }}>Edit my registration</button><p className="registration-fine">Each confirmed outing has its own RSVP and any required permissions. Your registration is not an outing RSVP.</p></>
+          : registered && state.member ? <><p className="registration-intro">Your interest is saved with club leadership. Help choose our next outing while the crew confirms the plan.</p><dl className="registration-record"><div><dt>Name</dt><dd>{state.member.name}</dd></div><div><dt>Grade</dt><dd>{state.member.grade}</dd></div><div><dt>Here for</dt><dd>{state.member.interest}</dd></div></dl><Link className="registration-primary" href={cloudConfigured ? "/profile/" : "/#expeditions"}>{cloudConfigured ? "Make your profile & find friends" : "Choose our next outing"}<ArrowUpRight size={18}/></Link><button className="registration-secondary" onClick={() => { setEditing(true); setSaved(false); setError(''); }}>Edit my registration</button><p className="registration-fine">Each confirmed outing has its own RSVP and any required permissions. Your registration is not an outing RSVP.</p></>
           : <form onSubmit={register} className="registration-form"><p className="registration-intro">Tell the crew a little about you. Your details are visible only to you and approved club leaders.</p><label>Your name<input name="name" autoComplete="name" required minLength={2} maxLength={70} defaultValue={state.member?.name ?? ''} placeholder="First and last name" disabled={saving}/></label><div className="registration-fields"><label>Grade<select name="grade" required defaultValue={state.member?.grade ?? ''} disabled={saving}><option value="" disabled>Choose grade</option>{['9','10','11','12'].map(grade => <option key={grade} value={grade}>Grade {grade}</option>)}</select></label><label>I’m here for<select name="interest" required defaultValue={state.member?.interest ?? 'All of it'} disabled={saving}>{['Explore','Serve','Lead','All of it'].map(interest => <option key={interest}>{interest}</option>)}</select></label></div><label className="registration-consent"><input type="checkbox" name="consent" required disabled={saving}/><span>I’m a Cathedral Catholic student and agree to save my name, grade, and interests for club registration.</span></label><button className="registration-primary" disabled={saving}>{saving ? <><Loader2 size={18} className="spin"/> Saving…</> : editing ? 'Save changes' : 'Register with SUMMIT'}</button>{editing && <button type="button" className="registration-secondary" disabled={saving} onClick={() => { setEditing(false); setError(''); }}>Cancel changes</button>}<p className="registration-fine">Registering your interest doesn’t sign you up for an outing. Leaders confirm each plan separately.</p></form>}
         {error && <p className="registration-error" role="alert">{error}</p>}
         {saved && <p className="registration-saved" role="status"><Check size={16}/> Registration saved. Club leadership can see your interests.</p>}
-        {state?.signedIn && <a className="registration-signout" href={signOutHref} target="_top">Sign out or switch accounts</a>}
+        {state?.signedIn && (cloudConfigured ? <MemberSignOut onDone={() => void load()}/> : <a className="registration-signout" href={signOutHref} target="_top">Sign out or switch accounts</a>)}
         {localPreview && <p className="registration-local">Local preview · Sign-in uses one shared demo account and a local database. Real student accounts become available on the hosted site.</p>}
       </section>
     </div>

@@ -102,3 +102,7 @@ The visual direction carries deep forest through the entire club page, with suns
 Forest structure and the contrast between shaded groves and flowering clearings were informed by the National Park Service's [Giant Forest trails](https://www.nps.gov/seki/planyourvisit/gfdayhikesum.htm) and [Crescent Meadow](https://home.nps.gov/thingstodo/crescent-meadow.htm). This is an original imagined environment, not a recreation of those trails. Those references informed the earlier procedural scene. The current hike uses original Higgsfield-generated frames; no reference-site artwork is included.
 
 The brighter entrance also draws on the [Big Trees Trail photograph](https://www.nps.gov/thingstodo/big-trees-trail.htm): warm trunks, visible sky above a meadow, varied tree ages and sunlight on the low vegetation.
+
+### Member profiles and friends
+
+The profile and friends feature is implemented with private photos, friend requests, sharing controls, and a Supabase backend shared with registration, votes, and leadership. Hosted activation is still pending; the public configuration is intentionally empty. See [member backend setup](docs/MEMBER-BACKEND.md) for activation, authorization rules, and validation. The existing hike and static preview remain available.

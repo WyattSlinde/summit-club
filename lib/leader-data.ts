@@ -2,6 +2,7 @@ export type LeaderMember = {
   name: string; grade: string; interest: string; created_at: string; choices: string | null;
 };
 export type LeaderData = {
+  reports?: { id: string; reason: string; details: string; created_at: string; reported_name: string }[];
   members: LeaderMember[];
   memberCount: number;
   proposals: { id: string; title: string; description: string; category: string; name?: string; created_at: string }[];

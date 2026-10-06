@@ -7,6 +7,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { adventures } from '@/lib/adventures';
 import { rosterCSV, type LeaderData } from '@/lib/leader-data';
 import './leader-desk.css';
+import { leaderRequest } from '@/lib/leader-client';
 
 const dateLabel = (date: string) => new Date(date).toLocaleString('en-US', {
   timeZone: 'America/Los_Angeles', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
@@ -27,9 +28,7 @@ export default function LeaderDesk({ open, onOpenChange, onChanged }: {
     const controller = new AbortController(); activeRequest.current = controller;
     setLoading(true); setError('');
     try {
-      const response = await fetch('/api/leader', { signal: AbortSignal.any([controller.signal, AbortSignal.timeout(15000)]), cache: 'no-store' });
-      const result = await response.json() as LeaderData & { error?: string };
-      if (!response.ok) throw new Error(result.error || 'Could not load the leadership desk.');
+      const result = await leaderRequest(undefined, controller.signal);
       if (!controller.signal.aborted) { setData(result); setUpdatedAt(Date.now()); }
     } catch (error) {
       if (!controller.signal.aborted) { setData(null); setError(error instanceof Error ? error.message : 'Could not connect. Please try again.'); }
@@ -45,10 +44,7 @@ export default function LeaderDesk({ open, onOpenChange, onChanged }: {
   async function save(body: unknown) {
     setBusy(true); setError(''); setNotice('');
     try {
-      const response = await fetch('/api/leader', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body), signal: AbortSignal.timeout(15000) });
-      const result = await response.json() as { error?: string };
-      if (!response.ok) throw new Error(result.error || 'Could not save.');
+      await leaderRequest(body as Record<string, unknown>);
       await load(); onChanged(); return true;
     } catch (error) { setError(error instanceof Error ? error.message : 'Please try again.'); return false; }
     finally { setBusy(false); }
@@ -83,7 +79,7 @@ export default function LeaderDesk({ open, onOpenChange, onChanged }: {
           <div><Lightbulb size={17}/><strong>{data.totalIdeas}</strong><span>student ideas</span></div>
           <div><CalendarDays size={17}/><strong>{data.events.filter(event => event.status === 'published' && Date.parse(event.starts_at) > updatedAt).length}</strong><span>upcoming events</span></div>
         </div>
-        <Tabs defaultValue="members"><TabsList className="desk-tabs"><TabsTrigger value="members">Members</TabsTrigger><TabsTrigger value="ideas">Ideas & votes</TabsTrigger><TabsTrigger value="events">Events & RSVPs</TabsTrigger></TabsList>
+        <Tabs defaultValue="members"><TabsList className="desk-tabs"><TabsTrigger value="members">Members</TabsTrigger><TabsTrigger value="ideas">Ideas & votes</TabsTrigger><TabsTrigger value="events">Events & RSVPs</TabsTrigger>{data.reports && <TabsTrigger value="reports">Member concerns {data.reports.length > 0 ? `(${data.reports.length})` : ''}</TabsTrigger>}</TabsList>
           <TabsContent value="members">
             <div className="desk-filters"><label className="desk-search"><Search size={17}/><input aria-label="Search members by name or grade" placeholder="Search name or grade" value={search} onChange={event => setSearch(event.target.value)}/></label>
               <select aria-label="Filter members by interest" value={interest} onChange={event => setInterest(event.target.value)}>{['All interests', 'Explore', 'Serve', 'Lead', 'All of it'].map(value => <option key={value}>{value}</option>)}</select></div>
@@ -115,6 +111,7 @@ export default function LeaderDesk({ open, onOpenChange, onChanged }: {
               {event.status === 'published' && <button className="text-button" disabled={busy} onClick={async () => { if (await save({ action: 'cancel', id: event.id })) setNotice('Event cancelled. It is no longer accepting RSVPs.'); }}>Cancel event</button>}
             </article>) : <p className="desk-empty">Publish the first meeting when its date and location are confirmed.</p>}</div>
           </TabsContent>
+          {data.reports && <TabsContent value="reports"><div className="desk-list"><h3>Member concerns</h3><p className="fine">Follow up privately through the school’s usual support process.</p>{data.reports.length ? data.reports.map(report => <article key={report.id}><span className="eyebrow">{report.reason} · {report.reported_name}</span><p>{report.details || 'No additional details.'}</p><small>{dateLabel(report.created_at)} Pacific</small><button className="text-button" disabled={busy} onClick={async () => { if (await save({ action: 'resolve', id: report.id })) setNotice('Concern marked reviewed.'); }}>Mark reviewed</button></article>) : <p className="desk-empty">No open concerns.</p>}</div></TabsContent>}
         </Tabs>
       </>}
     </DialogContent>

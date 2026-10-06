@@ -14,6 +14,6 @@ await writeFile(path.join(output, 'config.json'), JSON.stringify({ version: 3, r
   { src: '/api/.*', status: 503 },
   { src: '/(?:ascent-hd|ascent-motion|ridge-hd|ridge-motion)/(.*)', headers: { 'Cache-Control': 'public, max-age=86400' }, continue: true },
   { handle: 'filesystem' },
-  { src: '/(?:register|leadership|signin-with-chatgpt|signout-with-chatgpt)/?', dest: '/index.html' },
+  { src: '/(?:register|leadership|profile|signin-with-chatgpt|signout-with-chatgpt)/?', dest: '/index.html' },
 ] }, null, 2));
 console.log(`Vercel preview ready at ${output}`);

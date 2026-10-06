@@ -9,6 +9,7 @@ export default defineConfig({
   publicDir: path('../public'),
   plugins: [react()],
   resolve: { alias: {
+    '@/lib/signin-intent': path('./signin-intent.ts'),
     '@/lib/basecamp-client': path('./basecamp-client.ts'),
     'next/link': path('./link.tsx'),
     'next/navigation': path('./navigation.ts'),
