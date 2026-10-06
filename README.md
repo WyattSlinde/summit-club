@@ -106,3 +106,5 @@ The brighter entrance also draws on the [Big Trees Trail photograph](https://www
 ### Member profiles and friends
 
 The profile and friends feature is implemented with private photos, friend requests, sharing controls, and a Supabase backend shared with registration, votes, and leadership. Hosted activation is still pending; the public configuration is intentionally empty. See [member backend setup](docs/MEMBER-BACKEND.md) for activation, authorization rules, and validation. The existing hike and static preview remain available.
+
+The community section now includes monthly member hike ratings and a private hike-photo camera roll. The trail catalog, ranking rules, storage policies, moderation controls, and required second migration are documented in [member backend setup](docs/MEMBER-BACKEND.md#hike-ratings-and-the-camera-roll).

@@ -12,6 +12,7 @@ import SummitExperience from './summit-experience';
 import ExpeditionConsole from './expedition-console';
 import ForestStory from './forest-story';
 import FirstOuting from './first-outing';
+import TrailCommunity from './trail-community';
 import { SummitMark, SummitWordmark } from './summit-brand';
 import './forest-continuity.css';
 import { cloudConfigured } from '@/lib/cloud-client';
@@ -53,7 +54,7 @@ useEffect(()=>{
  if(!state||restoredInitialHash.current)return;
  restoredInitialHash.current=true;
  const hash=location.hash;
- if(!['#basecamp','#calendar','#expeditions','#board','#club','#join'].includes(hash))return;
+ if(!['#basecamp','#calendar','#expeditions','#board','#club','#join','#trail-community','#trail-photos'].includes(hash))return;
  // Saved events and ideas can shift a deep link after the first render.
  const frame=requestAnimationFrame(()=>window.dispatchEvent(new CustomEvent('summit:navigate',{detail:hash.slice(1)})));
  return()=>cancelAnimationFrame(frame);
@@ -113,7 +114,7 @@ return <><a className="skip" href="#basecamp" onClick={enterClub}>Skip to club b
       <section className="expeditions section" id="expeditions" aria-labelledby="outings-title">
         <div className="next-heading"><div><span className="field-guide-kicker">THE SUMMIT FIELD GUIDE</span><h2 id="outings-title">Where should we go next?</h2></div><p>Three starting points. Your votes help choose what happens next.</p></div>
         <ExpeditionConsole selected={selected} onSelect={setSelected} onOpenNotes={()=>open('trip')} onVote={()=>vote(trip.id)} voted={!!state?.myVotes.some(v=>v.adventure_id===trip.id)} busy={!!busy} voteCount={state?.votes.find(v=>v.adventure_id===trip.id)?.count??0} votesReady={!!state} votes={state?.votes} votesFailed={!!loadError} packedItems={packed} previewOnly={state?.previewOnly}/>
-        <p className="outing-photo-note">Photos show examples of adventure and service, not past SUMMIT trips. <a href={sitePath('/photos/credits.txt')} target="_blank" rel="noopener noreferrer">Photo credits &amp; licenses</a></p>
+        <a className="community-jump" href="#trail-community">See the crew’s top hikes &amp; photos ↓</a><p className="outing-photo-note">Photos show examples of adventure and service, not past SUMMIT trips. <a href={sitePath('/photos/credits.txt')} target="_blank" rel="noopener noreferrer">Photo credits &amp; licenses</a></p>
         {(error||loadError)&&!modal&&<div className="error" role="alert">{error||loadError} <button disabled={loading} onClick={retryBasecamp}>{loading?'Connecting…':'Retry'}</button></div>}
       </section>
       <section className="board section" id="board" aria-labelledby="ideas-title">
@@ -123,6 +124,7 @@ return <><a className="skip" href="#basecamp" onClick={enterClub}>Skip to club b
       <FirstOuting/>
       <section id="club" className="club-notes section"><details><summary>Our values &amp; the SUMMIT name <Plus size={16}/></summary><div className="club-notes-content"><p>Explore. Serve. Lead. We get outside, give back, and grow by making things happen together.</p><dl>{values.map(v=><div key={v[1]}><dt><span>{v[0]}</span>{v[1]}</dt><dd>{v[2]}</dd></div>)}</dl><h3>The PEAK mindset</h3><dl>{peaks.map(p=><div key={p[0]}><dt><span>{p[0]}</span>{p[1]}</dt><dd>{p[2]}</dd></div>)}</dl></div></details></section>
       <section className="club-signup section" id="join" aria-labelledby="join-title"><div><p className="registration-summary-status">{!state?(loadError?'Status unavailable':'Checking registration…'):state.previewOnly?'Registration opens at launch':state.member?'Registered with SUMMIT':'Not registered yet'}</p><h2 id="join-title">{state?.member?'You’re registered.':'Join SUMMIT'}</h2><p>{state?.member?'Your interest is saved. Check the calendar and help choose our next outing.':'Register your interest with your name, grade, and what you’d like to do.'}</p></div><div className="club-signup-action"><Link className="button" href="/register">{state?.member?'View registration':'Register your interest'}<Plus size={17}/></Link></div></section>
+      <TrailCommunity account={state}/>
     </div>
   </SummitExperience>
 </main>

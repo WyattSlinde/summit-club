@@ -30,3 +30,4 @@ export async function clubRequest(operation, payload = {}) {
 }
 export function announceMemberChange() { window.dispatchEvent(new Event('summit:member-change')); }
 export async function signOutMember() { await cloudClient().auth.signOut(); announceMemberChange(); }
+export async function communityRequest(operation, payload = {}) { calls.push({ operation, payload }); return { photos: [] }; }

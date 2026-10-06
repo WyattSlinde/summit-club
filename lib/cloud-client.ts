@@ -13,8 +13,8 @@ export function cloudClient() {
   });
   return instance;
 }
-export async function clubRequest<T>(operation: string, payload: Record<string, unknown> = {}): Promise<T> {
-  const { data, error } = await cloudClient().rpc('summit_request', { operation, payload });
+async function request<T>(rpc: string, operation: string, payload: Record<string, unknown>): Promise<T> {
+  const { data, error } = await cloudClient().rpc(rpc, { operation, payload });
   if (error) {
     if (error.code === 'P0001') throw new Error(error.message);
     if (['23514', '23502', '22P02'].includes(error.code)) throw new Error('Check the form fields and try again.');
@@ -24,6 +24,8 @@ export async function clubRequest<T>(operation: string, payload: Record<string, 
   if (data?.error) throw new Error(data.error);
   return data as T;
 }
+export function clubRequest<T>(operation: string, payload: Record<string, unknown> = {}) { return request<T>('summit_request', operation, payload); }
+export function communityRequest<T>(operation: string, payload: Record<string, unknown> = {}) { return request<T>('community_request', operation, payload); }
 export function announceMemberChange() { window.dispatchEvent(new Event('summit:member-change')); }
 export async function signOutMember() {
   const { error } = await cloudClient().auth.signOut({ scope: 'local' });

@@ -57,3 +57,17 @@ Grade, registration name, email, and friend lists are not included in friend pro
 - Existing D1/ChatGPT-auth routes are preserved when cloud configuration is absent. Once configured, the client uses Supabase consistently. Existing local D1 data is not silently migrated.
 
 Public configuration and migrations belong in Git. Passwords, SMTP credentials, service-role keys, `.env` files, dependency directories, and database exports do not.
+
+## Hike ratings and the camera roll
+
+Apply the second migration, `20261006205628_hike_ratings_and_gallery.sql`, after the member migration. It adds:
+
+- A leader-managed trail catalog with official park information links. The initial real trail entries are [Guy Fleming Trail](https://www.parks.ca.gov/?page_id=23207), [Cowles Mountain](https://www.sandiego.gov/cowles-mountain-summit), and [Los Peñasquitos Canyon](https://www.sandiego.gov/park-and-recreation/parks/osp/lospenasquitos). These are not scheduled SUMMIT outings and have no seeded ratings or invented trip photos.
+- 1–5 star ratings with a member's attestation that they hiked the trail. One row per member/trail/hike month; saving again updates the same rating. Members can remove their rating. Months follow `America/Los_Angeles`, and the board offers the latest 12 months. Three distinct members' ratings are required to rank. Ranking uses the exact mean, then rating count, then name and ID; the displayed score is rounded to one decimal.
+- A members-only hike-photo gallery at the bottom of the main site. Captions, accessible descriptions, trail selection, historical hike dates, camera-roll previews, edit/remove actions, trail filtering, stable cursor pagination, and a My photos view for unfinished/hidden uploads are included.
+- A private `hike-photos` bucket. Each member may keep up to 30 photo records and create up to 10 per day. Uploads require a reserved draft row, are immutable, and accept JPEGs up to 4 MB. The client accepts JPG/PNG/WebP originals up to 10 MB, re-encodes without original metadata, and preserves the image's aspect ratio at a maximum dimension of 1600 pixels. No public student image URLs are generated.
+- Explicit uploader confirmation that they have permission to share, including permission from people pictured. All registered members may view published gallery photos with the uploader's display name, even when the uploader keeps their separate profile private. Blocked relationships are excluded. Anonymous visitors cannot list or download gallery photos.
+- A Hikes & photos tab in the leadership desk: add/archive trails, inspect reported images, hide/restore photos, and mark concerns reviewed. Leaders can access hidden photos for review; owners can still delete them. Photos are shared immediately within the club after upload and consent, not held in a pre-approval queue.
+- Storage-aware deletion: a photo is first hidden, its object is deleted through the Storage API, and then its metadata is deleted. Failed cleanups remain visible to their owner in My photos for retry. Deleting a club profile first removes gallery objects; the server prevents account cleanup from silently leaving storage objects behind.
+
+Activation remains pending alongside the member backend. The static preview displays the verified trail catalog and honest empty states; it cannot save ratings or accept uploads. Tests run the actual SQL in Postgres plus the React forms in a DOM harness; production email, storage delivery, and live multi-account verification still require the dedicated Supabase project.
