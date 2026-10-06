@@ -1,0 +1,30 @@
+/** Build local, independently addressable WebP frames. The site never plays the source clip. */
+import { spawn } from 'node:child_process';
+import { mkdir, readdir, copyFile, writeFile, stat } from 'node:fs/promises';
+import { resolve } from 'node:path';
+const source = process.argv[2];
+if (!source) throw new Error('Usage: FFMPEG_PATH=/path/to/ffmpeg node scripts/prepare-journey.mjs /path/to/source.mp4');
+const ffmpeg = process.env.FFMPEG_PATH || 'ffmpeg';
+const root = resolve('public/journey');
+const variants = [{name:'desktop',width:1600,quality:70},{name:'mobile',width:960,quality:65}];
+for (const variant of variants) {
+  const destination = resolve(root,variant.name);
+  await mkdir(destination,{recursive:true});
+  // Do not mix a new sequence with stale frames. Existing outputs require a new destination.
+  if ((await readdir(destination)).some(name => name.endsWith('.webp'))) throw new Error(`${destination} already contains a sequence.`);
+  await new Promise((done,fail) => {
+    const child=spawn(ffmpeg,['-hide_banner','-loglevel','warning','-i',resolve(source),'-an','-vf',`fps=20,scale=${variant.width}:-2`,'-c:v','libwebp','-q:v',String(variant.quality),'-compression_level','5','-threads','2','-start_number','0',resolve(destination,'%04d.webp')],{stdio:'inherit'});
+    child.on('error',fail); child.on('exit',code=>code===0?done():fail(new Error(`ffmpeg exited ${code}`)));
+  });
+}
+const files=(await readdir(resolve(root,'desktop'))).filter(name=>name.endsWith('.webp')).sort();
+const mobile=(await readdir(resolve(root,'mobile'))).filter(name=>name.endsWith('.webp')).sort();
+if (files.length!==mobile.length || files.length<2) throw new Error('Incomplete variants');
+await copyFile(resolve(root,'desktop',files[0]),resolve(root,'trailhead.webp'));
+await copyFile(resolve(root,'desktop',files.at(-1)),resolve(root,'overlook.webp'));
+const manifest={frameCount:files.length,width:1600,height:900,mobileWidth:960,mobileHeight:540,fps:20,path:'/journey',version:'higgsfield-1'};
+await writeFile('app/journey-media.json',JSON.stringify(manifest,null,2)+'\n');
+for (const variant of variants) {
+  const bytes=(await Promise.all(files.map(file=>stat(resolve(root,variant.name,file))))).reduce((sum,file)=>sum+file.size,0);
+  console.log(`${variant.name}: ${files.length} frames, ${(bytes/1024/1024).toFixed(1)} MiB`);
+}

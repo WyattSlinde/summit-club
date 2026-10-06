@@ -4,22 +4,20 @@ Cathedral Catholic High School outdoor adventure, service, and leadership club.
 
 ## What works
 
-- A live Three.js forest whose walking position is driven directly by native page scroll. Stopping holds position; scrolling backward retraces the route. The camera stays about 1.78 m above the ground, and SUMMIT appears after reaching the overlook. There is no video player, frame sequence, automatic walking, or aerial camera lift.
-- One shared 3D landscape continues behind the club introduction, outings, and ideas. The club page emerges over that landscape instead of switching to a separate forest photograph. Forest green, moss, and warm paper colors are shared by the journey, content, and signup dialogs.
-- Reduced-motion and WebGL-error fallbacks, a skip-to-club link, and a navigation bar that arrives with the summit reveal.
-- Three Explore / Serve / Lead stops explain the club during the hike; students can jump to a stop, look left/right, recenter, drag to look around on desktop, or swipe sideways on touchscreens while retaining native vertical scrolling.
-- A 27% shorter, sunlit green trail with denser pines, ferns, grasses, wooden markers, fallen timber, stone cairns, grazing deer, rabbits, birds, and subtle daylight pollen. Plant and wildlife motion pauses offscreen; reduced-motion users get a static entrance.
-- Photographic pine-needle, moss-floor and compacted-soil materials on the live 3D landscape, soft irregular track edges, textured bark, gentle tree movement and nearby detail shadows.
-- Rebuilt deer and rabbits with continuous anatomical meshes, fur coloration, articulated limbs and quiet responses as the camera approaches. A binocular button eases into a close-up of nearby wildlife; scrolling, turning or pressing it again restores the wide view.
-- Varied trail width, rolling banks, exposed roots, scattered mossy stone and a shallow animated brook. The entrance has mature conifers, young trees and light-barked leafy groves, with lupines, cream and gold wildflowers, low shrubs and butterflies. Nearby terrain has denser geometry, while distant terrain and phone vegetation use lighter detail.
-- A brighter meadow entrance with warmer bark, open tree crowns, smaller foreground boulders and more flowering patches. Forest stands have separate bounds so offscreen trees can be skipped; a 12-second graphics-loading deadline falls back to the accessible club layout if initialization stalls.
-- Proportioned pine sprays and exposed branch joints, irregular moss and needle beds, lower foothills, and a narrow recessed brook. Tree detail changes with camera distance; distant understory and trunks are culled to reduce rendering work.
-- A short club page: who can join, meeting status, club leadership, signup, outing voting and suggestions. Full SUMMIT/PEAK values are optional expandable content.
-- Three selectable outing ideas, live vote counts, downloadable field notes, and a device-local packing checklist.
-- Authenticated club-interest registration and a personalized downloadable SVG field pass.
-- Database-backed voting and adventure proposals.
-- Leadership desk: view interest and ideas, publish/cancel events, and inspect RSVPs.
-- Student calendar with persistent RSVPs.
+- A Higgsfield-generated photographic mountain hike, delivered as 241 local WebP frames. Native page scroll chooses the exact frame: stop to hold the view, scroll backward to retrace the path. There is no video element, autoplay, playback clock, or automatic camera motion.
+- A continuous forest-to-overlook shot with vibrant pines, ferns, flowers, rocky trail and a grazing deer. SUMMIT appears at the overlook; the club field journal rises into view below it.
+- Separate desktop/mobile frames, four concurrent requests, compressed prefetch, a bounded decoded-image cache, a static poster while loading, per-request timeouts, and an accessible still-image fallback.
+- Reduced-motion and data-saver visitors receive a static overlook and ordinary club page. Everyone has a skip-to-club link.
+- Explore / Serve / Lead trail stops, reversible scrubbing, and a replay link. The cinematic camera is fixed to the generated path; free 3D turning is not part of this version.
+- A concise forest-green and warm-paper club page: what the club does, who can join, real meeting status, Tobias Kell's leadership, signup, outing votes and suggestions. Full SUMMIT/PEAK values are expandable.
+- Three selectable outing proposals, live vote counts, downloadable notes, and a device-local packing checklist.
+- Authenticated interest registration, a downloadable SVG club pass, database-backed voting and proposals, event RSVPs, and a leadership desk.
+
+## Journey media
+
+The generated source clip is a production asset, not a website player. Its source job and generation prompts are recorded in `journey-provenance.json`. The website ships only the derived frames and two stills in `public/journey/`; no external Higgsfield URL is needed at runtime. The desktop sequence is about 29.6 MiB and the mobile sequence about 15.0 MiB, prefetched progressively. Only one variant loads per visit.
+
+To prepare replacement media, use `FFMPEG_PATH=/path/to/ffmpeg node scripts/prepare-journey.mjs /path/to/source.mp4` with empty frame output folders. The script produces both sizes and updates `app/journey-media.json`. FFmpeg is an authoring tool and is not required to run the site.
 
 ## Local development
 
@@ -59,16 +57,16 @@ Publication has not completed: the current environment rejects the Sites workflo
 
 ## Validation
 
-Earlier local checks covered unauthenticated write rejection, cross-origin rejection, malformed submissions, member privacy, duplicate vote prevention, leadership authorization, event creation, idempotent RSVPs, cancellation, and stale-event rejection. Earlier browser checks covered desktop/mobile layout and the club flows.
+Earlier API checks covered unauthenticated write rejection, cross-origin rejection, malformed submissions, member privacy, duplicate vote prevention, leadership authorization, event creation, idempotent RSVPs, cancellation, and stale-event rejection.
 
-The October 5 repairs were checked with TypeScript, a production build, HTTP readiness and asset checks, and geometry validation. The later scroll-driven revision adds `npm run test:journey`: six regression checks cover paused position, backward travel, human eye height, the overlook reveal, reduced motion, and invalid scroll input. Server-rendered HTML also confirms one shared canvas, the club sections, and no video element. Rendering is held once the club is revealed, avoiding continuous scene rendering behind the lower page.
+The cinematic revision is checked with TypeScript, scoped ESLint, a production build, HTTP readiness and asset validation, and `npm run test:journey`. Journey tests cover exact pause/reverse mapping, reveal bounds, reduced motion, directional prefetch, cache limits/disposal, out-of-order decoding and missing-media fallback. Club UI server-render checks cover loading/error states, a real meeting date, populated votes and unknown vote counts.
 
-Earlier CPU estimates for forest and understory geometry at the entrance were about 1.17 million triangles on desktop and 357,000 on mobile; these are not GPU timing measurements. Fresh browser and visual verification was blocked by the browser tool's URL security policy, so the latest scenery and layout still require an in-browser check.
+The generated source was visually inspected as a contact sheet and checked for abrupt scene cuts. Browser automation for localhost was rejected by the browser URL security policy; the rebuilt page still needs a fresh interactive browser check. These source/HTTP checks do not establish final rendered layout or scroll smoothness on a physical phone.
 
 ## Design references
 
 The new visual direction uses one deep-forest/moss/warm-paper/trail-amber palette and original generated landscape assets. Research references included [JavaScript Mastery's React/Three.js/GSAP video](https://www.youtube.com/watch?v=DEeaT6FxEws) and [Bruno Simon's interactive portfolio](https://bruno-simon.com/). No reference-site code or artwork was copied.
 
-Forest structure and the contrast between shaded groves and flowering clearings were informed by the National Park Service's [Giant Forest trails](https://www.nps.gov/seki/planyourvisit/gfdayhikesum.htm) and [Crescent Meadow](https://home.nps.gov/thingstodo/crescent-meadow.htm). This is an original imagined environment, not a recreation of those trails. The forest, terrain, plants and water are procedural geometry and shaders; the reference photos were not downloaded or used as website assets.
+Forest structure and the contrast between shaded groves and flowering clearings were informed by the National Park Service's [Giant Forest trails](https://www.nps.gov/seki/planyourvisit/gfdayhikesum.htm) and [Crescent Meadow](https://home.nps.gov/thingstodo/crescent-meadow.htm). This is an original imagined environment, not a recreation of those trails. Those references informed the earlier procedural scene. The current hike uses original Higgsfield-generated frames; no reference-site artwork is included.
 
 The brighter entrance also draws on the [Big Trees Trail photograph](https://www.nps.gov/thingstodo/big-trees-trail.htm): warm trunks, visible sky above a meadow, varied tree ages and sunlight on the low vegetation.
