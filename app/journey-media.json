@@ -1,11 +1,11 @@
 {
-  "frameCount": 364,
-  "width": 1600,
-  "height": 900,
-  "mobileWidth": 960,
-  "mobileHeight": 540,
-  "fps": 20,
-  "summitFrame": 283,
-  "path": "/ascent",
-  "version": "summit-overpass-2"
+  "frameCount": 433,
+  "width": 2560,
+  "height": 1440,
+  "mobileWidth": 1008,
+  "mobileHeight": 1792,
+  "fps": 24,
+  "summitFrame": 340,
+  "path": "/ascent-hd",
+  "version": "sunset-hd-3"
 }

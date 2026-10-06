@@ -4,9 +4,10 @@ Cathedral Catholic High School outdoor adventure, service, and leadership club.
 
 ## What works
 
-- A Higgsfield-generated photographic mountain hike, delivered as 364 local WebP frames. Native page scroll chooses the exact frame: stop to hold the view, scroll backward to retrace the path. There is no video element, autoplay, playback clock, or automatic camera motion.
+- A Higgsfield-generated photographic mountain hike, delivered as 433 local WebP frames. Native page scroll chooses the exact frame: stop to hold the view, scroll backward to retrace the path. There is no video element, autoplay, playback clock, or automatic camera motion.
+- A mule deer beside the opening trail, a distant hawk, and a peach-and-lavender sunset. Narrow screens begin on the deer and ease toward the path as you scroll.
 - An uphill forest-and-granite climb with a fixed camera hold at the peak. SUMMIT rises from behind the foreground ridge, then continued scrolling carries the camera over the crest and down into the club page. Every stage can be reversed with scroll.
-- Separate desktop/mobile frames, four concurrent requests, compressed prefetch, a bounded decoded-image cache, a static poster while loading, per-request timeouts, and an accessible still-image fallback.
+- Sharper 2560×1440 desktop frames and 1008×1792 portrait frames from a 4K-enhanced source, Retina-aware canvas sizing, four concurrent requests, nearby-frame prefetch, a bounded decoded-image cache, a static poster while loading, per-request timeouts, and an accessible still-image fallback.
 - Reduced-motion and data-saver visitors receive a static overlook and ordinary club page. Everyone has a skip-to-club link.
 - Explore / Serve / Lead trail stops, reversible scrubbing, and a replay link. The cinematic camera is fixed to the generated path; free 3D turning is not part of this version.
 - A calm forest-green arrival and warm-paper club page: what the club does, who can join, real meeting status, Tobias Kell's leadership, signup, outing votes and suggestions. Full SUMMIT/PEAK values are expandable.
@@ -15,9 +16,9 @@ Cathedral Catholic High School outdoor adventure, service, and leadership club.
 
 ## Journey media
 
-The generated source clip is a production asset, not a website player. Its source job and generation prompts are recorded in `journey-provenance.json`. The website ships only the derived frames and three stills in `public/ascent/`; no external Higgsfield URL is needed at runtime. The desktop sequence is about 42.3 MiB and the mobile sequence about 22.0 MiB, prefetched progressively. Only one variant loads per visit.
+The generated source clip is a production asset, not a website player. Its source job and generation prompts are recorded in `journey-provenance.json`. The website ships only the derived frames and three stills in `public/ascent-hd/`; no external Higgsfield URL is needed at runtime. The complete desktop sequence is 139.9 MiB and the portrait sequence is 55.5 MiB. Only the variant matching the viewport loads, progressively as needed. At most 65 nearby frames are considered for prefetch, 96 compressed frames are retained, and the decoded cache holds 12 portrait or 14 desktop frames. Resizing across the portrait threshold replaces the sequence. The 3840×2160 source was enhanced from a 1080p generation; it is not native 4K camera footage.
 
-To prepare replacement media, use `FFMPEG_PATH=/path/to/ffmpeg node scripts/prepare-journey.mjs /path/to/source.mp4 ascent 283` with a fresh media directory and the chosen summit-frame index. The script produces both sizes and updates `app/journey-media.json`. FFmpeg is an authoring tool and is not required to run the site.
+To prepare replacement media, use `FFMPEG_PATH=/path/to/ffmpeg node scripts/prepare-journey.mjs /path/to/source.mp4 ascent-hd 340` with a fresh media directory and the chosen summit-frame index. The script samples 24 frames per source second, applies the scroll-aligned portrait crop, produces both sizes and updates `app/journey-media.json`. FFmpeg is an authoring tool and is not required to run the site. Restart the development server after generating a new media directory so its public-asset index includes the new files.
 
 ## Private GitHub repository
 
@@ -63,9 +64,9 @@ Publication has not completed: the current environment rejects the Sites workflo
 
 Earlier API checks covered unauthenticated write rejection, cross-origin rejection, malformed submissions, member privacy, duplicate vote prevention, leadership authorization, event creation, idempotent RSVPs, cancellation, and stale-event rejection.
 
-The cinematic revision is checked with TypeScript, scoped ESLint, a production build, HTTP readiness and asset validation, and `npm run test:journey`. Journey tests cover exact pause/reverse mapping, summit title hold and descent, reveal bounds, resize/fallback reading position, reduced motion, directional prefetch, cache limits/disposal, out-of-order decoding and missing-media fallback. Club UI server-render checks cover loading/error states, a real meeting date, populated votes and unknown vote counts.
+The cinematic revision is checked with TypeScript, scoped ESLint, a production build, HTTP readiness and asset validation, and `npm run test:journey`. Journey tests cover exact pause/reverse mapping, summit title hold and descent, reveal bounds, resize/fallback reading position, reduced motion, directional prefetch, cache limits/disposal, out-of-order decoding, missing-media fallback, Retina allocation limits, easing into the summit hold, and wildlife framing. All 16 journey tests pass. Club UI server-render checks cover loading/error states, a real meeting date, populated votes and unknown vote counts.
 
-The generated source and both joins were inspected as contact sheets. A discontinuity in the original generation was replaced with a separately generated four-second climb; a brief blend eases the second join. The landscape is generated, so minor geometry/motion artifacts remain possible. Browser automation for localhost was rejected by the browser URL security policy; the rebuilt page still needs a fresh interactive browser check. These source/HTTP checks do not establish final rendered layout or scroll smoothness on a physical phone.
+The generated source, edited sunset sequence, enhanced output, and both joins were inspected as contact sheets or individual frames. A discontinuity in the original generation was replaced with a separately generated four-second climb; a brief blend eases the second join. The landscape is generated, so minor geometry/motion artifacts remain possible. Browser automation for localhost was rejected by the browser URL security policy; the rebuilt page still needs a fresh interactive browser check. These source/HTTP checks do not establish final rendered layout or scroll smoothness on a physical phone.
 
 ## Design references
 

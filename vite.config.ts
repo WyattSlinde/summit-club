@@ -59,7 +59,7 @@ export default defineConfig(async ({ command }) => {
       watch: {
         // Frame exports and worker state are not source modules. Hundreds of
         // invalidations here can exhaust Vinext's request-scope registry.
-        ignored: ["**/public/ascent/**", "**/public/journey/**", "**/dist/**", "**/.wrangler/**"],
+        ignored: ["**/public/**", "**/dist/**", "**/.wrangler/**"],
         ...(isCodexSeatbeltSandbox ? { useFsEvents: false, usePolling: true } : {}),
       },
     },

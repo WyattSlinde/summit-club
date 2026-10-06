@@ -65,7 +65,47 @@
     "blendSeconds": 0.125,
     "summitFrame": 283
   },
-  "delivery": "364 individually addressable WebP frames at 20 samples per source second; desktop 1600×900 and mobile 960×540. Only user scroll selects frames. No autoplay, video element, or playback clock.",
-  "review": "Inspected source and bridge contact sheets and join frames. Original source had a hard cut at 8.5 seconds; a generated bridge replaces it, with a brief blend into the tail. Minor generative artifacts may remain. Rendered browser verification remains blocked by browser URL policy.",
-  "disclosure": "Generated landscape and wildlife, not a documented club outing or a verified real trail."
+  "delivery": "433 independently addressable WebP frames at 24 samples per source second; desktop 2560×1440 and portrait 1008×1792, from the 4K-enhanced sunset edit. Scroll alone selects frames and crop position. No autoplay, video element, or playback clock. Summit hold at frame 340.",
+  "review": "Inspected the original and bridge joins, the complete sunset edit and 4K-enhanced source as contact sheets, and individual opening, portrait, and summit frames. One mule deer and a hawk are visible. The enhanced source keeps the approved route; minor generative geometry/motion artifacts may remain. Rendered localhost inspection remains blocked by browser URL policy.",
+  "disclosure": "Generated landscape and wildlife, not a documented club outing or a verified real trail.",
+  "polish": {
+    "date": "2026-10-05",
+    "editJob": "ef7e8dc0-7eeb-4e01-ac29-4e01346f6a95",
+    "edit": {
+      "model": "seedance_2_5",
+      "mode": "video_edit",
+      "resolution": "1080p",
+      "generate_audio": false,
+      "bitrate_mode": "high",
+      "medias": [
+        {
+          "role": "video",
+          "value": "5ed54263-6c15-4c65-86c1-16c225f7f06f"
+        }
+      ],
+      "prompt": "POLISH THIS EXACT SHOT. Preserve the entire continuous first-person camera path, timing, perspective, granite terrain, stairs, trees, summit rocks and valley geometry exactly. Do not change the shot length or introduce cuts. Improve fine photographic clarity in rock grain, needles, bark and foliage: sharp natural detail, not oversharpened or plastic. Relight it as a beautiful late-afternoon mountain sunset: the low setting sun just off screen creates soft gold rim light on granite and tree edges; distant sky has layered peach and soft coral clouds grading upward into pale lavender-blue. Rich living green pines remain clearly lit and vibrant, foreground readable and inviting, no dark orange filter. Add two realistic mule deer grazing just off the left side of the trail during the opening six seconds, visible in the middle distance, one briefly lifts its head; preserve their positions naturally as the walking camera passes. A small realistic hawk glides far across the distant sky at the summit around seconds 12-16, correct scale, no close-up giant bird. All animals anatomically accurate and grounded, with natural light and shadows. Gently ease any tiny discontinuity around the rock crest while retaining the same route. Same single hiking scene and same final camera tilt down toward the forest clearing. Absolutely no captions, logos, people, cards, text, extra interfaces or montage. Photorealistic outdoor documentary image quality."
+    },
+    "enhancementJob": "dfb01dc7-ed35-4022-9aaa-9e644e36dd6e",
+    "enhancement": {
+      "model": "bytedance_video_upscale",
+      "medias": [
+        {
+          "role": "video",
+          "value": "ef7e8dc0-7eeb-4e01-ac29-4e01346f6a95"
+        }
+      ],
+      "resolution": "4k",
+      "fps": 24,
+      "preset": "aigc",
+      "model_version": "pro"
+    },
+    "observedWildlife": "One mule deer in the opening left-hand undergrowth, and a hawk crossing the distant summit sky. The prompt requested two deer; only one is clearly visible in the inspected result.",
+    "output": {
+      "width": 3840,
+      "height": 2160,
+      "fps": 24,
+      "durationSeconds": 18.041667,
+      "sourceResolution": "1920×1080, AI enhanced to 3840×2160"
+    }
+  }
 }

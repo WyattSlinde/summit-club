@@ -14,7 +14,7 @@
 .forest-next{display:inline-flex;align-items:center;min-height:43px;color:var(--forest-paper);font-size:12px;border-bottom:1px solid var(--forest-line)}
 .forest-next:hover{border-color:var(--forest-paper)}
 .forest-notice{align-self:center;min-width:0}
-.forest-panorama{height:134px;width:100%;background:linear-gradient(#10251d08,#10251d24),url('/ascent/overlook.webp') center 53%/cover;border-radius:2px;margin-bottom:22px}
+.forest-panorama{height:134px;width:100%;background-position:center 53%;background-size:cover;background-color:#173626;border-radius:2px;margin-bottom:22px}
 .forest-notice-label{font:9px/1.6 var(--mono);letter-spacing:.8px;color:var(--forest-muted)}
 .forest-notice-copy>h3{font:500 22px/1.3 'DM Sans',sans-serif;letter-spacing:-.025em;margin:12px 0 9px;color:var(--forest-paper)}
 .forest-meeting-copy,.forest-meeting-place{font-size:12px;line-height:1.8;color:var(--forest-muted)}

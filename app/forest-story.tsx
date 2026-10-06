@@ -3,6 +3,7 @@
 import { useId } from 'react';
 import { Plus } from 'lucide-react';
 import './forest-story.css';
+import media from './journey-media.json';
 
 type Props = {
   onJoin: () => void;
@@ -27,7 +28,7 @@ export default function ForestStory({ onJoin, member = false, nextEvent, loading
         <div className="forest-actions"><button type="button" className="forest-join" onClick={onJoin}>{member ? 'View registration' : 'Join SUMMIT'}<Plus size={17} strokeWidth={1.7} aria-hidden="true" /></button><a className="forest-next" href="#expeditions">See outing ideas</a></div>
       </div>
       <aside className="forest-notice" aria-label="Club meeting and leadership">
-        <div className="forest-panorama" aria-hidden="true" />
+        <div className="forest-panorama" aria-hidden="true" style={{backgroundImage: `linear-gradient(#10251d08,#10251d24),url(${media.path}/overlook.webp)`}} />
         <div className="forest-notice-copy"><p className="forest-notice-label">{nextEvent ? 'NEXT ON THE CALENDAR' : 'MEETING UPDATE'}</p>
         <h3>{meetingTitle}</h3>
         {nextEvent ? <><p className="forest-meeting-date">{meetingDate} Pacific</p><p className="forest-meeting-place">{nextEvent.location}</p><a href="#calendar" className="forest-calendar-link">Details &amp; RSVP</a></> : <p className="forest-meeting-copy">{loading ? 'Looking for the latest club plans.' : loadFailed ? 'We couldn’t load the latest plans. Try reconnecting below.' : 'The date and place will appear here once confirmed.'}</p>}

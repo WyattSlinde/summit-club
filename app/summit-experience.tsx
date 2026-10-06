@@ -2,12 +2,12 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ArrowDown, ArrowUpRight, Mountain, RotateCcw } from 'lucide-react';
 import { ScrollSequence } from './scroll-sequence';
-import { JOURNEY_VIEWPORTS, trailJourney, frameForProgress, reflowScroll } from './trail-journey';
+import { JOURNEY_VIEWPORTS, trailJourney, frameForProgress, reflowScroll, canvasResolution, frameFocalX } from './trail-journey';
 import media from './journey-media.json';
 import './summit-experience.css';
 
 // The visible granite edge in the summit still, in the source image's coordinates.
-const ridge = [[0,900],[55,801],[112,751],[160,716],[200,690],[270,677],[350,693],[430,689],[500,706],[554,730],[605,774],[630,749],[660,719],[704,685],[740,642],[785,610],[831,604],[904,602],[989,617],[1053,646],[1115,696],[1133,678],[1150,661],[1190,655],[1234,669],[1295,689],[1348,720],[1368,750],[1400,765],[1431,784],[1480,792],[1525,790],[1595,803],[1675,815],[1767,829],[1813,868],[1863,910],[1920,916]];
+const ridge = [[0,852],[45,797],[90,751],[130,719],[170,698],[210,685],[253,677],[282,680],[327,689],[386,689],[444,694],[500,709],[551,733],[602,776],[616,786],[638,749],[667,709],[706,675],[744,637],[787,610],[834,601],[900,601],[962,610],[1020,628],[1080,659],[1131,695],[1147,675],[1177,656],[1212,650],[1252,667],[1298,688],[1344,715],[1400,756],[1450,797],[1500,799],[1550,792],[1620,806],[1690,814],[1762,830],[1815,855],[1870,890],[1920,902]];
 const stops = [
   { name: 'The trail', at: .10, start: .12, end: .25, title: 'Explore.', copy: 'Get outside with your Cathedral Catholic crew.' },
   { name: 'The climb', at: .30, start: .28, end: .40, title: 'Serve. Lead.', copy: 'Give back. Try something new. Help make it happen.' },
@@ -29,6 +29,8 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
     let start = 0, runway = 1, progress = 0, focusDestination: string | null = null;
     let measured = false, measuredSimple = false, measuredHeight = 0;
     let sequence: ScrollSequence | undefined, currentImage: ImageBitmap | undefined;
+    let sequenceMobile: boolean | undefined;
+    const isPortraitViewport = () => visual!.clientWidth / Math.max(1, visual!.clientHeight) <= 9 / 16;
     let deadline: ReturnType<typeof setTimeout> | undefined;
     let previousPhase = '', previousStop = -2, previousAccessible: boolean | undefined, lastDrawn = -1;
     const isSimple = () => motion.matches || !!connection?.saveData || fallback;
@@ -37,7 +39,7 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
       currentImage = image;
       const w = canvas.width, h = canvas.height, scale = Math.max(w / image.width, h / image.height);
       const width = image.width * scale, height = image.height * scale;
-      context.drawImage(image, (w - width) / 2, (h - height) / 2, width, height);
+      context.drawImage(image, (w - width) * frameFocalX(index, media.fps), (h - height) / 2, width, height);
       if (lastDrawn < 0) { setReady(true); clearTimeout(deadline); }
       lastDrawn = index;
       shell!.dataset.frame = String(index);
@@ -65,9 +67,9 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
       shell.style.setProperty('--sx-scene-scale', String(1 + state.approach * .08));
       shell.style.setProperty('--sx-scene-y', `${-state.approach * 9}vh`);
       const remaining = Math.max(0, start + runway - scrollY);
-      shell.style.setProperty('--sx-page-y', isSimple() ? '0px' : `${-remaining + (1 - state.approach) * visual!.clientHeight * .65}px`);
-      shell.style.setProperty('--sx-page-angle', `${isSimple() ? 0 : (1 - state.approach) * 24}deg`);
-      shell.style.setProperty('--sx-page-scale', String(isSimple() ? 1 : .74 + state.approach * .26));
+      shell.style.setProperty('--sx-page-y', isSimple() ? '0px' : `${-remaining + (1 - state.approach) * visual!.clientHeight * .32}px`);
+      shell.style.setProperty('--sx-page-angle', `${isSimple() ? 0 : (1 - state.approach) * 8}deg`);
+      shell.style.setProperty('--sx-page-scale', String(isSimple() ? 1 : .92 + state.approach * .08));
       shell.style.setProperty('--sx-distance', `${state.walk * 100}%`);
       shell.dataset.journeyProgress = progress.toFixed(4);
       const nextStop = isSimple() ? -1 : stops.findIndex(item => progress >= item.start && progress < item.end);
@@ -100,8 +102,10 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
       const crop = Math.max(visual.clientWidth / 1920, height / 1080);
       const ox = (visual.clientWidth - 1920 * crop) / 2, oy = (height - 1080 * crop) / 2;
       shell.style.setProperty('--sx-ridge', `polygon(${ridge.map(([x, y]) => `${x * crop + ox}px ${y * crop + oy}px`).join(',')},100% 100%,0 100%)`);
-      const dpr = Math.min(devicePixelRatio || 1, 1.5);
-      canvas.width = Math.round(visual.clientWidth * dpr); canvas.height = Math.round(visual.clientHeight * dpr);
+      const resolution = canvasResolution(visual.clientWidth, height, devicePixelRatio);
+      canvas.width = resolution.width; canvas.height = resolution.height;
+      if (context) { context.imageSmoothingEnabled = true; context.imageSmoothingQuality = 'high'; }
+      if (sequence && !reduced && sequenceMobile !== isPortraitViewport()) { startSequence(); return; }
       if (currentImage && !reduced) draw(currentImage, lastDrawn);
       queue();
     }
@@ -143,10 +147,10 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
       sequence?.dispose(); sequence = undefined; currentImage = undefined;
       if (isSimple()) { setReady(true); clearTimeout(deadline); measure(); return; }
       deadline = setTimeout(() => { if (lastDrawn < 0 && !isSimple()) fail(); }, 18000);
-      const mobile = innerWidth < 800;
+      const mobile = isPortraitViewport(); sequenceMobile = mobile;
       sequence = new ScrollSequence({ count: media.frameCount,
         url: index => `${media.path}/${mobile ? 'mobile' : 'desktop'}/${String(index).padStart(4, '0')}.webp?v=${media.version}`,
-        maxDecoded: mobile ? 24 : 32, onFrame: draw, onError: fail });
+        maxDecoded: mobile ? 12 : 14, onFrame: draw, onError: fail });
       measure();
     }
     const sizes = new ResizeObserver(measure); sizes.observe(visual); sizes.observe(underlay);
@@ -166,7 +170,7 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
     <div className="sx-journey"><div className="sx-stage" data-phase={phase} data-ready={ready}>
       <div className="sx-cinematic" aria-hidden={hidden} inert={hidden}>
         <div className="sx-topbar" inert={atSummit || descending || simple}><a href="#basecamp" onClick={enter} className="sx-school"><Mountain size={28} strokeWidth={1.3} /><span>CATHEDRAL CATHOLIC<small>THE OUTDOOR CLUB</small></span></a><a className="sx-skip" href="#basecamp" onClick={enter}>Club &amp; signup <ArrowUpRight size={15} /></a></div>
-        <div className="sx-opening" aria-hidden={phase !== 'opening'}><span className="sx-eyebrow">CATHEDRAL CATHOLIC’S OUTDOOR CLUB</span><p>It starts<br /><em>with a climb.</em></p><span className="sx-opening-copy">Scroll up the mountain.<br />There’s something waiting at the top.</span></div>
+        <div className="sx-opening" aria-hidden={phase !== 'opening'}><span className="sx-eyebrow">CATHEDRAL CATHOLIC’S OUTDOOR CLUB</span><p>It starts<br /><em>with a climb.</em></p><span className="sx-opening-copy">Scroll to climb the mountain.<br />There’s something waiting at the top.</span></div>
         <div className="sx-trail-stories" aria-live="polite" aria-atomic="true">{stops.map((item, index) => <article key={item.name} className="sx-trail-story" data-active={stop === index} aria-hidden={stop !== index}><span className="sx-eyebrow">0{index + 1} — {item.name.toUpperCase()}</span><h2>{item.title}</h2><p>{item.copy}</p></article>)}</div>
         <nav className="sx-route" aria-label="Along the trail" inert={atSummit || descending || simple}><span className="sx-route-line"><i /></span>{stops.map((item, index) => <button key={item.name} onClick={() => seekRef.current(item.at)} aria-current={stop === index ? 'step' : undefined}><i />{item.name}</button>)}<button onClick={() => seekRef.current(.65)}><Mountain size={13} />The summit</button></nav>
         <div className="sx-titlecard" aria-hidden={!atSummit}>

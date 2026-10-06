@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { trailJourney, frameForProgress, frameWindow, WALK_END, DESCENT_START, CLUB_START, reflowScroll } from '../app/trail-journey.ts';
+import { trailJourney, frameForProgress, frameWindow, WALK_END, DESCENT_START, CLUB_START, reflowScroll, canvasResolution, frameFocalX } from '../app/trail-journey.ts';
 import { ScrollSequence } from '../app/scroll-sequence.ts';
 
 const tick = () => new Promise(resolve => setTimeout(resolve, 0));
@@ -25,6 +25,7 @@ test('the camera holds at the peak while SUMMIT rises, then travels beyond it', 
   assert.equal(trailJourney(1).title,0);
   assert.equal(trailJourney(1).camp,1);
   assert.equal(trailJourney(CLUB_START).accessible,true);
+  assert.ok(trailJourney(CLUB_START).cover + 14 <= 0, 'club controls activate after the scene has cleared');
   assert.equal(trailJourney(.5).accessible,false);
 });
 test('the descent uncovers the club only after the summit hold', () => {
@@ -105,4 +106,38 @@ test('resize and fallback preserve club reading offset instead of jumping to the
   assert.equal(reflowScroll(1890,0,3780,4200,900,1000,false,false),2100);
   assert.equal(reflowScroll(1200,0,0,3780,900,900,true,false),4080);
   assert.equal(reflowScroll(1890,0,3780,0,900,900,false,true),900);
+});
+
+test('high density screens receive sharp backing pixels with a fixed allocation ceiling', () => {
+  assert.deepEqual(canvasResolution(1440,900,2),{width:2880,height:1800});
+  assert.deepEqual(canvasResolution(390,844,3),{width:780,height:1688});
+  const large=canvasResolution(3840,2160,3);
+  assert.ok(large.width*large.height<8510000);
+});
+test('camera velocity eases into and out of the summit hold', () => {
+  const count=10001,peak=8000;
+  const near=frameForProgress(.52,count,peak)-frameForProgress(.51,count,peak);
+  const middle=frameForProgress(.27,count,peak)-frameForProgress(.26,count,peak);
+  assert.ok(near<middle/10);
+  assert.ok(frameForProgress(.70,count,peak)-peak<10);
+});
+test('portrait framing starts with the wildlife and returns to a centered summit', () => {
+  assert.equal(frameFocalX(0,24),0);
+  assert.ok(frameFocalX(24,24)>0 && frameFocalX(24,24)<.5);
+  for (const frame of [72,100,340]) assert.equal(frameFocalX(frame,24),.5);
+  const paused=frameFocalX(35,24);
+  frameFocalX(400,24);assert.equal(frameFocalX(35,24),paused);
+});
+test('HD prefetch stays near the visitor and a small cache settles without decode churn', async () => {
+  const oldFetch=globalThis.fetch,oldBitmap=globalThis.createImageBitmap;
+  let fetches=0,decodes=0,live=0,maxLive=0;
+  globalThis.fetch=async url=>{fetches++;return {ok:true,blob:async()=>new Blob([String(url)])};};
+  globalThis.createImageBitmap=async()=>{decodes++;live++;maxLive=Math.max(maxLive,live);return {width:2560,height:1440,close(){live--;}};};
+  const sequence=new ScrollSequence({count:500,url:String,maxDecoded:8,onFrame:()=>{},onError:()=>assert.fail('unexpected error')});
+  try{
+    sequence.seek(200);for(let i=0;i<15;i++)await tick();
+    const held=decodes;assert.ok(fetches<=65,'does not preload the entire trail');
+    for(let i=0;i<10;i++)await tick();assert.equal(decodes,held,'small cache does not endlessly redecode');
+    sequence.seek(300);for(let i=0;i<15;i++)await tick();assert.ok(maxLive<=12);
+  }finally{sequence.dispose();assert.equal(live,0);globalThis.fetch=oldFetch;globalThis.createImageBitmap=oldBitmap;}
 });

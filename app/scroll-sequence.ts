@@ -17,10 +17,14 @@ export class ScrollSequence {
   private shown = -1;
   private direction = 1;
   private stopped = false;
-  private cursor = 0;
   private maxDecoded: number;
+  private decodeRadius: number;
   private options: Options;
-  constructor(options: Options) { this.options = options; this.maxDecoded = options.maxDecoded ?? 32; }
+  constructor(options: Options) {
+    this.options = options;
+    this.maxDecoded = Math.max(4, options.maxDecoded ?? 32);
+    this.decodeRadius = Math.min(10, Math.floor((this.maxDecoded - 2) / 2));
+  }
   seek(frame: number) {
     if (this.stopped) return;
     const next = Math.min(this.options.count - 1, Math.max(0, Math.round(frame)));
@@ -36,15 +40,13 @@ export class ScrollSequence {
   }
   private pump() {
     if (this.stopped) return;
-    const priorities = frameWindow(this.wanted, this.options.count, this.direction, 10);
+    const priorities = frameWindow(this.wanted, this.options.count, this.direction, this.decodeRadius);
+    const compressed = frameWindow(this.wanted, this.options.count, this.direction, 32);
     while (this.inFlight.size < 4) {
       let index = priorities.find(i => !this.images.has(i) && !this.inFlight.has(i) && !this.failed.has(i));
-      // Prefetch compressed frames; distant frames stay undecoded.
+      // Fetch only the nearby trail. Do not download the whole HD sequence while idle.
       if (index === undefined) {
-        for (let scanned = 0; scanned < this.options.count; scanned++) {
-          const i = this.cursor++ % this.options.count;
-          if (!this.blobs.has(i) && !this.inFlight.has(i) && !this.failed.has(i)) { index = i; break; }
-        }
+        index = compressed.find(i => !this.blobs.has(i) && !this.inFlight.has(i) && !this.failed.has(i));
       }
       if (index === undefined) break;
       this.inFlight.add(index);
@@ -61,8 +63,12 @@ export class ScrollSequence {
         blob = await response.blob();
         if (this.stopped) return;
         this.blobs.set(index, blob);
+        if (this.blobs.size > 96) {
+          const farthest = [...this.blobs.keys()].sort((a, b) => Math.abs(b - this.wanted) - Math.abs(a - this.wanted));
+          while (this.blobs.size > 96) this.blobs.delete(farthest.shift()!);
+        }
       }
-      if (Math.abs(index - this.wanted) <= 10) {
+      if (Math.abs(index - this.wanted) <= this.decodeRadius) {
         const image = await createImageBitmap(blob);
         if (this.stopped) { image.close(); return; }
         this.images.set(index, image);
