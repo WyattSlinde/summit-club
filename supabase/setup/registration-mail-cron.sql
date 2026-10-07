@@ -1,5 +1,5 @@
 -- Run only after deploying registration-mail and configuring its secrets.
--- Enable pg_cron and pg_net in the Supabase dashboard first.
+-- The registration_mail_scheduler migration enables pg_cron and pg_net.
 -- In Vault, create summit_project_url and summit_mail_worker_secret.
 -- The latter must match the Edge Function's SUMMIT_MAIL_WORKER_SECRET.
 do $$begin

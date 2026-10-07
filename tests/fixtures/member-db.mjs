@@ -14,7 +14,10 @@ export async function setup() {
     grant usage on schema storage to authenticated;
     grant select,insert,update,delete on storage.objects to authenticated;`);
   const directory = new URL('../../supabase/migrations/', import.meta.url);
-  for (const file of (await readdir(directory)).filter(name => name.endsWith('.sql')).sort()) await db.exec(await readFile(new URL(file, directory), 'utf8'));
+  // PGlite has no background workers or outbound HTTP. Only this extension-only
+  // migration is omitted; its scheduler and HTTP responses are checked on Supabase.
+  const hostedOnly = new Set(['20261007014056_registration_mail_scheduler.sql']);
+  for (const file of (await readdir(directory)).filter(name => name.endsWith('.sql') && !hostedOnly.has(name)).sort()) await db.exec(await readFile(new URL(file, directory), 'utf8'));
   for (const [name, id] of Object.entries(people)) await db.query('insert into auth.users values($1,$2,$3)', [id, name === 'unverified' ? null : '2026-10-01T00:00:00Z', name + '@example.test']);
   await db.query('insert into private.club_leaders values($1)', [people.leader]);
   return db;
@@ -31,4 +34,3 @@ export const join = (db, name) => rpc(db, name, 'join', { name: name + ' Student
 export async function profile(db, name, overrides = {}) {
   return rpc(db, name, 'save_profile', { display_name: name, bio: 'I love the outdoors.', wants: 'Try a sunrise hike.', interests: ['Hiking', 'Wildlife'], visibility: 'friends', accepting_requests: true, ...overrides });
 }
-
