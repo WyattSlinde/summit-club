@@ -18,6 +18,11 @@ test('static preview exposes no account or records and rejects every write', asy
   const { outputFiles } = await build({
     entryPoints: [new URL('../preview/basecamp-client.ts', import.meta.url).pathname],
     bundle: true, format: 'esm', write: false,
+    plugins: [{ name: 'offline-preview', setup(builder) {
+      builder.onLoad({ filter: /cloud-config\.json$/ }, () => ({
+        loader: 'json', contents: '{"url":"","publishableKey":"","authReady":false}',
+      }));
+    } }],
   });
   const { basecampRequest } = await import(`data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString('base64')}`);
   const status = await basecampRequest();
@@ -31,4 +36,21 @@ test('static preview exposes no account or records and rejects every write', asy
   for (const method of ['POST', 'post', 'PUT', 'PATCH', 'DELETE']) {
     await assert.rejects(basecampRequest({ method }), /live club backend/);
   }
+});
+
+test('configured static hosting routes member reads and writes through the club RPC', async () => {
+  const { outputFiles } = await build({
+    entryPoints: [new URL('../preview/basecamp-client.ts', import.meta.url).pathname],
+    bundle: true, format: 'esm', write: false,
+    plugins: [{ name: 'isolated-club-rpc', setup(builder) {
+      builder.onLoad({ filter: /cloud-client\.ts$/ }, () => ({ loader: 'ts', contents: `
+        export const cloudConfigured = true;
+        export async function clubRequest(operation, payload) { return { operation, payload }; }
+      ` }));
+    } }],
+  });
+  const { basecampRequest } = await import(`data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString('base64')}`);
+  assert.deepEqual(await basecampRequest(), { operation: 'basecamp', payload: {} });
+  const vote = { action: 'vote', adventureId: 'coast', selected: true };
+  assert.deepEqual(await basecampRequest({ method: 'POST', body: JSON.stringify(vote) }), { operation: 'vote', payload: vote });
 });

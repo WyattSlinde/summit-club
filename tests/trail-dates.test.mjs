@@ -12,6 +12,6 @@ test('monthly selections follow Pacific time across UTC month boundaries, DST an
   assert.equal(monthEnd('2026-02-01','2026-02-06'), '2026-02-06');
 });
 test('the visible catalog matches the database seed and uses official source links', async () => {
-  const sql = await readFile(new URL('../supabase/migrations/20261006205628_hike_ratings_and_gallery.sql', import.meta.url), 'utf8');
+  const sql = await readFile(new URL('../supabase/migrations/20261007005528_hike_ratings_and_gallery.sql', import.meta.url), 'utf8');
   for (const hike of trailCatalog) { assert.ok(sql.includes(`'${hike.id}'`)); assert.ok(sql.includes(`'${hike.name}'`)); assert.ok(sql.includes(hike.official_url)); assert.match(hike.official_url,/^https:\/\/www\.(parks\.ca\.gov|sandiego\.gov)\//); }
 });

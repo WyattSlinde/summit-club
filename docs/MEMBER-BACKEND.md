@@ -1,6 +1,14 @@
 # SUMMIT member accounts
 
-Status: implemented and tested locally. The public GitHub Pages site is still a visual preview until a separate SUMMIT Supabase project and verified email delivery are configured. `lib/cloud-config.json` deliberately contains no project URL or key yet. No student records have been copied from the unrelated Lowkey project.
+Status: the dedicated **SUMMIT** Supabase project (`vybchvdgablypeimevuj`, US West) was created in the owner's `lowkey` organization on the confirmed $0/month free plan. This is a separate project with its own database, Auth users, Storage, and keys. The existing Lowkey application was not modified or connected.
+
+All three migrations and the `registration-mail` Edge Function are deployed. `lib/cloud-config.json` contains only SUMMIT's URL and publishable key; `authReady` remains false. Public signup is intentionally disabled until hosted Auth settings and verified email delivery are complete. No real student accounts or emails have been created/sent.
+
+Hosted SQL/RLS checks passed for registration, idempotent voting, ratings, friendship privacy, blocking, unverified-user rejection, private roster access, leader-only registration details, and notification queuing. Tests ran in one transaction and rolled back all fixtures, including queued mail. HTTP checks verified anonymous basecamp reads and rejected roster/worker access. This does not verify real Auth confirmation/recovery or Storage upload delivery.
+
+Remaining setup: `supabase/config.toml` declares the correct site URL, redirects, confirmed email requirement, and 12-character minimum password. The CLI reviewed the exact differences, but `config push` failed with `AccessTokenRequiredError`; these settings are **not yet applied**. Log into the Supabase CLI with the project owner's account, review `config diff --project-ref vybchvdgablypeimevuj`, then push only to that project. Configure a verified SMTP sender, notification secrets/schedule, and the real leader's verified account. Never reuse the Lowkey project's keys or sender credentials without separate authorization.
+
+The hosted migration tool assigned its own timestamps. Local filenames now match the hosted ledger; SQL content is unchanged. Supabase advisors returned no warning/error findings. Informational [RLS-without-policy notices](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy) reflect intentional RPC-only tables with direct client grants revoked. [Unused-index notices](https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index) are expected before traffic; retain the relationship and gallery indexes.
 
 ## What is implemented
 
@@ -61,7 +69,7 @@ Public configuration and migrations belong in Git. Passwords, SMTP credentials, 
 
 ## Hike ratings and the camera roll
 
-Apply the second migration, `20261006205628_hike_ratings_and_gallery.sql`, after the member migration. It adds:
+Apply the second migration, `20261007005528_hike_ratings_and_gallery.sql`, after the member migration. It adds:
 
 - A leader-managed trail catalog with official park information links. The initial real trail entries are [Guy Fleming Trail](https://www.parks.ca.gov/?page_id=23207), [Cowles Mountain](https://www.sandiego.gov/cowles-mountain-summit), and [Los Peñasquitos Canyon](https://www.sandiego.gov/park-and-recreation/parks/osp/lospenasquitos). These are not scheduled SUMMIT outings and have no seeded ratings or invented trip photos.
 - 1–5 star ratings with a member's attestation that they hiked the trail. One row per member/trail/hike month; saving again updates the same rating. Members can remove their rating. Months follow `America/Los_Angeles`, and the board offers the latest 12 months. Three distinct members' ratings are required to rank. Ranking uses the exact mean, then rating count, then name and ID; the displayed score is rounded to one decimal.
@@ -71,7 +79,7 @@ Apply the second migration, `20261006205628_hike_ratings_and_gallery.sql`, after
 - A Hikes & photos tab in the leadership desk: add/archive trails, inspect reported images, hide/restore photos, and mark concerns reviewed. Leaders can access hidden photos for review; owners can still delete them. Photos are shared immediately within the club after upload and consent, not held in a pre-approval queue.
 - Storage-aware deletion: a photo is first hidden, its object is deleted through the Storage API, and then its metadata is deleted. Failed cleanups remain visible to their owner in My photos for retry. Deleting a club profile first removes gallery objects; the server prevents account cleanup from silently leaving storage objects behind.
 
-Activation remains pending alongside the member backend. The static preview shows the public introduction and a disabled registration form; member basecamp is gated until signup is active. It cannot save ratings or accept uploads. Tests run the actual SQL in Postgres plus the React forms in a DOM harness; production email, storage delivery, and live multi-account verification still require the dedicated Supabase project.
+Tables, functions, and private buckets are installed in the dedicated SUMMIT project. Student activation remains pending email setup. The site shows the public introduction and a disabled registration form; member basecamp is gated until signup is active. Tests run the actual SQL in Postgres plus the React forms in a DOM harness; production email, Storage delivery, and live multi-account verification remain to be completed.
 
 
 ## Public entry and member basecamp
@@ -82,7 +90,7 @@ The single signup form collects name, email, password, grade, interest, optional
 
 ## Registration emails to Tobias
 
-**Not activated yet.** The notification code is tested, but no real email has been sent. The Supabase project, Auth mail sender, notification sender, and schedule still require configuration.
+**Not activated yet.** The notification tables and Edge Function are deployed and tested, but no real email has been sent. The Auth mail sender, notification sender/secrets, and schedule still require configuration. The deployed worker rejects requests without its server-only secret; no schedule is running.
 
 The third migration adds a private durable outbox. A successful first registration queues one immutable message in the same transaction as the member record. It targets `Tkell2028@cchsdons.com` and includes name, verified account email, grade, interests, and the optional signup note. Editing registration updates the leader roster without sending repeated signup emails. No older registrations are backfilled or emailed by this migration. Queue records are deleted with the member record.
 

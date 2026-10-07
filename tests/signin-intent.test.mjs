@@ -1,6 +1,32 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { signInFor, readSignInIntent, signInForVote, readVoteIntent } from '../lib/signin-intent.ts';
+import { build } from 'esbuild';
+
+async function intentModule(configured) {
+  const { outputFiles } = await build({
+    entryPoints: [new URL('../lib/signin-intent.ts', import.meta.url).pathname],
+    bundle: true, format: 'esm', write: false,
+    define: { 'import.meta.env.BASE_URL': '"/summit-club/"' },
+    plugins: [{ name: 'isolated-cloud-config', setup(builder) {
+      builder.onLoad({ filter: /cloud-config\.json$/ }, () => ({
+        loader: 'json', contents: JSON.stringify({ url: configured ? 'https://test.example' : '', publishableKey: configured ? 'test-only' : '', authReady: configured }),
+      }));
+    } }],
+  });
+  return import(`data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString('base64')}`);
+}
+const { signInFor, readSignInIntent, signInForVote, readVoteIntent } = await intentModule(false);
+
+test('configured member sign-in stays on the hosted project and restores intent without voting', async () => {
+  const cloud = await intentModule(true);
+  for (const intent of ['join', 'idea']) {
+    assert.equal(cloud.signInFor(intent), `/summit-club/profile/?intent=${intent}`);
+  }
+  for (const outing of ['ridge', 'coast', 'wild']) {
+    assert.equal(cloud.signInForVote(outing), `/summit-club/profile/?intent=vote&outing=${outing}`);
+  }
+  assert.throws(() => cloud.signInForVote('coast&selected=true'), RangeError);
+});
 
 test('sign-in returns to the requested club action using a fixed local path', () => {
   for(const intent of ['join','idea']) {

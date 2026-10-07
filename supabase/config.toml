@@ -1,4 +1,17 @@
 project_id = "summit-club"
+
+[auth]
+site_url = "https://wyattslinde.github.io/summit-club/"
+additional_redirect_urls = [
+  "https://wyattslinde.github.io/summit-club/register/?complete=1",
+  "https://wyattslinde.github.io/summit-club/profile/",
+  "https://wyattslinde.github.io/summit-club/profile/?recovery=1",
+]
+minimum_password_length = 12
+
+[auth.email]
+enable_confirmations = true
+
 [functions.registration-mail]
 # The worker checks its own server-only secret before touching the queue.
 verify_jwt = false
