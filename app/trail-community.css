@@ -7,6 +7,10 @@
 .trail-month-heading p,.trail-gallery-heading p{font-size:14px;color:var(--trail-muted);line-height:1.7}
 .trail-month{display:flex;flex-direction:column;gap:10px;font-size:9px;font-weight:600;letter-spacing:.13em;min-width:190px}
 .trail-month select,.trail-gallery-tools select{appearance:auto;background:transparent;color:var(--trail-ink);border:0;border-bottom:1px solid #879c7d;padding:12px 24px 12px 0;font:14px 'DM Sans',sans-serif;border-radius:0}
+.trail-catalog-empty{display:flex;gap:18px;align-items:flex-start;padding:28px 0;border-top:1px solid var(--trail-line)}
+.trail-catalog-empty>svg{flex-shrink:0;color:var(--trail-muted)}
+.trail-catalog-empty h3{font-size:21px;font-weight:500;letter-spacing:-.025em;margin:0 0 8px}
+.trail-catalog-empty p{font-size:14px;line-height:1.7;color:var(--trail-muted);max-width:540px;margin:0}
 .trail-ranking{border-top:1px solid var(--trail-line)}
 .trail-rank-row{display:grid;grid-template-columns:50px minmax(0,1fr) 100px 165px;gap:24px;align-items:center;padding:29px 12px;border-bottom:1px solid var(--trail-line);transition:background .2s}
 .trail-rank-row.is-first{background:#e6eadb;border-top:3px solid #b8965e;padding-top:26px}

@@ -1,18 +1,21 @@
 export const cloudConfigured = true;
 export const calls = [], listeners = new Set();
 const mineId = '10000000-0000-4000-8000-000000000001';
-const hikes = [{ id: 'cowles-mountain', name: 'Cowles Mountain', area: 'Mission Trails Regional Park', official_url: 'https://www.sandiego.gov/cowles-mountain-summit', average: 4, rating_count: 3, rank: 1, my_rating: null }];
+let hikes = [], ratingsFailure = true;
+export function setRatingsFailure(value) { ratingsFailure = value; }
+export function publishTestTrail() { hikes = [{ id: 'test-ridge', name: 'Test Ridge', area: 'Test Park', official_url: 'https://example.test/ridge', average: 4, rating_count: 3, rank: 1, my_rating: null }]; }
 let photos = [];
 const files = new Map();
 export async function communityRequest(operation, payload = {}) {
   calls.push({ operation, payload });
+  if (operation === 'ratings' && ratingsFailure) throw new Error('Trail board unavailable. Try again.');
   if (operation === 'ratings') return structuredClone({ month: payload.month || '2026-10-01', today: '2026-10-06', minimum_ratings: 3, hikes });
   if (operation === 'rate') { hikes[0].my_rating = { stars: payload.stars, hiked_on: payload.hiked_on }; return { saved: true }; }
   if (operation === 'remove_rating') { hikes[0].my_rating = null; return { saved: true }; }
   if (operation === 'gallery') return structuredClone({ photos: photos.filter(p => p.status === 'published') });
   if (operation === 'my_photos') return structuredClone({ photos });
   if (operation === 'photo_draft') {
-    const photo = { ...payload, object_path: `${mineId}/${payload.id}.jpg`, hike_name: 'Cowles Mountain', author_name: 'Taylor', status: 'draft', mine: true, published_at: null };
+    const photo = { ...payload, object_path: `${mineId}/${payload.id}.jpg`, hike_name: 'Test Ridge', author_name: 'Taylor', status: 'draft', mine: true, published_at: null };
     photos.push(photo); return structuredClone(photo);
   }
   if (operation === 'photo_publish') { const photo = photos.find(p => p.id === payload.id); photo.status = 'published'; photo.published_at = '2026-10-06T18:00:00Z'; return { saved: true }; }

@@ -21,7 +21,7 @@ type Props = {
 
 export default function ForestStory({ onJoin, member = false, brandActive = true, nextEvent, loading = false, loadFailed = false, compact = false }: Props) {
   const uid = useId().replace(/:/g, '');
-  const meetingTitle = nextEvent?.title || (loading ? 'Checking the calendar…' : loadFailed ? 'Calendar unavailable' : 'First meeting being planned.');
+  const meetingTitle = nextEvent?.title || (loading ? 'Checking the calendar…' : loadFailed ? 'Calendar unavailable' : 'No meeting posted yet.');
   const meetingDate = nextEvent ? new Date(nextEvent.starts_at).toLocaleString('en-US', { timeZone: 'America/Los_Angeles', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : null;
 
   return <section id="basecamp" className="forest-story" aria-labelledby={`forest-title-${uid}`}>

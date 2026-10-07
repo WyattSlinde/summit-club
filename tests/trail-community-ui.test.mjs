@@ -6,7 +6,7 @@ import { JSDOM } from 'jsdom';
 import { pathToFileURL, fileURLToPath } from 'node:url';
 import path from 'node:path';
 
-test('trail UI saves an actual chosen rating, shares a photo, edits its caption and removes it', async () => {
+test('trail UI handles unavailable and empty catalogs, then rates and shares on a leader-listed trail', async () => {
   const rootPath = fileURLToPath(new URL('../', import.meta.url));
   const dom = new JSDOM('<!doctype html><html><body><div id="root"></div></body></html>', { url: 'https://example.test/summit-club/', pretendToBeVisual: true });
   for (const key of ['window','document','navigator','HTMLElement','HTMLInputElement','HTMLTextAreaElement','HTMLSelectElement','HTMLButtonElement','Node','Element','Event','MouseEvent','CustomEvent','MutationObserver','NodeFilter','getComputedStyle','FormData']) Object.defineProperty(globalThis, key, { configurable: true, value: dom.window[key] });
@@ -31,7 +31,7 @@ test('trail UI saves an actual chosen rating, shares a photo, edits its caption 
   await writeFile(output, outputFiles[0].text);
   const { createElement, act } = await import('react'); const { createRoot } = await import('react-dom/client');
   const { default: TrailCommunity } = await import(pathToFileURL(output).href);
-  const { calls, listeners } = await import('./fixtures/trail-cloud.mjs');
+  const { calls, listeners, setRatingsFailure, publishTestTrail } = await import('./fixtures/trail-cloud.mjs');
   const root = createRoot(document.getElementById('root'));
   async function settle(task = () => {}) { await act(async () => { await task(); await new Promise(resolve => setTimeout(resolve, 25)); }); }
   const buttons = () => [...document.querySelectorAll('button')];
@@ -41,6 +41,22 @@ test('trail UI saves an actual chosen rating, shares a photo, edits its caption 
   try {
     await settle(() => root.render(createElement(TrailCommunity, { account })));
     await settle(() => { for (const listener of listeners) listener('INITIAL_SESSION', { user: { id: '10000000-0000-4000-8000-000000000001' } }); });
+    assert.match(document.body.textContent, /Trail board unavailable/);
+    assert.doesNotMatch(document.body.textContent, /No trails listed yet|Cowles Mountain|Guy Fleming|Peñasquitos/);
+    assert.equal(document.querySelectorAll('.trail-rank-row').length, 0);
+    assert.equal(buttons().find(b => b.textContent.includes('Add a hike photo')).disabled, true);
+    setRatingsFailure(false);
+    await click('Try again');
+    assert.match(document.body.textContent, /No trails listed yet/);
+    assert.match(document.body.textContent, /Photo uploads open once Tobias adds a trail/);
+    assert.equal(buttons().find(b => b.textContent.includes('Add a hike photo')).disabled, true);
+    assert.ok(!buttons().some(b => b.textContent.includes('Start the camera roll')));
+    await click('Add a hike photo');
+    assert.equal(document.querySelector('input[type="file"]'), null, 'Empty trail list cannot open an unusable upload form.');
+    publishTestTrail();
+    await settle(() => window.dispatchEvent(new Event('summit:gallery-change')));
+    assert.doesNotMatch(document.body.textContent, /No trails listed yet/);
+    assert.equal(buttons().find(b => b.textContent.includes('Add a hike photo')).disabled, false);
     await click('Rate this hike');
     await settle(() => { for (const listener of listeners) listener('SIGNED_IN', { user: { id: '10000000-0000-4000-8000-000000000001' } }); });
     assert.ok(document.querySelector('input[name="stars"]'), 'Same-account refresh keeps the rating form open.');
@@ -53,7 +69,7 @@ test('trail UI saves an actual chosen rating, shares a photo, edits its caption 
     await click('Add a hike photo');
     const file = document.querySelector('input[type="file"]');
     await settle(() => { Object.defineProperty(file, 'files', { configurable: true, value: [new dom.window.File(['photo'], 'trail.jpg', { type: 'image/jpeg' })] }); file.dispatchEvent(new Event('change', { bubbles: true })); });
-    await change(document.querySelector('select[name="hike_id"]'), 'cowles-mountain');
+    await change(document.querySelector('select[name="hike_id"]'), 'test-ridge');
     await change(document.querySelector('textarea[name="caption"]'), 'The best part was the company.');
     await change(document.querySelector('input[name="alt_text"]'), 'Friends enjoying the view from a rocky summit');
     await settle(() => document.querySelector('input[name="consent"]').click());

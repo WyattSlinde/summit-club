@@ -2,11 +2,6 @@ export type Hike = { id: string; name: string; area: string; official_url: strin
 export type MonthlyHikes = { month: string; today: string; minimum_ratings: number; hikes: Hike[] };
 export type HikePhoto = { id: string; hike_id: string; hike_name: string; object_path: string; caption: string; alt_text: string; author_name: string; hiked_on: string; published_at: string | null; status: 'draft' | 'published' | 'hidden' | 'deleting'; mine: boolean };
 export type Gallery = { photos: HikePhoto[] };
-export const trailCatalog: Omit<Hike, 'average' | 'rating_count' | 'rank' | 'my_rating'>[] = [
-  { id: 'torrey-guy-fleming', name: 'Guy Fleming Trail', area: 'Torrey Pines State Natural Reserve', official_url: 'https://www.parks.ca.gov/?page_id=23207' },
-  { id: 'cowles-mountain', name: 'Cowles Mountain', area: 'Mission Trails Regional Park', official_url: 'https://www.sandiego.gov/cowles-mountain-summit' },
-  { id: 'penasquitos-canyon', name: 'Los Peñasquitos Canyon', area: 'Los Peñasquitos Canyon Preserve', official_url: 'https://www.sandiego.gov/park-and-recreation/parks/osp/lospenasquitos' },
-];
 export function pacificDate(now = new Date()) {
   const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(now);
   const part = (name: string) => parts.find(value => value.type === name)!.value;
