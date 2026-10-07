@@ -1,3 +1,4 @@
+import './pack-motion-frames.mjs';
 import { build } from 'vite';
 import { copyFile, mkdir, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';

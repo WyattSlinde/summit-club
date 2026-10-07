@@ -65,9 +65,9 @@ export function reflowScroll(scroll: number, start: number, oldRunway: number, n
 }
 
 /** Respect Retina displays without allocating an unbounded full-screen canvas. */
-export function canvasResolution(width: number, height: number, pixelRatio: number) {
+export function canvasResolution(width: number, height: number, pixelRatio: number, moving = false) {
   const w = Math.max(1, width), h = Math.max(1, height);
-  const ratio = Math.min(Math.max(1, pixelRatio || 1), 2, Math.sqrt(8500000 / (w * h)));
+  const ratio = Math.min(Math.max(1, pixelRatio || 1), moving ? 1 : 2, Math.sqrt((moving ? 1400000 : 8500000) / (w * h)));
   return { width: Math.round(w * ratio), height: Math.round(h * ratio) };
 }
 

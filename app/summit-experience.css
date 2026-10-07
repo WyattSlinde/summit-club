@@ -143,3 +143,9 @@
 .sx-arrival-strip>span>svg{color:var(--forest-sunset)}
 @media(max-width:700px){.sx-titlecard{top:26%;padding-inline:4%}.sx-titlecard h1{width:92vw}.sx-title-rise>.sx-eyebrow{font-size:8px;margin-bottom:24px;letter-spacing:.08em}.sx-title-rise>.sx-motto{font-size:9px;letter-spacing:.2em;margin-top:24px}.sx-summit-invitation{bottom:24%}.sx-summit-invitation>p{font-size:17px}.sx-school>.summit-mark{width:34px;height:34px}}
 @media(max-height:580px){.sx-titlecard{top:14%}.sx-titlecard h1{width:min(63vw,720px)}.sx-title-rise>.sx-eyebrow{margin-bottom:12px;font-size:8px}.sx-title-rise>.sx-motto{margin-top:16px;font-size:9px}.sx-summit-invitation{bottom:10%}.sx-summit-invitation>p{font-size:14px}}
+
+/* Most of the hike is opaque: reserve the full-screen mask for the actual reveal. */
+.sx-backdrop{mask-image:none;-webkit-mask-image:none;contain:paint}
+.sx-backdrop[data-revealing=true]{mask-image:linear-gradient(to bottom,#000 calc(var(--sx-cover) - 14%),transparent calc(var(--sx-cover) + 14%));-webkit-mask-image:linear-gradient(to bottom,#000 calc(var(--sx-cover) - 14%),transparent calc(var(--sx-cover) + 14%))}
+.sx-world{transform:none;will-change:auto}
+.sx-simple .sx-backdrop{mask:none;-webkit-mask:none}

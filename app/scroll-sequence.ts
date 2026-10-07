@@ -7,6 +7,7 @@ type Options = {
   previewUrl?: (frame: number) => string;
   onFrame: (image: ImageBitmap, frame: number, nextImage?: ImageBitmap, mix?: number) => void;
   onError: () => void;
+  loadPreview?: (frame:number, signal:AbortSignal, priority:'high'|'low') => Promise<Blob>;
   maxDecoded?: number;
   maxPreviewDecoded?: number;
 };
@@ -166,11 +167,14 @@ export class ScrollSequence {
     try {
       const url = layer === 'motion' ? this.options.previewUrl ?? this.options.url : this.options.url;
       const signal = AbortSignal.any([controller.signal, AbortSignal.timeout(12000)]);
-      const response = await fetch(url(frame), {
-        signal, cache: 'force-cache', priority: frame === this.wanted && layer === 'motion' ? 'high' : 'low',
-      } as RequestInit & { priority: 'high' | 'low' });
-      if (!response.ok) throw new Error(`Frame ${frame}: ${response.status}`);
-      const blob = await response.blob();
+      const priority = frame === this.wanted && layer === 'motion' ? 'high' : 'low';
+      let blob:Blob;
+      if(layer==='motion' && this.options.loadPreview)blob=await this.options.loadPreview(frame,signal,priority);
+      else {
+        const response = await fetch(url(frame), { signal, cache:'force-cache', priority } as RequestInit & {priority:'high'|'low'});
+        if(!response.ok)throw new Error(`Frame ${frame}: ${response.status}`);
+        blob=await response.blob();
+      }
       if (this.stopped || controller.signal.aborted || this.requests.get(id) !== request) return;
       this[layer].blobs.set(frame, blob);
       this.trim();

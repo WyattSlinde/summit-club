@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ArrowDown, ArrowUpRight, Mountain, RotateCcw } from 'lucide-react';
 import { ScrollSequence } from './scroll-sequence';
+import { MotionPacks } from './motion-packs';
 import { FramePainter } from './frame-painter';
 import { JOURNEY_VIEWPORTS, trailJourney, framePositionForProgress, reflowScroll, canvasResolution, frameFocalX } from './trail-journey';
 import media from './journey-media.json';
@@ -41,6 +42,8 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
       if (!cache) { cache = new Map(); styleCache.set(element, cache); }
       if (cache.get(name) !== text) { element.style.setProperty(name, text); cache.set(name, text); }
     }
+    let packs: MotionPacks | undefined;
+    let moving = false, detailPaintTimer: ReturnType<typeof setTimeout> | undefined, lastRequestedPose = -1;
     let sequence: ScrollSequence | undefined, currentImage: ImageBitmap | undefined, currentNext: ImageBitmap | undefined, currentMix = 0;
     let sequenceMobile: boolean | undefined;
     const isPortraitViewport = () => visual!.clientWidth / Math.max(1, visual!.clientHeight) <= 9 / 16;
@@ -50,6 +53,8 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
     function draw(image: ImageBitmap, index: number, nextImage?: ImageBitmap, mix = 0) {
       if (disposed || !context || !canvas) return;
       currentImage = image; currentNext = nextImage; currentMix = mix;
+      const resolution=canvasResolution(measuredWidth,measuredHeight,devicePixelRatio,moving);
+      if(canvas.width!==resolution.width||canvas.height!==resolution.height){canvas.width=resolution.width;canvas.height=resolution.height;}
       const w = canvas.width, h = canvas.height;
       const paint = (bitmap: ImageBitmap, pose: number, opacity: number) => {
         const scale = Math.max(w / bitmap.width, h / bitmap.height);
@@ -71,10 +76,10 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
     const receiveFrame = (...values: Parameters<typeof draw>) => painter.queue(values);
     function fail() {
       if (disposed) return;
-      clearTimeout(deadline);
+      clearTimeout(deadline);clearTimeout(detailPaintTimer);
       painter.flush();
       fallback = true; setFailed(true); setReady(true);
-      sequence?.dispose(); sequence = undefined; currentImage = undefined; currentNext = undefined;
+      sequence?.dispose(); packs?.dispose(); packs=undefined; sequence = undefined; currentImage = undefined; currentNext = undefined;
       measure();
     }
     function update() {
@@ -94,8 +99,8 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
       setStyle(stage!, '--sx-foreground', state.foreground);
       setStyle(stage!, '--sx-distance', `${(state.walk * 100).toFixed(3)}%`);
       setStyle(visual!, '--sx-cover', `${state.cover.toFixed(3)}%`);
-      setStyle(visual!, '--sx-scene-scale', 1);
-      setStyle(visual!, '--sx-scene-y', '0vh');
+      const revealing=state.approach>0&&state.approach<1;
+      if(visual!.dataset.revealing!==String(revealing))visual!.dataset.revealing=String(revealing);
       const remaining = Math.max(0, start + runway - currentScroll);
       const ended = progress >= 1 || isSimple();
       setStyle(underlay, 'opacity', state.camp);
@@ -112,7 +117,19 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
       if (nextStop !== previousStop) { previousStop = nextStop; setStop(nextStop); }
       if (state.phase !== previousPhase) { previousPhase = state.phase; setPhase(state.phase); }
       if (state.accessible !== previousAccessible) { previousAccessible = state.accessible; setUnderlayVisible(state.accessible); revealRef.current?.(state.navigation); }
-      if (!isSimple()) sequence?.seek(framePositionForProgress(progress, media.frameCount, 'summitFrame' in media ? Number(media.summitFrame) : undefined));
+      if (!isSimple()) {
+        const pose=framePositionForProgress(progress,media.frameCount,media.summitFrame);
+        if(pose!==lastRequestedPose){
+          lastRequestedPose=pose;moving=true;clearTimeout(detailPaintTimer);
+          // Only resolution settles after input; the camera pose never advances on a timer.
+          detailPaintTimer=setTimeout(()=>{
+            if(disposed||isSimple())return;
+            moving=false;painter.flush();
+            if(currentImage)draw(currentImage,lastDrawn,currentNext,currentMix);
+          },180);
+        }
+        sequence?.seek(pose);
+      }
       painter.flush();
       if (state.accessible && focusDestination) {
         const destinationId = focusDestination; focusDestination = null;
@@ -140,7 +157,7 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
       const crop = Math.max(width / 1920, height / 1080);
       const ox = (width - 1920 * crop) / 2, oy = (height - 1080 * crop) / 2;
       setStyle(stage!, '--sx-ridge', `polygon(${ridge.map(([x, y]) => `${x * crop + ox}px ${y * crop + oy}px`).join(',')},100% 100%,0 100%)`);
-      const resolution = canvasResolution(width, height, devicePixelRatio);
+      const resolution = canvasResolution(width, height, devicePixelRatio, moving);
       painter.flush();
       canvas.width = resolution.width; canvas.height = resolution.height;
       if (context) { context.imageSmoothingEnabled = true; context.imageSmoothingQuality = 'high'; }
@@ -183,12 +200,15 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
     };
     function startSequence() {
       painter.flush();
-      clearTimeout(deadline); setReady(false); lastDrawn = -1;
-      sequence?.dispose(); sequence = undefined; currentImage = undefined; currentNext = undefined;
+      clearTimeout(deadline);clearTimeout(detailPaintTimer);setReady(false);lastDrawn=-1;lastRequestedPose=-1;moving=false;
+      sequence?.dispose(); packs?.dispose(); packs=undefined; sequence = undefined; currentImage = undefined; currentNext = undefined;
       if (isSimple()) { setReady(true); clearTimeout(deadline); measure(); return; }
       deadline = setTimeout(() => { if (lastDrawn < 0 && !isSimple()) fail(); }, 18000);
       const mobile = isPortraitViewport(); sequenceMobile = mobile;
+      packs=new MotionPacks(start=>sitePath(`/journey-packs/${mobile?'mobile':'desktop'}/${String(start).padStart(4,'0')}.bin?v=${media.version}`),index=>sitePath(journeyFrameUrl(media,index,mobile,true)));
+      const source=packs;
       sequence = new ScrollSequence({ count: media.frameCount,
+        loadPreview:(index,signal,priority)=>source.load(index,signal,priority),
         url: index => sitePath(journeyFrameUrl(media, index, mobile)),
         previewUrl: index => sitePath(journeyFrameUrl(media, index, mobile, true)),
         maxDecoded: 2, maxPreviewDecoded: 32, onFrame: receiveFrame, onError: fail });
@@ -199,8 +219,8 @@ export default function SummitExperience({ onJoin, children, onReveal }: Props) 
     addEventListener('summit:enter', enterEvent); addEventListener('summit:navigate', navigateEvent); document.addEventListener('click', clubLink); addEventListener('hashchange', hashChanged); motion.addEventListener('change', startSequence);
     startSequence(); const initial = requestAnimationFrame(hashChanged);
     return () => {
-      disposed = true; clearTimeout(deadline); cancelAnimationFrame(frame); cancelAnimationFrame(focusFrame); cancelAnimationFrame(initial);
-      sizes.disconnect(); painter.dispose(); sequence?.dispose();
+      disposed = true; clearTimeout(deadline);clearTimeout(detailPaintTimer); cancelAnimationFrame(frame); cancelAnimationFrame(focusFrame); cancelAnimationFrame(initial);
+      sizes.disconnect(); painter.dispose(); sequence?.dispose();packs?.dispose();
       removeEventListener('scroll', queue); removeEventListener('resize', measure); removeEventListener('summit:enter', enterEvent); removeEventListener('summit:navigate', navigateEvent); document.removeEventListener('click', clubLink); removeEventListener('hashchange', hashChanged); motion.removeEventListener('change', startSequence);
     };
   }, []);
