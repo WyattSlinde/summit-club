@@ -1,0 +1,221 @@
+/* Shared materials, from the sunset arrival to the member field journal.
+   Textures are tiny static SVGs; no filters, timers, or scroll listeners. */
+:root {
+  --summit-forest: #203b2e;
+  --summit-deep: #142b23;
+  --summit-moss: #687957;
+  --summit-mist: #d5ddc8;
+  --summit-paper: #f5efdf;
+  --summit-linen: #e9ddc6;
+  --summit-muted: #53614e;
+  --summit-rule: #203b2e30;
+  --summit-sun: #efbb83;
+  --summit-rust: #914a30;
+  --summit-grain: url('../public/brand/paper-grain.svg');
+  --summit-contours: url('../public/brand/contours.svg');
+}
+
+/* Keep the dark frame, but let light and landscape occupy the welcome. */
+.member-basecamp .member-masthead {
+  background: var(--summit-deep) !important;
+  border-bottom-color: #efbb8330;
+  backdrop-filter: none;
+}
+body .members-gate {
+  background: var(--summit-contours) right center / 960px auto no-repeat, radial-gradient(ellipse at 90% 20%, #3d5938, transparent 70%), var(--summit-deep);
+  color: var(--summit-paper);
+}
+.member-basecamp .member-welcome {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 40px;
+  min-height: 490px;
+  overflow: hidden;
+  padding: 68px 7% 56px;
+  border-bottom: 4px solid var(--summit-sun);
+  background: var(--summit-deep);
+}
+.member-welcome .member-welcome-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 59%;
+  z-index: -3;
+}
+.member-basecamp .member-welcome::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background: linear-gradient(90deg, #142b23f5, #142b23e6 29%, #142b23ba 50%, #142b2330 73%, #142b2310), linear-gradient(0deg, #142b23b5, transparent 55%);
+}
+.member-basecamp .member-welcome::after {
+  content: '';
+  position: absolute;
+  inset: 0 53% 0 -10%;
+  z-index: -1;
+  background: var(--summit-contours) center / 750px auto no-repeat;
+  opacity: .38;
+  pointer-events: none;
+}
+.member-welcome .member-welcome-copy { display: block; margin: 0; min-width: 0; max-width: 640px; }
+.member-welcome .member-welcome-copy h1 {
+  font-size: clamp(40px, 4.6vw, 66px);
+  line-height: 1.06;
+  margin: 25px 0 20px;
+  color: var(--summit-paper);
+  overflow-wrap: anywhere;
+}
+.member-welcome-copy > p { max-width: 470px; color: var(--summit-mist); font-size: 16px; line-height: 1.8; }
+.member-welcome .field-guide-kicker { color: var(--summit-sun); font-size: 11px; }
+.member-welcome .member-welcome-links { display: flex; flex-wrap: wrap; gap: 12px 26px; margin-top: 26px; }
+.member-welcome .member-welcome-links a { color: var(--summit-paper); font-size: 13px; min-height: 46px; }
+.member-welcome .member-welcome-links a:first-child {
+  padding: 11px 18px;
+  background: var(--summit-sun);
+  border: 1px solid var(--summit-sun);
+  border-radius: 3px;
+  color: var(--summit-deep);
+  font-weight: 600;
+}
+.member-welcome .member-welcome-links a:hover { text-decoration: underline; text-underline-offset: 5px; }
+.member-welcome .member-welcome-links a:first-child:hover { background: var(--summit-paper); border-color: var(--summit-paper); text-decoration: none; }
+.member-welcome-caption { display: grid; justify-items: end; gap: 10px; flex: none; padding-bottom: 5px; }
+.member-welcome-caption > span { font: 10px/1.7 var(--mono); letter-spacing: .13em; color: var(--summit-paper); }
+.member-welcome .member-welcome-caption a { font-size: 10px; min-height: 30px; color: var(--summit-paper); text-decoration: underline; text-underline-offset: 4px; }
+
+/* Paper, moss, and copper give the useful sections a readable rhythm. */
+.member-basecamp .idea-strip {
+  padding: 26px 30px;
+  border: 1px solid var(--summit-rule);
+  border-left: 3px solid var(--summit-rust);
+  border-radius: 3px;
+  background: #fff9ec75;
+}
+.member-basecamp .idea-button { background: var(--summit-forest); color: var(--summit-paper); border-color: var(--summit-forest); }
+.member-basecamp .idea-button:hover { background: #35523c; }
+.member-basecamp .first-outing { margin-top: 15px; }
+.member-basecamp .trail-community {
+  --trail-ink: var(--summit-forest);
+  --trail-muted: var(--summit-muted);
+  --trail-paper: var(--summit-paper);
+  --trail-line: var(--summit-rule);
+  background: transparent;
+  margin-top: 20px;
+}
+.member-basecamp .trail-section-label { border-top: 2px solid var(--summit-rust); padding-top: 22px; }
+.member-basecamp .trail-rank-row.is-first { background: #dfe5ce; border-top-color: var(--summit-moss); }
+.member-basecamp .trail-gallery-empty {
+  background: var(--summit-grain), linear-gradient(120deg, #e2e7d4, var(--summit-linen));
+  border-color: var(--summit-rule);
+}
+.member-basecamp .trail-button, .member-page .member-primary {
+  background: var(--summit-forest);
+  border-color: var(--summit-forest);
+  color: var(--summit-paper);
+}
+.member-basecamp .trail-button:hover, .member-page .member-primary:hover { background: #35523c; }
+.member-basecamp .community-jump { min-height: 44px; color: var(--summit-rust); border-color: var(--summit-rule); }
+.member-basecamp .xc-field-guide .xc-tab-image { border-radius: 2px; }
+.member-basecamp .xc-field-guide .xc-tab-image > img { opacity: .92; }
+.member-basecamp .xc-field-guide .xc-tab[data-state=active] .xc-tab-image > img { opacity: 1; }
+.member-basecamp .xc-field-guide .xc-tab[data-state=active] { box-shadow: inset 0 2px 0 var(--summit-rust); }
+.member-basecamp .xc-field-guide .xc-tab:after { display: none; }
+.member-basecamp .xc-field-guide .xc-landscape { border-radius: 3px; }
+
+/* Registration keeps the forest setting around a clear paper form. */
+body .registration-page {
+  --member-ink: var(--summit-forest);
+  --member-muted: var(--summit-muted);
+  background: var(--summit-contours) left top / 960px auto repeat-y, radial-gradient(ellipse at 5% 30%, #3d5938, transparent 55%), var(--summit-deep);
+  color: var(--summit-paper);
+}
+body .registration-page.registration-embedded { background-color: #142b23; }
+body .registration-page .registration-layout { max-width: 1200px; gap: 8%; }
+body .registration-page .registration-panel {
+  max-width: none;
+  padding: clamp(25px, 3.2vw, 42px);
+  background: var(--summit-grain), var(--summit-paper);
+  color: var(--summit-forest);
+  border: 1px solid #e6d8be;
+  border-top: 4px solid var(--summit-sun);
+  border-radius: 5px;
+  box-shadow: 0 18px 48px #071b1420;
+}
+body .registration-page .registration-status { color: var(--summit-rust); }
+body .registration-page .registration-panel :is(h1, h2) { color: var(--summit-forest); }
+body .registration-page .registration-panel :is(.registration-intro, .registration-fine, .registration-loading, .registration-consent, .registration-form small) { color: var(--summit-muted); }
+body .registration-page .registration-form label { color: var(--summit-forest); }
+body .registration-page .registration-form :is(input:not([type=checkbox]), select, textarea) {
+  background: #fffaf0;
+  color: var(--summit-forest);
+  border-color: #74836e;
+  border-radius: 3px;
+}
+body .registration-page .registration-form :is(input, textarea)::placeholder { color: #67735e; opacity: 1; }
+body .registration-page .registration-primary { background: var(--summit-forest); color: var(--summit-paper); border-color: var(--summit-forest); border-radius: 3px; }
+body .registration-page .registration-primary:hover { background: #35523c; }
+body .registration-page .registration-secondary { color: var(--summit-rust); border-color: var(--summit-rule); }
+body .registration-page .registration-confirmation > svg { color: var(--summit-rust); }
+body .registration-page .registration-panel .registration-error { color: #923c29; }
+body .registration-page .registration-panel .registration-saved { color: #315d3d; }
+body .registration-page .registration-consent input { accent-color: var(--summit-forest); }
+body .registration-page .registration-panel :is(a, button, input, select, textarea):focus-visible { outline: 2px solid var(--summit-rust); outline-offset: 4px; }
+body .registration-page .registration-availability { color: var(--summit-muted); border-color: var(--summit-rust); background: var(--summit-linen); }
+body .registration-page .signup-welcome > span { color: var(--summit-sun); }
+body .registration-page .signup-welcome h2 { color: var(--summit-paper); }
+body .registration-page .signup-welcome li::before { content: '↗'; display: inline-block; margin-right: 12px; color: var(--summit-sun); }
+body .registration-page .signup-welcome li { border-bottom-color: #efbb8330; }
+
+/* Profiles and leadership use the same materials and the same header. */
+body .member-page {
+  --member-ink: var(--summit-forest);
+  --member-muted: var(--summit-muted);
+  --member-cream: var(--summit-paper);
+  --member-soft: #e5e7d7;
+  --member-line: var(--summit-rule);
+  background: var(--summit-grain), linear-gradient(115deg, var(--summit-linen), var(--summit-paper) 50%, #e9eadb);
+}
+.member-page .member-header { background: var(--summit-deep); color: var(--summit-paper); max-width: none; height: 76px; padding-inline: max(6%, calc((100% - 1200px) / 2)); }
+.member-page .member-header :is(.member-brand, nav a, .member-text) { color: var(--summit-paper); }
+.member-page .member-header .summit-mark { color: var(--summit-sun); }
+.member-page .member-cover { max-width: none; border-radius: 0; border-color: var(--summit-sun); }
+.member-page .member-field-note {
+  background: var(--summit-contours) center / 700px auto, var(--summit-forest);
+  color: var(--summit-paper);
+  border-top: 3px solid var(--summit-sun);
+}
+.member-page .member-field-note::after { display: none; }
+.member-page .member-field-note p { color: var(--summit-mist); }
+.member-page .member-field-note a, .member-page .member-field-note > svg { color: var(--summit-sun); }
+.member-page .member-tag > button { background: #fff9ec; border-color: #89917c; }
+.member-page .member-tag > span, .member-page .member-kicker { color: var(--summit-rust); }
+.member-page .member-field-note .member-kicker { color: var(--summit-sun); }
+body .member-report-dialog, body .trail-dialog, body .summit-dialog { background: var(--summit-grain), var(--summit-paper); }
+.club-footer.club-footer { background: var(--summit-contours) right center / 760px auto, var(--summit-deep); }
+
+@media (max-width: 1000px) {
+  .member-welcome-caption { display: none; }
+  .member-basecamp .member-welcome { min-height: 460px; }
+}
+@media (max-width: 760px) {
+  .member-basecamp .member-welcome { min-height: 540px; padding: 145px 6% 32px; align-items: flex-end; }
+  .member-basecamp .member-welcome::before { background: linear-gradient(0deg, #142b23 4%, #142b23e8 37%, #142b2399 65%, #142b2320 100%); }
+  .member-basecamp .member-welcome::after { inset: 40% 0 0 -35%; opacity: .25; }
+  .member-welcome .member-welcome-copy h1 { font-size: clamp(36px, 8.7vw, 54px); }
+  .member-welcome-copy > p { font-size: 15px; max-width: 440px; }
+  .member-welcome .member-welcome-links { gap: 8px 19px; margin-top: 21px; }
+  .member-welcome .member-welcome-links a { font-size: 12px; }
+  .member-basecamp .idea-strip { padding: 24px; }
+  body .registration-page .registration-panel { padding: 25px 22px; margin-top: 15px; }
+  .member-page .member-header { height: 70px; padding-inline: 20px; }
+  body .registration-page .registration-form :is(input:not([type=checkbox]), select, textarea) { font-size: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .member-welcome a, .registration-primary { transition: none; }
+}

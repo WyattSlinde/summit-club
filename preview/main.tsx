@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { createRoot } from 'react-dom/client';
 import { cloudConfigured } from '../lib/cloud-client';
 import '../app/globals.css';
+import '../app/field-journal.css';
 
 // Keep account and friend controls out of the hike's initial route bundle.
 const MemberBasecamp = lazy(() => import('../app/members/basecamp'));
