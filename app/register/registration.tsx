@@ -18,6 +18,7 @@ export default function Registration({ embedded = false }: Props) {
   const router = useRouter();
   const [account, setAccount] = useState<BasecampState | null>(null), [email, setEmail] = useState('');
   const [loading, setLoading] = useState(cloudConfigured), [saving, setSaving] = useState(false);
+  const [authBusy, setAuthBusy] = useState(false);
   const [mode, setMode] = useState<'signup'|'signin'>('signup'), [editing, setEditing] = useState(false);
   const [error, setError] = useState(''), [notice, setNotice] = useState(''), [confirmation, setConfirmation] = useState(false);
   const [draft, setDraft] = useState<RegistrationDetails | null>(null);
@@ -29,14 +30,14 @@ export default function Registration({ embedded = false }: Props) {
     await cloudClient().auth.updateUser({ data:{ summit_registration:null } });
     announceMemberChange(); goToMembers();
   }
-  const load = useCallback(async () => {
+  const load = useCallback(async (enterBasecamp = false) => {
     if (!cloudConfigured || submitting.current) return;
     const current=++version.current; setLoading(true); setError('');
     try {
       const state=await basecampRequest<BasecampState>();
       if(current!==version.current)return;
       setAccount(state);
-      if(state.member && !new URLSearchParams(location.search).has('edit')) { if(!embedded)goToMembers(); return; }
+      if(state.member && !new URLSearchParams(location.search).has('edit')) { if(!embedded||enterBasecamp)goToMembers(); return; }
       if(state.signedIn) {
         const {data,error:authError}=await cloudClient().auth.getUser();
         if(authError)throw new Error('Could not check your account. Please sign in again.');
@@ -85,6 +86,11 @@ export default function Registration({ embedded = false }: Props) {
     try{const {error}=await cloudClient().auth.resend({type:'signup',email,options:{emailRedirectTo:new URL(sitePath('/register/?complete=1'),location.origin).href}});if(error)throw error;setNotice('If confirmation is needed, a new link will arrive by email.');}
     catch(e){setError(e instanceof Error?e.message:'Could not resend. Try again.');}finally{setSaving(false);}
   }
+  function chooseMode(next: 'signup' | 'signin') {
+    setMode(next);setConfirmation(false);setNotice('');setError('');
+    const url=new URL(location.href);url.searchParams.set('mode',next);
+    history.replaceState(history.state,'',url.pathname+url.search+url.hash);
+  }
   const Tag=embedded?'div':'main', Heading=embedded?'h2':'h1';
   const disabled=saving||loading||!cloudAuthReady;
   return <Tag className={`registration-page ${embedded?'registration-embedded':''}`}>
@@ -92,11 +98,12 @@ export default function Registration({ embedded = false }: Props) {
     <div className="registration-layout">
       <aside className="signup-welcome"><span>EXPLORE. SERVE. LEAD.</span><h2>Your next adventure<br/>starts with the crew.</h2><p>Hike somewhere new. Give back along the way. Meet people who are up for it.</p><ul><li>Open to every Cathedral Catholic student</li><li>No outdoor experience needed</li><li>Student-led, from the first idea to the trail</li></ul><p className="signup-leader">Led by Tobias Kell<br/><a href="mailto:Tkell2028@cchsdons.com">Tkell2028@cchsdons.com</a></p></aside>
       <section className="registration-panel" aria-labelledby="registration-title" aria-busy={loading||saving}>
+        {!account?.signedIn&&<div className="registration-account-switch" role="group" aria-label="Join or log in"><button type="button" aria-pressed={mode==='signup'} disabled={loading||saving||authBusy||!cloudAuthReady} onClick={()=>chooseMode('signup')}>Join the club</button><button type="button" aria-pressed={mode==='signin'} disabled={loading||saving||authBusy||!cloudAuthReady} onClick={()=>chooseMode('signin')}>Log in</button></div>}
         <span className="registration-status">{editing?'YOUR REGISTRATION':mode==='signin'?'WELCOME BACK':'JOIN THE CLUB'}</span>
         <Heading id="registration-title">{account?.member&&!editing?'You’re in.':confirmation?'Check your inbox.':editing?'Make it yours.':mode==='signin'?'Back to basecamp.':'You belong out here.'}</Heading>
         {loading?<p role="status" className="registration-loading"><Loader2 className="spin" size={18}/> Checking your registration…</p>
         :account?.member&&!editing?<><p className="registration-intro">Your member basecamp is ready. Choose an outing, find friends, and share what you’ve been up to.</p><Link className="registration-primary" href="/members/">Open member basecamp<ArrowUpRight size={17}/></Link><Link className="registration-secondary" href="/register/?edit=1">Edit registration</Link></>
-        :mode==='signin'&&!account?.signedIn&&cloudConfigured?<MemberAuth onSignedIn={()=>void load()}/>
+        :mode==='signin'&&!account?.signedIn&&cloudConfigured?<MemberAuth registrationEntry onBusyChange={setAuthBusy} onSignedIn={()=>void load(true)}/>
         :confirmation?<div className="registration-confirmation"><Mail size={28}/><p className="registration-intro">We’ve requested a confirmation link for <strong>{email}</strong>. Confirming your email finishes registration securely.</p><button className="registration-secondary" disabled={saving} onClick={()=>void resend()}>Resend confirmation</button></div>
         :<form className="registration-form" onSubmit={register}>
           {!cloudAuthReady&&<p className="registration-availability" role="status">Online signup is being connected. This form will open when it’s ready. You can contact Tobias above in the meantime.</p>}
@@ -109,7 +116,7 @@ export default function Registration({ embedded = false }: Props) {
           <button className="registration-primary" disabled={disabled}>{saving?<><Loader2 className="spin" size={18}/> Joining…</>:!cloudAuthReady?'Signup opens soon':editing?'Save & return to basecamp':account?.signedIn?'Join & enter basecamp':'Join SUMMIT'}<ArrowUpRight size={17}/></button>
           <p className="registration-fine">After joining: your profile, friends, outing votes, top hikes, and club photos. Each outing has its own RSVP.</p>
         </form>}
-        {!account?.signedIn&&<button type="button" className="registration-secondary" disabled={saving||!cloudAuthReady} onClick={()=>{setMode(mode==='signin'?'signup':'signin');setConfirmation(false);setNotice('');setError('');}}>{mode==='signin'?'New here? Join the club':'Already a member? Sign in'}</button>}
+        {!account?.signedIn&&<button type="button" className="registration-secondary" disabled={saving||authBusy||!cloudAuthReady} onClick={()=>chooseMode(mode==='signin'?'signup':'signin')}>{mode==='signin'?'New here? Join the club':'Already a member? Log in'}</button>}
         {error&&<p className="registration-error" role="alert">{error}</p>}{notice&&<p className="registration-saved" role="status">{notice}</p>}
         {account?.signedIn&&<MemberSignOut onDone={()=>void load()}/>}
       </section>

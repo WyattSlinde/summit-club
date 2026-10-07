@@ -43,6 +43,33 @@ test('single signup form confirms email, saves club details, and opens members p
   assert.equal(fixtureApi.calls.filter(c=>c.operation==='join').length,1);
   assert.equal(fixtureApi.calls.some(c=>c.operation==='signup'),false);
   assert.deepEqual(fixtureApi.destinations,['/members/']);
+  // Returning members can discover login above the form, use a password or
+  // request an existing-account-only link, and enter basecamp from the homepage.
+  fixtureApi.reset();fixtureApi.returning();history.replaceState(null,'','/summit-club/');
+  await settle(()=>root.render(createElement(Registration,{embedded:true,key:'returning-login'})));
+  const loginChoice=document.querySelectorAll('.registration-account-switch button')[1];
+  await settle(()=>loginChoice.click());
+  assert.equal(new URLSearchParams(location.search).get('mode'),'signin');
+  assert.equal(document.querySelector('.registration-form'),null);
+  assert.equal(document.querySelector('.member-auth-tabs'),null,'no second signup form inside login');
+  const input=(type,value)=>{const el=document.querySelector(`.member-form input[type="${type}"]`);Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(el,value);el.dispatchEvent(new Event('input',{bubbles:true}));};
+  await settle(()=>input('email','taylor@example.test'));
+  await settle(()=>document.querySelector('.member-login-alternative button').click());
+  const link=fixtureApi.calls.find(c=>c.operation==='login-link');
+  assert.equal(link.payload.options.shouldCreateUser,false);
+  assert.equal(link.payload.options.emailRedirectTo,'https://example.test/summit-club/register/?complete=1');
+  assert.match(document.body.textContent,/a login link will arrive/);assert.deepEqual(fixtureApi.destinations,[]);
+  await settle(()=>input('password','incorrect'));
+  await settle(()=>document.querySelector('.member-form').dispatchEvent(new Event('submit',{bubbles:true,cancelable:true})));
+  assert.match(document.body.textContent,/Invalid login credentials/);assert.deepEqual(fixtureApi.destinations,[]);
+  await settle(()=>input('password','correct-test-password'));
+  await settle(()=>document.querySelector('.member-form').dispatchEvent(new Event('submit',{bubbles:true,cancelable:true})));
+  assert.deepEqual(fixtureApi.destinations,['/members/']);
+  assert.equal(fixtureApi.calls.some(c=>c.operation==='join'||c.operation==='signup'),false,'login does not register the same member twice');
+  fixtureApi.reset();history.replaceState(null,'','/summit-club/register/?mode=signin');
+  await settle(()=>root.render(createElement(Registration,{key:'login-deep-link'})));
+  assert.equal(document.querySelectorAll('.registration-account-switch button')[1].getAttribute('aria-pressed'),'true');
+  assert.ok(document.querySelector('.member-form'));
   fixtureApi.reset();fixtureApi.setReady(false);history.replaceState(null,'','/summit-club/register/');
   await settle(()=>root.render(createElement(Registration,{key:'offline'})));
   assert.ok(field('email').disabled);assert.ok(document.querySelector('button[type="submit"]')?.disabled??document.querySelector('.registration-primary').disabled);assert.equal(fixtureApi.calls.length,0);

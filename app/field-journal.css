@@ -148,6 +148,32 @@ body .registration-page .registration-panel {
   box-shadow: 0 18px 48px #071b1420;
 }
 body .registration-page .registration-status { color: var(--summit-rust); }
+.registration-panel .registration-account-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  padding: 5px;
+  margin-bottom: 28px;
+  border: 1px solid var(--summit-rule);
+  border-radius: 5px;
+  background: var(--summit-linen);
+}
+.registration-account-switch button {
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--summit-forest);
+  font: 500 14px/1.4 'DM Sans', sans-serif;
+}
+.registration-account-switch button[aria-pressed=true] { background: var(--summit-forest); color: var(--summit-paper); }
+.registration-account-switch button:not([aria-pressed=true]):hover { background: #fff9ec; }
+.registration-panel .member-auth-entry { padding: 0; border: 0; background: transparent; }
+.member-auth .member-login-alternative { display: grid; gap: 12px; margin-top: 24px; padding-top: 22px; border-top: 1px solid var(--summit-rule); }
+.member-login-alternative > span { color: var(--member-muted); font-size: 12px; }
+.member-login-alternative .member-secondary { width: 100%; border-color: #74836e; }
+.member-login-alternative small { color: var(--member-muted); font-size: 12px; line-height: 1.6; }
 body .registration-page .registration-panel :is(h1, h2) { color: var(--summit-forest); }
 body .registration-page .registration-panel :is(.registration-intro, .registration-fine, .registration-loading, .registration-consent, .registration-form small) { color: var(--summit-muted); }
 body .registration-page .registration-form label { color: var(--summit-forest); }

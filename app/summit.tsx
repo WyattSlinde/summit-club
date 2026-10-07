@@ -20,7 +20,7 @@ export default function Summit() {
  return <><a className="skip" href="#basecamp" onClick={enter}>Skip to the club</a>
   <header className="masthead journey-nav public-masthead" data-arrived={arrived}>
    <a href="#home" className="wordmark" aria-label="SUMMIT home"><SummitMark motion="entrance" active={arrived}/><SummitWordmark/><span>CATHEDRAL CATHOLIC<br/>OUTDOOR CLUB</span></a>
-   <nav><a href="#basecamp" onClick={enter}>The club</a><Link href="/register/?mode=signin">Sign in</Link></nav>
+   <nav><a href="#basecamp" onClick={enter}>The club</a><Link href="/register/?mode=signin">Log in</Link></nav>
    <a className="join-nav" href="#join" onClick={e=>{e.preventDefault();navigate('join');}}>Join SUMMIT<ArrowUpRight size={17}/></a>
   </header>
   <main><SummitExperience onJoin={()=>navigate('join')} onReveal={setArrived}>
