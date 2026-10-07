@@ -31,6 +31,18 @@ test('single signup form confirms email, saves club details, and opens members p
   fixtureApi.destinations.length=0;history.replaceState(null,'','/summit-club/');
   await settle(()=>root.render(createElement(Registration,{embedded:true,key:'registered-public'})));
   assert.deepEqual(fixtureApi.destinations,[],'returning members can replay the public hike without a forced redirect');assert.match(document.body.textContent,/Open member basecamp/);
+  // A verified email-test account has no pending club fields. It must still be
+  // able to fill in real details, without creating another Auth account.
+  fixtureApi.reset();fixtureApi.confirm();history.replaceState(null,'','/summit-club/register/?complete=1');
+  await settle(()=>root.render(createElement(Registration,{key:'confirmed-no-draft'})));
+  assert.match(document.body.textContent,/Email confirmed. Add your details/);
+  assert.equal(field('name').disabled,false);assert.equal(field('email'),null);
+  assert.equal(document.querySelector('.registration-back').getAttribute('href'),'/summit-club/#home');
+  assert.deepEqual(fixtureApi.destinations,[]);
+  await settle(()=>{field('name').value='Taylor Student';field('grade').value='10';field('interest').value='Explore';field('consent').checked=true;document.querySelector('form').dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));});
+  assert.equal(fixtureApi.calls.filter(c=>c.operation==='join').length,1);
+  assert.equal(fixtureApi.calls.some(c=>c.operation==='signup'),false);
+  assert.deepEqual(fixtureApi.destinations,['/members/']);
   fixtureApi.reset();fixtureApi.setReady(false);history.replaceState(null,'','/summit-club/register/');
   await settle(()=>root.render(createElement(Registration,{key:'offline'})));
   assert.ok(field('email').disabled);assert.ok(document.querySelector('button[type="submit"]')?.disabled??document.querySelector('.registration-primary').disabled);assert.equal(fixtureApi.calls.length,0);

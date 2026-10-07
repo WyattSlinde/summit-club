@@ -12,6 +12,18 @@ minimum_password_length = 12
 [auth.email]
 enable_confirmations = true
 
+[auth.hook.send_email]
+enabled = true
+uri = "https://vybchvdgablypeimevuj.supabase.co/functions/v1/auth-email"
+secrets = "env(SEND_EMAIL_HOOK_SECRET)"
+
 [functions.registration-mail]
 # The worker checks its own server-only secret before touching the queue.
 verify_jwt = false
+
+[functions.auth-email]
+enabled = true
+# Supabase signs every Auth request; handler.ts verifies Standard Webhooks signatures.
+verify_jwt = false
+import_map = "./functions/auth-email/deno.json"
+entrypoint = "./functions/auth-email/index.ts"
