@@ -1,5 +1,5 @@
 import { cloudConfigured, clubRequest } from './cloud-client';
-export type Member = { name: string; grade: string; interest: string; created_at: string };
+export type Member = { name: string; grade: string; interest: string; created_at: string; note?: string; contact_email?: string };
 export type VoteState = { votes: { adventure_id: string; count: number }[]; myVotes: { adventure_id: string }[] };
 export type BasecampState = VoteState & {
   previewOnly?: boolean;

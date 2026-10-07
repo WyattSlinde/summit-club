@@ -1,4 +1,5 @@
 export type LeaderMember = {
+  contact_email?: string; note?: string; notification_status?: string;
   name: string; grade: string; interest: string; created_at: string; choices: string | null;
 };
 export type LeaderData = {
@@ -19,9 +20,9 @@ export function csvCell(value: string) {
   return `"${safe.replaceAll('"', '""')}"`;
 }
 export function rosterCSV(members: LeaderMember[], choiceName: (id: string) => string) {
-  return [['Name', 'Grade', 'Interest', 'Outing votes', 'Joined'], ...members.map(member => [
+  return [['Name', 'Grade', 'Interest', 'Outing votes', 'Joined', 'Email', 'Student note', 'Signup email'], ...members.map(member => [
     member.name, member.grade, member.interest,
     (member.choices ?? '').split(',').filter(Boolean).map(choiceName).join('; '),
-    member.created_at.slice(0, 10),
+    member.created_at.slice(0, 10), member.contact_email || '', member.note || '', member.notification_status || '',
   ])].map(row => row.map(csvCell).join(',')).join('\r\n');
 }

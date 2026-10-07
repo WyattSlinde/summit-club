@@ -18,8 +18,9 @@ The hiking sequence, scroll timeline, mountain reveal, and animated identity are
 ## Activate the hosted backend
 
 1. Obtain the owner's organization choice and cost approval, then create a dedicated SUMMIT Supabase project. Do not reuse another application's database.
-2. Apply every SQL file in `supabase/migrations/` to the new project in timestamp order: member profiles first, then hike ratings and the gallery. Both files were created with Supabase CLI `migration new`.
+2. Apply every SQL file in `supabase/migrations/` to the new project in timestamp order: member profiles first, hike ratings and the gallery second, registration notifications third. All files were created with Supabase CLI `migration new`.
 3. Configure Auth Site URL as `https://wyattslinde.github.io/summit-club/`. Allow these exact redirects:
+   - `https://wyattslinde.github.io/summit-club/register/?complete=1`
    - `https://wyattslinde.github.io/summit-club/profile/`
    - `https://wyattslinde.github.io/summit-club/profile/?recovery=1`
    Add localhost redirects only for development when needed.
@@ -46,7 +47,7 @@ The public `summit_request` function is an invoker wrapper. Its private implemen
 
 The private `member-photos` storage bucket accepts JPEG only. Object policies restrict writes to `<auth.uid()>/avatar.jpg` and reads to the owner or an accepted, permitted friend. Downloads use the viewer's JWT, not permanent public URLs or long-lived signed URLs. Removing a friend or blocking them denies future downloads; files already downloaded cannot be recalled.
 
-Grade, registration name, email, and friend lists are not included in friend profile cards. A student's account is email-verified; school membership is self-attested at registration, not represented as school-verified. Only the original registration fields and explicitly submitted ideas are exposed to leaders. Bio/next-adventure notes are governed by profile sharing settings.
+Grade, registration name, email, and friend lists are not included in friend profile cards. A student's account is email-verified; school membership is self-attested at registration, not represented as school-verified. Registration name, verified email, grade, interests, the optional signup note, and explicitly submitted ideas are exposed to leaders. Bio/next-adventure notes are governed by profile sharing settings.
 
 ## Development and tests
 
@@ -64,10 +65,35 @@ Apply the second migration, `20261006205628_hike_ratings_and_gallery.sql`, after
 
 - A leader-managed trail catalog with official park information links. The initial real trail entries are [Guy Fleming Trail](https://www.parks.ca.gov/?page_id=23207), [Cowles Mountain](https://www.sandiego.gov/cowles-mountain-summit), and [Los Peñasquitos Canyon](https://www.sandiego.gov/park-and-recreation/parks/osp/lospenasquitos). These are not scheduled SUMMIT outings and have no seeded ratings or invented trip photos.
 - 1–5 star ratings with a member's attestation that they hiked the trail. One row per member/trail/hike month; saving again updates the same rating. Members can remove their rating. Months follow `America/Los_Angeles`, and the board offers the latest 12 months. Three distinct members' ratings are required to rank. Ranking uses the exact mean, then rating count, then name and ID; the displayed score is rounded to one decimal.
-- A members-only hike-photo gallery at the bottom of the main site. Captions, accessible descriptions, trail selection, historical hike dates, camera-roll previews, edit/remove actions, trail filtering, stable cursor pagination, and a My photos view for unfinished/hidden uploads are included.
+- A members-only hike-photo gallery at the bottom of member basecamp. Captions, accessible descriptions, trail selection, historical hike dates, camera-roll previews, edit/remove actions, trail filtering, stable cursor pagination, and a My photos view for unfinished/hidden uploads are included.
 - A private `hike-photos` bucket. Each member may keep up to 30 photo records and create up to 10 per day. Uploads require a reserved draft row, are immutable, and accept JPEGs up to 4 MB. The client accepts JPG/PNG/WebP originals up to 10 MB, re-encodes without original metadata, and preserves the image's aspect ratio at a maximum dimension of 1600 pixels. No public student image URLs are generated.
 - Explicit uploader confirmation that they have permission to share, including permission from people pictured. All registered members may view published gallery photos with the uploader's display name, even when the uploader keeps their separate profile private. Blocked relationships are excluded. Anonymous visitors cannot list or download gallery photos.
 - A Hikes & photos tab in the leadership desk: add/archive trails, inspect reported images, hide/restore photos, and mark concerns reviewed. Leaders can access hidden photos for review; owners can still delete them. Photos are shared immediately within the club after upload and consent, not held in a pre-approval queue.
 - Storage-aware deletion: a photo is first hidden, its object is deleted through the Storage API, and then its metadata is deleted. Failed cleanups remain visible to their owner in My photos for retry. Deleting a club profile first removes gallery objects; the server prevents account cleanup from silently leaving storage objects behind.
 
-Activation remains pending alongside the member backend. The static preview displays the verified trail catalog and honest empty states; it cannot save ratings or accept uploads. Tests run the actual SQL in Postgres plus the React forms in a DOM harness; production email, storage delivery, and live multi-account verification still require the dedicated Supabase project.
+Activation remains pending alongside the member backend. The static preview shows the public introduction and a disabled registration form; member basecamp is gated until signup is active. It cannot save ratings or accept uploads. Tests run the actual SQL in Postgres plus the React forms in a DOM harness; production email, storage delivery, and live multi-account verification still require the dedicated Supabase project.
+
+
+## Public entry and member basecamp
+
+The public `/` route retains the cinematic climb, summit reveal, short club overview, and inline registration. Outing votes, suggestions, calendar/RSVPs, ratings, and the camera roll now live at `/members/`. The member route checks the saved registration before mounting those tools. The separate profile/friends page remains at `/profile/`, linked from basecamp. Signing out clears the member page. A registered visitor can replay the public intro without being automatically redirected; an explicit visit to `/register/` returns an existing member to basecamp. `/register/?edit=1` edits registration.
+
+The single signup form collects name, email, password, grade, interest, optional note, and explicit consent to share registration details with Tobias. Until email is confirmed, validated pending fields are kept in the user's own Auth metadata; those fields never grant a role or prove school membership. The confirmation callback at `/register/?complete=1` calls the normal membership RPC, clears the pending metadata, and opens `/members/`. The database independently verifies the authenticated user's confirmed email and validates registration. Passwords never enter the registration table or email. Existing members use sign-in. Auth accounts without completed registration still cannot enter member basecamp.
+
+## Registration emails to Tobias
+
+**Not activated yet.** The notification code is tested, but no real email has been sent. The Supabase project, Auth mail sender, notification sender, and schedule still require configuration.
+
+The third migration adds a private durable outbox. A successful first registration queues one immutable message in the same transaction as the member record. It targets `Tkell2028@cchsdons.com` and includes name, verified account email, grade, interests, and the optional signup note. Editing registration updates the leader roster without sending repeated signup emails. No older registrations are backfilled or emailed by this migration. Queue records are deleted with the member record.
+
+The Edge Function `registration-mail` is server-only. It accepts a private worker token, claims leased jobs through service-only RPCs, and sends plain-text emails with Resend. Students cannot choose recipients, claim jobs, inspect the outbox, or mark messages sent. The worker uses a stable idempotency key and immutable payload for retries. Failures back off; after eight attempts or 23 hours from the first attempt, delivery needs review instead of risking a duplicate outside the provider's 24-hour idempotency window. A provider acceptance is shown as **Sent to mail provider**, not proof of inbox delivery. Leaders can see email status and export contact email/student notes in the private roster.
+
+To activate after the dedicated Supabase project exists:
+
+1. Configure a verified sending domain in Resend. Store `RESEND_API_KEY`, `SUMMIT_MAIL_FROM` (the verified sender address), and a random 32-byte-or-longer `SUMMIT_MAIL_WORKER_SECRET` in Edge Function secrets. `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are supplied by the hosted runtime. None belongs in browser configuration or Git. The school recipient is not the sender; do not impersonate `cchsdons.com` without control of that domain.
+2. Deploy `supabase/functions/registration-mail` using the checked-in function configuration. JWT gateway verification is disabled only because the handler checks its own server-only token before any work. Do not expose that token to clients.
+3. Enable `pg_cron` and `pg_net`. In Vault, store `summit_project_url` and `summit_mail_worker_secret` (matching the function secret). Run `supabase/setup/registration-mail-cron.sql` to invoke the worker each minute. The schedule contains secret names only.
+4. Use an authorized test signup with confirmed email. Confirm a single queue record, provider message ID, private roster entry, and actual receipt by Tobias. Test a provider failure and retry. Monitor Cron/Edge logs and `needs_review` rows. Reconcile Resend logs before manually retrying those rows; never blindly reset an ambiguous job after its deduplication window.
+5. Configure Supabase Auth email delivery separately (the same verified Resend domain can supply SMTP). Only enable `authReady` after confirmation and recovery work with an external test address.
+
+References: [Supabase scheduled functions](https://supabase.com/docs/guides/functions/schedule-functions), [Resend send API](https://resend.com/docs/api-reference/emails/send-email), [Resend idempotency](https://resend.com/docs/dashboard/emails/idempotency-keys).

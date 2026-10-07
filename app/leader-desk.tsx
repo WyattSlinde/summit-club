@@ -90,6 +90,9 @@ export default function LeaderDesk({ open, onOpenChange, onChanged }: {
             <div className="desk-roster">{members.length ? members.map((member, index) => <article key={`${member.created_at}-${index}`}>
               <div><strong>{member.name}</strong><span>Grade {member.grade} · Joined {new Date(member.created_at).toLocaleDateString('en-US', { timeZone: 'America/Los_Angeles', month: 'short', day: 'numeric' })}</span></div>
               <span className="desk-interest">{member.interest}</span>
+              {member.contact_email && <p><a href={`mailto:${member.contact_email}`}>{member.contact_email}</a></p>}
+              {member.note && <p>{member.note}</p>}
+              {member.notification_status && <p>Email to Tobias: {member.notification_status === 'sent' ? 'Sent to mail provider' : member.notification_status === 'needs_review' ? 'Needs delivery review' : 'Queued for sending'}</p>}
               {member.choices && <p>Voted for {(member.choices ?? '').split(',').map(choiceName).join(' · ')}</p>}
             </article>) : <p className="desk-empty">{data.memberCount ? 'No members match those filters.' : 'Registrations will appear here as students join.'}</p>}</div>
           </TabsContent>

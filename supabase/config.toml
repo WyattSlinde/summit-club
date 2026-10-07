@@ -1,0 +1,4 @@
+project_id = "summit-club"
+[functions.registration-mail]
+# The worker checks its own server-only secret before touching the queue.
+verify_jwt = false

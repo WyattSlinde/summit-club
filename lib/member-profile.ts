@@ -14,8 +14,8 @@ export function initials(name: string) { return name.trim().split(/\s+/).slice(0
 export function accountReturn(search: string) {
   const params = new URLSearchParams(search);
   if (params.getAll('intent').length !== 1 || params.getAll('outing').length > 1) return null;
-  if (params.get('intent') === 'idea') return '/?afterSignIn=idea#board';
+  if (params.get('intent') === 'idea') return '/members/?afterSignIn=idea#board';
   const outing = params.get('outing');
-  if (params.get('intent') === 'vote' && ['ridge', 'coast', 'wild'].includes(outing || '')) return `/?afterSignIn=vote&outing=${outing}#expeditions`;
+  if (params.get('intent') === 'vote' && ['ridge', 'coast', 'wild'].includes(outing || '')) return `/members/?afterSignIn=vote&outing=${outing}#expeditions`;
   return null;
 }

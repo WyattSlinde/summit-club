@@ -10,8 +10,8 @@ test('friend tags normalize but never accept names, paths or partial tags', () =
   assert.equal(initials('  Taylor Outside '), 'TO');
 });
 test('account links return only to fixed club actions and never accept external destinations', () => {
-  assert.equal(accountReturn('?intent=idea'), '/?afterSignIn=idea#board');
-  assert.equal(accountReturn('?intent=vote&outing=coast'), '/?afterSignIn=vote&outing=coast#expeditions');
+  assert.equal(accountReturn('?intent=idea'), '/members/?afterSignIn=idea#board');
+  assert.equal(accountReturn('?intent=vote&outing=coast'), '/members/?afterSignIn=vote&outing=coast#expeditions');
   for (const query of ['?return_to=https://evil.test', '?intent=vote&outing=https://evil.test', '?intent=vote&outing=coast&outing=ridge', '?intent=idea&intent=vote', '']) assert.equal(accountReturn(query), null);
 });
 test('photo processing rejects oversized files and active image formats before decoding', async () => {

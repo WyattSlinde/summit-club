@@ -8,8 +8,9 @@ test('sign-in returns to the requested club action using a fixed local path', ()
     assert.equal(href.pathname,'/signin-with-chatgpt');
     const returnTo=new URL(href.searchParams.get('return_to'),'https://summit.example');
     assert.equal(returnTo.origin,'https://summit.example');
-    assert.equal(readSignInIntent(returnTo.search),intent);
-    assert.equal(returnTo.hash,intent==='join'?'#basecamp':'#board');
+    assert.equal(returnTo.pathname,intent==='join'?'/register/':'/members/');
+    assert.equal(readSignInIntent(returnTo.search),intent==='join'?null:intent);
+    assert.equal(returnTo.hash,intent==='join'?'':'#board');
   }
   assert.equal(readSignInIntent('?afterSignIn=leader'),null);
   assert.equal(readSignInIntent('?afterSignIn=https://other.example'),null);
@@ -21,10 +22,10 @@ test('vote sign-in returns to the selected outing for explicit confirmation', ()
     assert.equal(href.pathname, '/signin-with-chatgpt');
     assert.deepEqual([...href.searchParams.keys()], ['return_to']);
     const returnPath = href.searchParams.get('return_to');
-    assert.equal(returnPath, `/?afterSignIn=vote&outing=${outing}#expeditions`);
+    assert.equal(returnPath, `/members/?afterSignIn=vote&outing=${outing}#expeditions`);
     const destination = new URL(returnPath, 'https://summit.example');
     assert.equal(destination.origin, 'https://summit.example');
-    assert.equal(destination.pathname, '/');
+    assert.equal(destination.pathname, '/members/');
     assert.equal(destination.hash, '#expeditions');
     assert.equal(readVoteIntent(destination.search), outing);
     assert.equal(readSignInIntent(destination.search), null);

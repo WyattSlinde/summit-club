@@ -11,6 +11,7 @@ import { ClubPhoto, PhotoCredit } from './club-photo';
 
 type Props = {
   onJoin: () => void;
+  compact?: boolean;
   member?: boolean;
   nextEvent?: { title: string; starts_at: string; location: string } | null;
   brandActive?: boolean;
@@ -18,7 +19,7 @@ type Props = {
   loadFailed?: boolean;
 };
 
-export default function ForestStory({ onJoin, member = false, brandActive = true, nextEvent, loading = false, loadFailed = false }: Props) {
+export default function ForestStory({ onJoin, member = false, brandActive = true, nextEvent, loading = false, loadFailed = false, compact = false }: Props) {
   const uid = useId().replace(/:/g, '');
   const meetingTitle = nextEvent?.title || (loading ? 'Checking the calendar…' : loadFailed ? 'Calendar unavailable' : 'First meeting being planned.');
   const meetingDate = nextEvent ? new Date(nextEvent.starts_at).toLocaleString('en-US', { timeZone: 'America/Los_Angeles', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : null;
@@ -38,14 +39,14 @@ export default function ForestStory({ onJoin, member = false, brandActive = true
           <p className="forest-intro-copy">Outdoor adventures. Service that matters. A student-led crew open to every Cathedral student.</p>
           <div className="forest-actions">
             <button type="button" className="forest-join" onClick={onJoin}>{member ? 'View registration' : 'Join SUMMIT'}<ArrowRight size={18} strokeWidth={1.6} aria-hidden="true"/></button>
-            <a className="forest-next" href="#expeditions">Find your next adventure<ArrowDownRight size={17} strokeWidth={1.6} aria-hidden="true"/></a>
+            <a className="forest-next" href={compact ? "#join" : "#expeditions"}>{compact ? "Find your people" : "Find your next adventure"}<ArrowDownRight size={17} strokeWidth={1.6} aria-hidden="true"/></a>
           </div>
           <p className="forest-audience">No experience needed. Just come as you are.</p>
         </div>
         <p className="forest-arrival-caption"><span>EXPLORE. SERVE. LEAD.</span><span>The view is only the beginning.</span></p>
       </div>
     </div>
-    <div className="forest-details">
+    {!compact && <div className="forest-details">
       <div className="forest-welcome">
         <p className="forest-notice-label">YOUR PEOPLE. YOUR PLANS.</p>
         <h3>A club you help build.</h3>
@@ -59,6 +60,6 @@ export default function ForestStory({ onJoin, member = false, brandActive = true
           : <p className="forest-meeting-copy">{loading ? 'Looking for the latest club plans.' : loadFailed ? 'We couldn’t load the latest plans. Try reconnecting below.' : 'The date and place will appear here once confirmed.'}</p>}
       </aside>
       <figure className="forest-photo"><div className="forest-panorama"><ClubPhoto photo={clubPhotos.hike} sizes="(max-width: 700px) 88vw, 24vw"/></div><PhotoCredit photo={clubPhotos.hike}/></figure>
-    </div>
+    </div>}
   </section>;
 }
