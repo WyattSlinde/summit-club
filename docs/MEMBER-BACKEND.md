@@ -90,7 +90,7 @@ The single signup form collects name, email, password, grade, interest, optional
 
 ## Registration emails to Tobias
 
-**Not activated yet.** The notification tables and Edge Function are deployed and tested, but no real email has been sent. The user completed Brevo account onboarding and Supabase CLI login. Brevo confirms the SUMMIT operator's sender inbox is verified, but currently requires phone verification before sending messages. Auth SMTP settings, notification secrets, and schedule still require configuration. The deployed worker rejects requests without its server-only secret; no schedule is running.
+**Not activated yet.** The notification tables and Edge Function are deployed and tested, but no real email has been sent. The user completed Brevo onboarding, phone verification, and Supabase CLI login. Brevo confirms the SUMMIT operator's sender inbox is verified. The user generated an SMTP key and saved it in SUMMIT's Auth SMTP settings; the dashboard confirms a stored password. This confirms configuration, not successful email delivery. The separate Brevo API key, notification secrets, and schedule still require configuration. The deployed worker rejects requests without its server-only secret; no schedule is running.
 
 The third migration adds a private durable outbox. A successful first registration queues one immutable message in the same transaction as the member record. It targets `Tkell2028@cchsdons.com` and includes name, verified account email, grade, interests, and the optional signup note. Editing registration updates the leader roster without sending repeated signup emails. No older registrations are backfilled or emailed by this migration. Queue records are deleted with the member record.
 
